@@ -174,18 +174,18 @@ During init you choose which tiers to activate (project, global, or both) and op
 
 ### `/mnemo:schema`
 
-Interactively creates or revises `.mnemo/SCHEMA.md` — the taxonomy that tells `/mnemo:ingest` how to classify what it finds.
+A guided conversation that builds or revises `.mnemo/SCHEMA.md` — the taxonomy that tells `/mnemo:ingest` how to classify what it finds.
 
-**What SCHEMA.md contains:**
+You don't fill in a form. The skill asks you questions, listens to your answers, and proposes a taxonomy draft that you can refine before anything is written. If files are already in `raw/`, it reads them first and comes to the conversation with concrete proposals inferred from your content — so you're reacting and adjusting rather than inventing from scratch.
+
+The conversation covers:
 
 - **Entity types** — the named things in your domain (people, tools, projects, systems…)
 - **Concept categories** — the ideas and patterns that recur (techniques, patterns, principles…)
 - **Tagging conventions** — which tags to apply and when
 - **Relationship hints** — how entities and concepts typically relate to each other
 
-**How it works:**
-
-If files are already present in `raw/`, schema reads them first and proposes entity types and concept categories inferred from the content — you review and adjust rather than starting from scratch. Otherwise it walks through a short guided questionnaire. Either way, a full draft is shown for approval before anything is written.
+Once the draft looks right, you approve it and the skill writes `SCHEMA.md`. Nothing is saved without your explicit confirmation.
 
 Run it at any time, not just at init. Useful when the domain evolves, new source types arrive, or the initial taxonomy turns out to be too coarse.
 
