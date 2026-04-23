@@ -151,15 +151,41 @@ python3 scripts/init_mnemo.py        # requires Python 3.10+
 
 ### `/mnemo:init`
 
-Bootstraps a new knowledge base with the taxonomy directory structure and a starter `SCHEMA.md`. Run once per project — warns if already initialized. Offers to run `/mnemo:schema` immediately after.
+Bootstraps a new knowledge base. Run once per project — warns if already initialized.
+
+What it creates:
+
+```
+.mnemo/
+├── raw/              ← drop your source files here
+├── wiki/
+│   ├── sources/
+│   ├── entities/
+│   ├── concepts/
+│   └── synthesis/
+├── index.md
+├── log.md
+└── SCHEMA.md         ← starter taxonomy, ready to edit
+```
+
+During init you choose which tiers to activate (project, global, or both) and optionally configure **qmd** for hybrid semantic search. After bootstrapping, init offers to run `/mnemo:schema` immediately so you can define your domain before the first ingest.
 
 ### `/mnemo:schema`
 
-Interactively creates or revises `.mnemo/SCHEMA.md` — the domain taxonomy that guides how ingest categorizes entities and concepts.
+Interactively creates or revises `.mnemo/SCHEMA.md` — the taxonomy that tells `/mnemo:ingest` how to classify what it finds.
 
-If files are already present in `raw/`, reads them first to infer entity types and concept categories before asking any questions. Otherwise walks through a short guided questionnaire. Shows a full draft for approval before writing.
+**What SCHEMA.md contains:**
 
-Can be run at any time — not just at init. Useful when the domain evolves or the initial taxonomy turns out to be too coarse.
+- **Entity types** — the named things in your domain (people, tools, projects, systems…)
+- **Concept categories** — the ideas and patterns that recur (techniques, patterns, principles…)
+- **Tagging conventions** — which tags to apply and when
+- **Relationship hints** — how entities and concepts typically relate to each other
+
+**How it works:**
+
+If files are already present in `raw/`, schema reads them first and proposes entity types and concept categories inferred from the content — you review and adjust rather than starting from scratch. Otherwise it walks through a short guided questionnaire. Either way, a full draft is shown for approval before anything is written.
+
+Run it at any time, not just at init. Useful when the domain evolves, new source types arrive, or the initial taxonomy turns out to be too coarse.
 
 ### `/mnemo:ingest`
 
