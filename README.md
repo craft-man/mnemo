@@ -1,6 +1,13 @@
 # mnemo
 
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Version](https://img.shields.io/badge/version-0.1.0-blue)](CHANGELOG.md)
+[![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+
 > *Knowledge that compounds.*
+
+If this saves you time, [![GitHub stars](https://img.shields.io/github/stars/craft-man/mnemo?style=social)](https://github.com/craft-man/mnemo) helps others find it.
 
 Most AI tools re-derive answers from your raw files on every query. mnemo builds a persistent wiki instead: Claude reads your sources once, synthesizes structured pages, and cross-references them permanently. The longer you use it, the richer the graph gets.
 
@@ -20,7 +27,7 @@ The difference compounds over time. At 5 sources it feels similar. At 50, the wi
 
 ## What it does
 
-mnemo gives Claude Code a two-tier knowledge base:
+mnemo gives your agent a two-tier knowledge base:
 
 - **Project** (`.mnemo/`) — knowledge scoped to the current project
 - **Global** (`~/.mnemo/`) — knowledge shared across all projects
@@ -40,7 +47,7 @@ Each tier is a taxonomy-based wiki:
 └── SCHEMA.md         ← domain conventions (edit per project)
 ```
 
-The plugin exposes six skills that instruct Claude to manage this structure using its native file tools — no server, no binary, no dependencies.
+mnemo exposes seven skills that work with any [agentskills.io](https://agentskills.io)-compatible agent — no server, no binary, no dependencies.
 
 ---
 
@@ -48,16 +55,50 @@ The plugin exposes six skills that instruct Claude to manage this structure usin
 
 **Requirements:** [Claude Code](https://claude.ai/code) CLI
 
+### Claude Code marketplace (recommended)
+
+```
+/plugin marketplace add craft-man/mnemo
+```
+
+Once installed, mnemo is available in any project — no `--plugin-dir` needed.
+
+### Other agents (Codex, Cursor, OpenCode…)
+
 ```bash
-git clone https://github.com/mnemo-ai/mnemo
+npx skills add craft-man/mnemo
+```
+
+### Manual (git clone)
+
+```bash
+git clone https://github.com/craft-man/mnemo
 claude --plugin-dir ./mnemo
 ```
 
-To avoid typing `--plugin-dir` every time:
+---
+
+## Quick start
+
+In any agent (Claude Code, Codex, Cursor, OpenCode…):
+
+```
+/mnemo:init
+```
+
+Without an agent — standalone bootstrap (Python 3.10+):
 
 ```bash
-echo 'alias claude="claude --plugin-dir /path/to/mnemo"' >> ~/.bashrc
-source ~/.bashrc
+python3 scripts/init_mnemo.py
+```
+
+Both paths offer to configure **qmd** for hybrid semantic search and prompt you to choose between project-only, global, or both tiers. Then:
+
+```
+/mnemo:schema      # "define my wiki taxonomy"
+# drop files into .mnemo/raw/
+/mnemo:ingest      # "ingest files in raw/"
+/mnemo:query <term>
 ```
 
 ---
@@ -66,7 +107,7 @@ source ~/.bashrc
 
 By default mnemo uses **BM25** — no extra dependencies, works out of the box.
 
-For better results, `/mnemo:init` offers to configure **[qmd](https://github.com/qmd-lab/qmd)**, a local hybrid search engine (BM25 + vector embeddings). Once set up, `/mnemo:query` routes through qmd automatically.
+For better results, both `/mnemo:init` and `python3 scripts/init_mnemo.py` offer to configure **[qmd](https://github.com/qmd-lab/qmd)**, a local hybrid search engine (BM25 + vector embeddings). Once set up, `/mnemo:query` routes through qmd automatically.
 
 **qmd requirements:** Node.js ≥ 22 or Bun ≥ 1.0, ~2 GB disk (models downloaded once on first use).
 
@@ -83,15 +124,23 @@ qmd is optional — BM25 remains available as fallback if qmd is unavailable or 
 
 ## Typical workflow
 
+Slash commands work in any agent. Natural language alternatives are shown in comments — use whichever your agent prefers.
+
 ```
-/mnemo:init                          # bootstrap once per project
-/mnemo:schema                        # define your domain taxonomy (infers from raw/ if files present)
+/mnemo:init                          # "initialize mnemo" — bootstrap + optional qmd setup
+/mnemo:schema                        # "define my wiki taxonomy"
 # drop files into .mnemo/raw/
-/mnemo:ingest                        # synthesize → wiki pages + wikilinks
-/mnemo:query database indexing       # search the knowledge base
-/mnemo:save B-tree vs Hash Index     # persist a Claude-generated insight
-/mnemo:lint                          # audit for broken links, orphans, stale claims
-/mnemo:stats                         # check size and scaling status
+/mnemo:ingest                        # "ingest files in raw/"
+/mnemo:query database indexing       # "what does my wiki say about database indexing?"
+/mnemo:save B-tree vs Hash Index     # "save this as a wiki page titled B-tree vs Hash Index"
+/mnemo:lint                          # "audit my wiki"
+/mnemo:stats                         # "show wiki stats"
+```
+
+No agent? Bootstrap with the standalone script:
+
+```bash
+python3 scripts/init_mnemo.py        # requires Python 3.10+
 ```
 
 ---
@@ -155,32 +204,9 @@ Displays page counts per category, total lines, top 5 largest pages, and index s
 
 ---
 
-## How it works
-
-Each skill is a `SKILL.md` file with detailed instructions — Claude follows them using its built-in `Read`, `Write`, `Glob`, and `Grep` tools. No moving parts.
-
-```
-mnemo/
-├── .claude-plugin/
-│   └── plugin.json
-├── skills/
-│   ├── init/SKILL.md
-│   ├── ingest/SKILL.md
-│   ├── query/SKILL.md
-│   ├── lint/SKILL.md
-│   ├── save/SKILL.md
-│   └── stats/SKILL.md
-└── CLAUDE.md
-```
-
----
-
 ## Contributing
 
-1. Fork the repo and create a feature branch
-2. Edit the relevant `SKILL.md` — test with `claude --plugin-dir ./mnemo`
-3. Use `/reload-plugins` inside Claude Code to pick up changes without restarting
-4. Open a PR describing what the change improves and why
+Each skill is a `SKILL.md` file — edit it, reload, test. See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide.
 
 ---
 

@@ -1,10 +1,13 @@
 {
   "name": "mnemo",
   "description": "Agentic Knowledge Management System — a Second Brain for Claude Code and agentskills.io-compatible agents. Ingests raw files into a synthesized, searchable wiki; queries your knowledge base; saves AI-generated insights permanently.",
-  "version": "0.3.0",
+  "version": "0.1.0",
   "author": {
     "name": "mnemo contributors"
   },
-  "homepage": "https://github.com/mnemo-ai/mnemo",
-  "license": "MIT"
+  "homepage": "https://github.com/craft-man/mnemo",
+  "repository": "https://github.com/craft-man/mnemo",
+  "license": "MIT",
+  "keywords": ["knowledge-base", "wiki", "second-brain", "obsidian", "rag-alternative", "llm-wiki"],
+  "category": "productivity"
 }

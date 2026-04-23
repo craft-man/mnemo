@@ -6,13 +6,14 @@ description: >
   initializing a personal knowledge base, or when the user says "set up my wiki",
   "create a knowledge base", "initialize mnemo", or "start my second brain".
   Run once per project before the first ingest.
+  After init, optionally wires the wiki into CLAUDE.md for future session memory.
 license: MIT
 compatibility: >
   Claude Code (slash command /mnemo:init). Other agentskills.io-compatible
   agents invoke by natural language. No external dependencies.
 metadata:
   author: mnemo contributors
-  version: "0.3.0"
+  version: "0.1.0"
 allowed-tools: Read Write Glob
 ---
 
@@ -143,3 +144,34 @@ Write `.mnemo/config.json`:
 > Search backend: **<qmd | BM25>**.
 > Next: drop files into `.mnemo/raw/` and run `/mnemo:ingest`."
 > (If schema was not defined in step 4, add: "Run `/mnemo:schema` to define your domain taxonomy first.")
+
+**7. CLAUDE.md wiring** — offer to persist the wiki in the project's agent memory:
+
+Ask the user:
+> "Want me to add a memory stanza to `CLAUDE.md` so I remember this wiki in future sessions? [y/n]"
+
+If `[n]`: do nothing. Do not ask again.
+
+If `[y]`:
+
+Check if `CLAUDE.md` already contains the heading `## mnemo`. If yes: skip silently — the stanza is already present.
+
+Otherwise:
+
+Build the stanza based on what was initialized in steps 2–5:
+
+```markdown
+## mnemo
+
+This project has a mnemo knowledge base in `.mnemo/`.
+- Query it with `/mnemo:query <term>` before answering factual questions
+- Ingest new sources with `/mnemo:ingest`
+- When a spec or plan is finalized (e.g. from superpowers brainstorming or writing-plans), move it to `.mnemo/raw/` and run `/mnemo:ingest` to add it to the knowledge base
+```
+
+Then:
+- If `CLAUDE.md` exists: append the stanza at the end of the file, preceded by a blank line.
+- If `CLAUDE.md` does not exist: create it with the stanza as the only content.
+
+Confirm:
+> "Done — stanza added to `CLAUDE.md`. I'll remember this wiki in future sessions."

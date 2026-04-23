@@ -1,5 +1,5 @@
 # Knowledge base data — user-specific, never commit
-.craftman_local/
+.mnemo/
 
 # Claude Code — local overrides contain machine-specific paths
 .claude/settings.local.json
