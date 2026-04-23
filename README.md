@@ -206,6 +206,27 @@ Displays page counts per category, total lines, top 5 largest pages, and index s
 
 ---
 
+## Using mnemo with Obsidian
+
+mnemo's wiki format is natively Obsidian-compatible — no conversion needed.
+
+- **Wikilinks** (`[[Page Title]]`) resolve directly in Obsidian's graph view
+- **YAML frontmatter** (`title`, `tags`, `category`) surfaces in Obsidian's properties panel
+- **Bidirectional links** built by `/mnemo:ingest` appear automatically in the backlinks panel
+
+To open your knowledge base in Obsidian, point a vault at `.mnemo/wiki/` (or `~/.mnemo/wiki/` for the global tier).
+
+### Obsidian Web Clipper
+
+[Obsidian Web Clipper](https://obsidian.md/clipper) lets you clip web pages, articles, and highlights directly from your browser. Use it as a capture front-end for mnemo:
+
+1. Configure Web Clipper to save clips into `.mnemo/raw/`
+2. Run `/mnemo:ingest` — mnemo synthesizes each clip into a structured wiki page, extracts entities and concepts, and links it into the graph
+
+This turns casual web browsing into a compounding knowledge base: clip once, query forever.
+
+---
+
 ## Contributing
 
 Each skill is a `SKILL.md` file — edit it, reload, test. See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide.
