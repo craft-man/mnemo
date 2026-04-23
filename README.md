@@ -7,6 +7,8 @@
 
 > *Knowledge that compounds.*
 
+Named after [Mnémosyne](https://fr.wikipedia.org/wiki/Mn%C3%A9mosyne), the Greek goddess of memory and mother of the Muses.
+
 If this saves you time, [![GitHub stars](https://img.shields.io/github/stars/craft-man/mnemo?style=social)](https://github.com/craft-man/mnemo) helps others find it.
 
 Most AI tools re-derive answers from your raw files on every query. mnemo builds a persistent wiki instead: Claude reads your sources once, synthesizes structured pages, and cross-references them permanently. The longer you use it, the richer the graph gets.
