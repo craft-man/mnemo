@@ -164,9 +164,11 @@ What it creates:
 │   ├── concepts/
 │   └── synthesis/
 ├── index.md
-├── log.md
+├── log.md            ← ingest audit trail
 └── SCHEMA.md         ← starter taxonomy, ready to edit
 ```
+
+`log.md` records every file that has been ingested — filename and ISO timestamp. Before processing any file, `/mnemo:ingest` checks this log and skips anything already present. This prevents duplicate pages, avoids re-billing the LLM for the same source, and makes reruns safe. To force a re-ingest of a file, remove its entry from `log.md`.
 
 During init you choose which tiers to activate (project, global, or both) and optionally configure **qmd** for hybrid semantic search. After bootstrapping, init offers to run `/mnemo:schema` immediately so you can define your domain before the first ingest.
 
