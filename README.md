@@ -220,7 +220,7 @@ To open your knowledge base in Obsidian, point a vault at `.mnemo/wiki/` (or `~/
 
 [Obsidian Web Clipper](https://obsidian.md/clipper) lets you clip web pages, articles, and highlights directly from your browser. Use it as a capture front-end for mnemo:
 
-1. Configure Web Clipper to save clips into `.mnemo/raw/`
+1. Configure Web Clipper to save clips into `.mnemo/raw/` (or `~/.mnemo/raw/` for the global knowledge base)
 2. Run `/mnemo:ingest` — mnemo synthesizes each clip into a structured wiki page, extracts entities and concepts, and links it into the graph
 
 This turns casual web browsing into a compounding knowledge base: clip once, query forever.
