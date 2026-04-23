@@ -151,15 +151,43 @@ python3 scripts/init_mnemo.py        # requires Python 3.10+
 
 ### `/mnemo:init`
 
-Bootstraps a new knowledge base with the taxonomy directory structure and a starter `SCHEMA.md`. Run once per project — warns if already initialized. Offers to run `/mnemo:schema` immediately after.
+Bootstraps a new knowledge base. Run once per project — warns if already initialized.
+
+What it creates:
+
+```
+.mnemo/
+├── raw/              ← drop your source files here
+├── wiki/
+│   ├── sources/
+│   ├── entities/
+│   ├── concepts/
+│   └── synthesis/
+├── index.md
+├── log.md            ← ingest audit trail
+└── SCHEMA.md         ← starter taxonomy, ready to edit
+```
+
+`log.md` records every file that has been ingested — filename and ISO timestamp. Before processing any file, `/mnemo:ingest` checks this log and skips anything already present. This prevents duplicate pages, avoids re-billing the LLM for the same source, and makes reruns safe. To force a re-ingest of a file, remove its entry from `log.md`.
+
+During init you choose which tiers to activate (project, global, or both) and optionally configure **qmd** for hybrid semantic search. After bootstrapping, init offers to run `/mnemo:schema` immediately so you can define your domain before the first ingest.
 
 ### `/mnemo:schema`
 
-Interactively creates or revises `.mnemo/SCHEMA.md` — the domain taxonomy that guides how ingest categorizes entities and concepts.
+A guided conversation that builds or revises `.mnemo/SCHEMA.md` — the taxonomy that tells `/mnemo:ingest` how to classify what it finds.
 
-If files are already present in `raw/`, reads them first to infer entity types and concept categories before asking any questions. Otherwise walks through a short guided questionnaire. Shows a full draft for approval before writing.
+You don't fill in a form. The skill asks you questions, listens to your answers, and proposes a taxonomy draft that you can refine before anything is written. If files are already in `raw/`, it reads them first and comes to the conversation with concrete proposals inferred from your content — so you're reacting and adjusting rather than inventing from scratch.
 
-Can be run at any time — not just at init. Useful when the domain evolves or the initial taxonomy turns out to be too coarse.
+The conversation covers:
+
+- **Entity types** — the named things in your domain (people, tools, projects, systems…)
+- **Concept categories** — the ideas and patterns that recur (techniques, patterns, principles…)
+- **Tagging conventions** — which tags to apply and when
+- **Relationship hints** — how entities and concepts typically relate to each other
+
+Once the draft looks right, you approve it and the skill writes `SCHEMA.md`. Nothing is saved without your explicit confirmation.
+
+Run it at any time, not just at init. Useful when the domain evolves, new source types arrive, or the initial taxonomy turns out to be too coarse.
 
 ### `/mnemo:ingest`
 
