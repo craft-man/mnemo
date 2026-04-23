@@ -1,0 +1,28 @@
+# Knowledge base data — user-specific, never commit
+.craftman_local/
+
+# Claude Code — local overrides contain machine-specific paths
+.claude/settings.local.json
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Obsidian
+.obsidian
+
+# Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+dist/
+*.egg-info/
+.venv/

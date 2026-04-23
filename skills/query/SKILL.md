@@ -1,0 +1,152 @@
+---
+name: query
+description: >
+  Search the mnemo wiki knowledge base. Uses qmd (hybrid BM25 + vector semantic
+  search) if configured at init, otherwise falls back to BM25 ranked retrieval.
+  Supports tag:, since:, category:, backlinks:, and top-linked modifiers. Use when
+  the user asks "what does my wiki say about X", "search my notes for Y", "find pages
+  about Z", "query the knowledge base", "what do I know about X", or "look up X in my
+  second brain". Falls back to global knowledge base if local returns no results.
+license: MIT
+compatibility: >
+  Claude Code (slash command /mnemo:query). Other agentskills.io-compatible
+  agents invoke by natural language. Optional: Python 3.10+ for faster BM25
+  (scripts/wiki_search.py).
+metadata:
+  author: mnemo contributors
+  version: "0.3.0"
+allowed-tools: Read Glob Grep Bash
+---
+
+## Step 0 — Route by search backend
+
+Before anything else, read `.mnemo/config.json` (if it exists) and check the `semantic_search` field:
+
+- **`"qmd"`** — attempt the qmd path below.
+- **`"bm25"`** or file absent — skip to Step 0b.
+
+**qmd path**: verify qmd is available (`qmd --version`). If available, run:
+```
+qmd query --collection mnemo-wiki "$ARGUMENTS"
+```
+If exit code is 0: present the results directly and **stop** — skip steps 0b through 8. If qmd is unavailable or returns a non-zero exit code, warn the user and fall through to Step 0b.
+
+---
+
+## Step 0b — Python fast path (optional)
+
+Before running the instruction-based search below, attempt the faster Python path:
+
+1. Use `Glob('**/mnemo/scripts/wiki_search.py')` to locate the search script.
+2. If found at `<script_path>`, run:
+   ```
+   python3 <script_path> .mnemo/wiki "$ARGUMENTS"
+   ```
+   Append any modifiers extracted from `$ARGUMENTS` as CLI flags:
+   - `category:<value>` → `--type <value>`
+   - `tag:<value>` → `--tag <value>`
+   - `since:<date>` → `--since <date>`
+   - `backlinks:<title>` → `--backlinks "<title>"`
+   - `top-linked` → `--top-linked`
+3. If exit code is 0, present the script output directly and **stop** — do not run steps 1–8.
+4. If Python is unavailable, the script is not found, or exit code is non-zero, continue to Step 1 below.
+
+Arguments: $ARGUMENTS
+
+Search the knowledge base for "$ARGUMENTS".
+
+## Step 1 — Parse all modifiers
+
+Extract all modifiers from `$ARGUMENTS` before searching. The remaining text after removing modifiers is the **search term** (may be empty if only modifiers are given).
+
+| Modifier | Syntax | Effect |
+|---|---|---|
+| Category filter | `category:sources` `category:entities` `category:concepts` `category:synthesis` | Restrict to that subdir |
+| Tag filter | `tag:<value>` | Only pages whose frontmatter `tags:` contains `<value>` |
+| Date filter | `since:<YYYY-MM-DD>` | Only pages whose frontmatter `created:` is on or after that date |
+| Backlinks | `backlinks:<Page Title>` | Find all pages containing `[[<Page Title>]]` — ignore search term |
+| Top-linked | `top-linked` | Rank all pages by number of inbound `[[wikilinks]]` — ignore search term |
+
+Multiple modifiers can be combined: `tag:redis since:2026-01-01 performance`
+
+---
+
+## Step 2 — Handle special modes first
+
+**If `backlinks:<Page Title>` is present:**
+- Grep all `.mnemo/wiki/**/*.md` files for `[[<Page Title>]]` or `[[<Page Title>|`.
+- List every matching file with a snippet showing the wikilink in context.
+- Report: "Pages linking to [[<Page Title>]]: N found." Skip steps 3–7.
+
+**If `top-linked` is present:**
+- For each page in `wiki/entities/` and `wiki/concepts/`, count how many other wiki files contain `[[<its title>]]`.
+- Sort descending. Report the top 10 with their inbound link count.
+- Apply `category:` and `tag:` filters if also present.
+- Skip steps 3–7.
+
+---
+
+## Step 3 — Build the candidate pool (index-first, bounded)
+
+Read `.mnemo/index.md`. If shard files exist in `wiki/indexes/` (`sources.md`, `entities.md`, `concepts.md`, `synthesis.md`), read the relevant ones based on the `category:` filter (or all if no filter).
+
+From the index entries, apply filters in order:
+
+1. **Tag filter** — if `tag:<value>` is set: read each candidate's YAML frontmatter (lines between `---` delimiters only, not the body). Keep only pages whose `tags:` list contains `<value>` (case-insensitive).
+2. **Date filter** — if `since:<YYYY-MM-DD>` is set: from the remaining candidates, keep only pages whose frontmatter `created:` date is ≥ the given date.
+3. **Term match** — if a search term remains: from the remaining candidates, score each by whether the search term appears in the index title (weight 2) or frontmatter `tags:` (weight 1). Keep the top 5 by score.
+
+If no search term (only filters), keep all candidates that pass the filters (up to 10).
+
+---
+
+## Step 4 — Read candidate pages
+
+Read the candidate pages identified in step 3 (up to 5, or 10 for filter-only queries). Extract snippets (~200 chars around the first occurrence of the search term, or the first body paragraph if no search term).
+
+---
+
+## Step 5 — Evaluate coverage
+
+If candidates sufficiently answer the query (≥ 2 strong matches or filter-only mode), go to step 7.
+
+If coverage is insufficient (< 2 strong matches and a search term exists), proceed to step 6.
+
+---
+
+## Step 6 — BM25-style full-text fallback
+
+- Break the search term into individual terms (ignore words shorter than 3 chars).
+- For each term, scan body content of unread wiki files (scoped to target subdirs).
+- Score each file: +2 per term matched in H1 title, +1 per term matched in body, +1 per term matched in `tags:`.
+- Read the top 5 scoring files not already read.
+- Label these results as "BM25-style matches".
+
+---
+
+## Step 7 — Global fallback
+
+If no local results after steps 3–6, repeat steps 3–6 in `~/.mnemo/` if it exists.
+
+---
+
+## Step 8 — Present results
+
+```
+## Results for "<original query>"
+Filters active: tag:redis, since:2026-01-01
+Pages read: N
+
+### Index matches
+- **[[Title]]** — `category: concepts` — *snippet*
+
+### Tag / date matches
+- **[[Title]]** — tag: redis, created: 2026-02-10 — *snippet*
+
+### BM25-style matches
+- **[[Title]]** — matched: term1 (title), term2 (body) — *snippet*
+```
+
+- If no results at all: say so explicitly. Never invent content.
+- Always report total pages read.
+- Offer to retry with a broader term, different filters, or suggest `/mnemo:ingest` if the topic may be unprocessed.
