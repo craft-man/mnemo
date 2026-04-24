@@ -10,6 +10,8 @@ PATTERNS=(
   "Invoke \`/mnemo:"
   "invoke /mnemo:"
   "Invoke /mnemo:"
+  "invoke the \`/mnemo:"
+  "Invoke the \`/mnemo:"
 )
 
 FOUND=0
