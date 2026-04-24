@@ -105,7 +105,7 @@ running `/mnemo:lint` to verify integration.
 
 ### Step 5 — Offer activity log
 
-After Step 4, if at least one item was saved OR if the session produced significant work (even without saves), offer to write a session activity log.
+After Step 4, if at least one item was saved, offer to write a session activity log.
 
 Ask the user: "Log this session in `wiki/activity/`? (y/n)"
 
@@ -115,8 +115,10 @@ If the user confirms:
 
 1. Determine today's date in `YYYY-MM-DD` format.
 2. Set target path: `.mnemo/wiki/activity/YYYY-MM-DD.md` (substitute `--global` path `~/.mnemo/wiki/activity/YYYY-MM-DD.md` if the `--global` flag was set).
-3. If the file already exists (multiple mine runs in one day): read it, then **append** new items to its `## Items Saved` section rather than overwriting.
+3. If the file already exists (multiple mine runs in one day): read it, locate the `## Items Saved` heading, and insert the new bullet lines directly before the `## Links` heading. Also update the `updated:` field in the YAML frontmatter to today's date.
 4. If the file does not exist, create it with this exact structure:
+
+*(Write these as a single file — the frontmatter and body blocks above are shown separately for clarity only.)*
 
 ```yaml
 ---
@@ -141,7 +143,7 @@ updated: YYYY-MM-DD
 
 ## Items Saved
 
-[One line per item saved in Step 3:]
+[One line per item saved in Step 3. If no items were saved, write: "None".]
 - [[Page Title]] (`category`)
 
 ## Links
