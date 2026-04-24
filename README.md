@@ -138,13 +138,26 @@ The active backend is stored in `.mnemo/config.json` under `search_backend` (`"b
 Slash commands work in any agent. Natural language alternatives are shown in comments — use whichever your agent prefers.
 
 ```
-/mnemo:init                          # "initialize mnemo" — bootstrap + optional qmd setup
+/mnemo:init                          # "initialize mnemo" — bootstrap, optional qmd + graphify setup
+```
+
+**For a code project** — init offers to run graphify immediately, or run it manually:
+```
+/mnemo:graphify                      # "map my codebase" — builds a persistent knowledge graph
+/mnemo:query <term>                  # "what does my wiki say about X?"
+```
+
+**For document-based knowledge** — init offers to run schema immediately, or run it manually:
+```
 /mnemo:schema                        # "define my wiki taxonomy"
 # drop files into .mnemo/raw/
 /mnemo:ingest                        # "ingest files in raw/"
 /mnemo:query database indexing       # "what does my wiki say about database indexing?"
+```
+
+**During any session:**
+```
 /mnemo:mine                          # "remember this" — extract knowledge from current session
-/mnemo:graphify                      # "map my codebase" — build a persistent knowledge graph from the project
 /mnemo:save B-tree vs Hash Index     # "save this as a wiki page titled B-tree vs Hash Index"
 /mnemo:lint                          # "audit my wiki"
 /mnemo:stats                         # "show wiki stats"
