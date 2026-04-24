@@ -13,6 +13,9 @@ Named after [Mnémosyne](https://fr.wikipedia.org/wiki/Mn%C3%A9mosyne), the Gree
 
 If this saves you time, [![GitHub stars](https://img.shields.io/github/stars/craft-man/mnemo?style=social)](https://github.com/craft-man/mnemo) helps others find it.
 
+> [!WARNING]
+> This plugin was originally built for Claude Code and is still in beta pending further cross-platform testing. Thanks for your patience! If you're interested in contributing, don't hesitate to jump in! All contributions are welcome.
+
 Most AI tools re-derive answers from your raw files on every query. mnemo builds a persistent wiki instead: Claude reads your sources once, synthesizes structured pages, and cross-references them permanently. The longer you use it, the richer the graph gets.
 
 Inspired by Karpathy's [LLM Wiki pattern](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f).
