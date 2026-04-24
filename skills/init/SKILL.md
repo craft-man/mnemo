@@ -123,7 +123,7 @@ If `[n]o`: continue — the starter SCHEMA.md from step 3 will be used until the
 3. Write `.mnemo/config.json`:
    ```json
    {
-     "semantic_search": "qmd",
+     "search_backend": "qmd",
      "qmd_collection": "mnemo-wiki"
    }
    ```
@@ -135,7 +135,7 @@ If `[n]o`: continue — the starter SCHEMA.md from step 3 will be used until the
 Write `.mnemo/config.json`:
 ```json
 {
-  "semantic_search": "bm25"
+  "search_backend": "bm25"
 }
 ```
 
