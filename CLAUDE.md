@@ -17,6 +17,7 @@ This document is your operating contract — follow it strictly.
 | `/mnemo:lint` | Audit for structure issues, broken links, oversized pages |
 | `/mnemo:save` | Persist generated content as a wiki page |
 | `/mnemo:stats` | Display size metrics and scaling thresholds |
+| `/mnemo:mine` | Extract knowledge from the current session worth persisting |
 
 ---
 
@@ -79,6 +80,13 @@ Invoke skills only when the user explicitly asks, or when a skill's own instruct
 
 - When the user wants to know the size or health of the knowledge base
 - To check if index sharding is needed
+
+### `/mnemo:mine`
+
+- During or after a session where decisions, new entities, or key insights were discussed
+- When the user types "à retenir", "mine this", "note ça", "save this", or similar
+- When the agent detects implicit high-value signals: "on a décidé", "in conclusion", "the architecture is"
+- Before ending a session that produced significant new knowledge
 
 ---
 
