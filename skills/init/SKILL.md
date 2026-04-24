@@ -14,7 +14,7 @@ compatibility: >
 metadata:
   author: mnemo contributors
   version: "0.4.2"
-allowed-tools: Read Write Glob
+allowed-tools: Read Write Edit Glob Bash
 ---
 
 Initialize `.mnemo/` with the full taxonomy structure.
@@ -35,6 +35,7 @@ Stop here.
 │   ├── entities/           ← people, tools, projects, systems
 │   ├── concepts/           ← ideas, patterns, techniques
 │   ├── synthesis/          ← cross-source analyses, comparisons
+│   ├── activity/           ← session logs (not searched by default)
 │   └── indexes/            ← index shards (created when >150 pages)
 ├── index.md
 ├── log.md
@@ -186,6 +187,44 @@ Then:
 
 Confirm:
 > "Done — stanza added to `CLAUDE.md`. I'll remember this wiki in future sessions."
+
+**8b. Stop hook injection** — wire the session-end reminder into the project's Claude Code settings:
+
+Check if `.claude/settings.local.json` exists in the current project directory.
+
+**Case A — file does not exist:**
+Create `.claude/settings.local.json` with:
+```json
+{
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'mnemo — session ending. Run /mnemo:mine to capture insights from this session.'"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**Case B — file exists, no `hooks` key yet:**
+Read the file. Add the `"hooks"` key from Case A at the top level, preserving all existing content.
+
+**Case C — file exists, `hooks.Stop` exists but no mnemo entry:**
+Read the file. Append the mnemo hook object to the existing `hooks.Stop` array, preserving all existing hooks.
+
+**Case D — file already contains the mnemo echo command:**
+Skip silently — already wired.
+
+After writing, confirm:
+> "Stop hook added to `.claude/settings.local.json` — you'll be reminded to run `/mnemo:mine` at session end."
+
+If the `.claude/` directory does not exist, create it first.
 
 **9. Graphify setup (optional)** — ask the user:
 
