@@ -136,7 +136,7 @@ Slash commands work in any agent. Natural language alternatives are shown in com
 # drop files into .mnemo/raw/
 /mnemo:ingest                        # "ingest files in raw/"
 /mnemo:query database indexing       # "what does my wiki say about database indexing?"
-/mnemo:mine                          # "à retenir" — extract knowledge from current session
+/mnemo:mine                          # "remember this" — extract knowledge from current session
 /mnemo:save B-tree vs Hash Index     # "save this as a wiki page titled B-tree vs Hash Index"
 /mnemo:lint                          # "audit my wiki"
 /mnemo:stats                         # "show wiki stats"
@@ -237,7 +237,7 @@ Saves Claude-generated content (summaries, comparisons, analyses) as a permanent
 
 Scans the current session for knowledge worth persisting — decisions, new entities, concepts, and conclusions. Presents a numbered candidate list; approved items are routed to `/mnemo:save`.
 
-Triggered explicitly (`/mnemo:mine`) or by keywords: `à retenir`, `mine this`, `note ça`, `save this`, and implicit signals like `on a décidé`, `in conclusion`, `the architecture is`.
+Triggered explicitly (`/mnemo:mine`) or by intent — the user expressing a desire to save something ("remember this", "note that", "important") or the agent detecting high-value signals ("we decided", "in conclusion", "key insight") — in any language.
 
 ### `/mnemo:stats`
 

@@ -3,9 +3,9 @@ name: mine
 description: >
   Extract knowledge from the current conversation session worth persisting to the
   mnemo knowledge base. Scans for decisions, new entities, insights, and conclusions.
-  Invoke explicitly (/mnemo:mine) or when triggered by keywords: "à retenir",
-  "mine this", "note ça", "save this", "retiens", or implicit signals such as
-  "on a décidé que", "in conclusion", "the architecture is", "key insight".
+  Invoke explicitly (/mnemo:mine) or when the user expresses intent to save something
+  ("remember this", "note that", "important") or when the agent detects high-value
+  signals ("we decided", "in conclusion", "key insight") — in any language.
 license: MIT
 compatibility: >
   Claude Code (slash command /mnemo:mine). Other agentskills.io-compatible agents
@@ -22,17 +22,19 @@ If `--global` is present in the invocation arguments, substitute every `.mnemo/`
 
 ## Trigger Patterns
 
-Invoke this skill — or propose invoking it — when any of the following appear in the conversation:
+Invoke this skill — or propose invoking it — when any of the following appear in the conversation, **in any language**:
 
 **Explicit triggers** (user clearly wants to save something):
-`mine this` · `à retenir` · `note ça` · `note that` · `save this` · `remember this` · `retiens ça` · `important`
+
+The user expresses intent to retain or save: phrases meaning "remember this", "note that", "keep this", "important", or a direct invocation of `/mnemo:mine`. Recognize these expressions regardless of the language the conversation is in.
 
 **Implicit triggers** (agent detects high-value content):
-- `on a décidé que` / `we decided` / `it was decided` / `la décision est`
-- `la conclusion` / `in conclusion` / `to summarize` / `en conclusion`
-- `l'architecture` / `the architecture is/will be` / `we'll use X for Y`
-- `key insight` / `insight:` / `notable`
-- A term matching an entity type or concept category in `SCHEMA.md` being defined for the first time
+
+- The user signals a resolved decision: phrases meaning "we decided", "we agreed on", "we'll use X for Y"
+- The user signals a conclusion: phrases meaning "in conclusion", "to summarize", "the result is"
+- The user describes an architecture or design: phrases meaning "the architecture is", "the structure will be"
+- The user highlights an insight: phrases meaning "key insight", "important point", "notable finding"
+- A term matching an entity type or concept category in `SCHEMA.md` is being defined for the first time
 
 ## Steps
 
