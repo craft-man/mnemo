@@ -3,7 +3,7 @@
 </p>
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.5.1-blue)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.6.0-blue)](CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
@@ -14,7 +14,7 @@ Named after [Mnémosyne](https://fr.wikipedia.org/wiki/Mn%C3%A9mosyne), the Gree
 If this saves you time, [![GitHub stars](https://img.shields.io/github/stars/craft-man/mnemo?style=social)](https://github.com/craft-man/mnemo) helps others find it.
 
 > [!WARNING]
-> This plugin was originally built for Claude Code and is still in beta pending further cross-platform testing. Thanks for your patience! If you're interested in contributing, don't hesitate to jump in! All contributions are welcome.
+> This plugin is in beta. Core skills run on Claude Code, OpenCode, Gemini CLI, Cursor, and any agentskills.io-compatible agent. Some optional features (Stop hook, CLAUDE.md wiring) are Claude Code-only and activate only when running on that platform. Thanks for your patience! Contributions welcome.
 
 Most AI tools re-derive answers from your raw files on every query. mnemo builds a persistent wiki instead: Claude reads your sources once, synthesizes structured pages, and cross-references them permanently. The longer you use it, the richer the graph gets.
 
