@@ -75,7 +75,7 @@ If not clear from context, ask:
 > "What language should I use for notes and responses? (e.g. English, French, Spanish)"
 
 **Q4 — Main domains of interest:**
-> "What are your main domains or topics? List them — e.g. 'distributed systems, Rust, personal finance' or 'UX research, product management'"
+> "What are your primary areas of expertise? Which keywords best describe your profile or interests? What subjects do you know most about? List them — e.g. 'distributed systems, Rust, personal finance' or 'UX research, product management'"
 
 **Q5 — Proactivity:**
 > "When you query or we work together, how proactive should I be?

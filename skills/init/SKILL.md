@@ -115,9 +115,9 @@ Invoke `/mnemo:onboard` now. It will detect whether a profile already exists:
    - If not found: show the install command and wait for the user to run it:
      ```
      # with npm
-     npm install -g qmd
-     # or with Bun
-     bun add -g qmd
+     npm install -g @tobilu/qmd
+     # or
+     bun install -g @tobilu/qmd
      ```
    - Once installed (user confirms or `qmd --version` succeeds): continue.
 
