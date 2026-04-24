@@ -140,23 +140,34 @@ If no local results after steps 3–6, repeat steps 3–6 in `~/.mnemo/` if it e
 
 ---
 
-## Step 8 — Present results
+## Step 8 — Present results (Layer 1 — compact index)
+
+Present a compact summary first. Do **not** dump full page bodies unless the user asks.
 
 ```
 ## Results for "<original query>"
-Filters active: tag:redis, since:2026-01-01
-Pages read: N
+Filters active: tag:redis, since:2026-01-01   ← omit line if no filters
+Pages read: N   |   Activity logs included: yes/no
 
-### Index matches
-- **[[Title]]** — `category: concepts` — *snippet*
-
-### Tag / date matches
-- **[[Title]]** — tag: redis, created: 2026-02-10 — *snippet*
-
-### BM25-style matches
-- **[[Title]]** — matched: term1 (title), term2 (body) — *snippet*
+1. **[[Title]]** `concepts` — *one-line snippet (≤120 chars)*
+2. **[[Title]]** `entities` — *one-line snippet*
+3. **[[Title]]** `synthesis` — *one-line snippet*
 ```
 
-- If no results at all: say so explicitly. Never invent content.
-- Always report total pages read.
-- Offer to retry with a broader term, different filters, or suggest `/mnemo:ingest` if the topic may be unprocessed.
+Rules for Layer 1:
+- One line per result. Title + category badge + snippet only.
+- Snippet = first 120 chars of the first body paragraph after the H1.
+- Number each result so the user can request expansion by number.
+- If no results: say so explicitly. Never invent content.
+- Always offer: "Type a number to expand, or ask a follow-up question."
+
+## Step 9 — Layer 2: expand on demand
+
+Trigger: user types a result number (e.g. "2"), "expand 2", "show me #3", "détaille le 1", "mostra il 2", "zeig mir 3", "muéstrame el 2", or any equivalent in any language.
+
+Action: re-read the full page for that result number and present:
+- Full frontmatter (title, category, tags, created)
+- Full page body
+- All wikilinks in `## Links`
+
+Do not re-run the search. Use the page path already found in Steps 3–6.
