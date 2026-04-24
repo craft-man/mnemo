@@ -169,6 +169,19 @@ def main() -> None:
         if fm and 'updated' not in fm:
             issues.append(('missing_updated', wf, 'No updated: field in frontmatter'))
 
+        # Superseded without History section
+        _superseded_by = fm.get('superseded_by')
+        _supersedes = fm.get('supersedes')
+        if _superseded_by or _supersedes:
+            fm_end = text.find('---', 3)  # end of frontmatter
+            body = text[fm_end + 3:] if fm_end != -1 else text
+            if '## History' not in body:
+                which = f'superseded_by: {_superseded_by!r}' if _superseded_by else f'supersedes: {_supersedes!r}'
+                issues.append((
+                    'superseded_without_history', wf,
+                    f'{which} but no ## History section',
+                ))
+
     # 10. No inbound links (entities and concepts only)
     for wf, (text, p) in all_texts.items():
         if 'wiki/entities/' not in wf and 'wiki/concepts/' not in wf:
