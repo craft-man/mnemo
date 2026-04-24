@@ -118,8 +118,6 @@ If the user confirms:
 3. If the file already exists (multiple mine runs in one day): read it, locate the `## Items Saved` heading, and insert the new bullet lines directly before the `## Links` heading. Also update the `updated:` field in the YAML frontmatter to today's date.
 4. If the file does not exist, create it with this exact structure:
 
-*(Write these as a single file — the frontmatter and body blocks above are shown separately for clarity only.)*
-
 ```yaml
 ---
 title: Session YYYY-MM-DD
@@ -143,12 +141,14 @@ updated: YYYY-MM-DD
 
 ## Items Saved
 
-[One line per item saved in Step 3. If no items were saved, write: "None".]
+[One line per item saved in Step 3:]
 - [[Page Title]] (`category`)
 
 ## Links
 
 [Wikilinks to the most relevant entities or concepts referenced today]
 ```
+
+*(Write these as a single file — the frontmatter and body blocks above are shown separately for clarity only.)*
 
 5. Report: "Activity log written to `wiki/activity/YYYY-MM-DD.md`."

@@ -130,6 +130,8 @@ Read `.mnemo/index.md`. If shard files exist in `wiki/indexes/` (`sources.md`, `
 
 If `$INCLUDE_ACTIVITY` is `true`: glob `.mnemo/wiki/activity/*.md`. If the directory does not exist or returns no files, continue without error. Otherwise add all found files to the candidate pool and label them as "activity log matches" in Step 8.
 
+Activity files bypass index-title scoring. Retain them if the search term appears in their body content (+1) or `tags:` frontmatter (+1); apply tag/date filters via their own frontmatter. If `$INCLUDE_ACTIVITY` is true and no search term exists, include all found activity files unfiltered. Activity matches remain labeled as "activity log matches" in Step 8 regardless of score.
+
 From the index entries, apply filters in order:
 
 1. **Tag filter** — if `tag:<value>` is set: read each candidate's YAML frontmatter (lines between `---` delimiters only, not the body). Keep only pages whose `tags:` list contains `<value>` (case-insensitive).

@@ -166,7 +166,7 @@ Body text referencing [[Related Concept]] and [[Entity Name]].
 ## Scalability Rules
 
 - **Page size cap** — soft cap 400 lines, hard cap 800 lines. When a page exceeds 800 lines during ingest, split into `<slug>-part-1.md` and `<slug>-part-2.md`. Warn the user when approaching 400 lines.
-- **Index sharding** — when total wiki pages exceed 150, the index splits into `index.md` (master TOC with shard links) + per-category shards in `wiki/indexes/sources.md`, `wiki/indexes/entities.md`, `wiki/indexes/concepts.md`, `wiki/indexes/synthesis.md`.
+- **Index sharding** — when total wiki pages exceed 150, the index splits into `index.md` (master TOC with shard links) + per-category shards in `wiki/indexes/sources.md`, `wiki/indexes/entities.md`, `wiki/indexes/concepts.md`, `wiki/indexes/synthesis.md`. (`activity/` pages are not indexed and are excluded from sharding.)
 - **Frontmatter filtering** — for large wikis, use YAML `tags:` and `category:` to narrow reads before loading full content.
 
 ---
