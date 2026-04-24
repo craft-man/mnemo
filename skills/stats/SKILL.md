@@ -13,7 +13,7 @@ compatibility: >
   (scripts/wiki_stats.py).
 metadata:
   author: mnemo contributors
-  version: "0.4.2"
+  version: "0.5.0"
 allowed-tools: Read Glob Bash
 ---
 

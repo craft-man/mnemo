@@ -6,6 +6,19 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.5.0] — 2026-04-24
+
+### Added
+
+- **`/mnemo:query` progressive disclosure** — results now show as a compact numbered index (title + category + snippet). Type a result number to expand to full page content. Works in any language.
+- **`/mnemo:query` activity intent detection** — temporal and procedural queries (e.g. "what did we do yesterday", "qu'est-ce qu'on a fait cette semaine") automatically include session logs from `wiki/activity/` in results. Multilingual signal detection (FR, EN, DE, IT, ES, JA, ZH, RU).
+- **`/mnemo:mine` session capture** — after saving items, offers to write a session activity log to `wiki/activity/YYYY-MM-DD.md`. Append-safe on same-day re-runs.
+- **`/mnemo:init` Stop hook injection** — automatically wires a session-end reminder hook into the host project's `.claude/settings.local.json` (creates the file if needed, merges safely if it exists).
+- **`activity/` category** — new wiki subdirectory for session logs, excluded from default search, included automatically when query detects activity intent.
+- **Session End Protocol in CLAUDE.md** — agent now proactively proposes `/mnemo:mine` at end of write-worthy sessions.
+
+---
+
 ## [0.4.2] — 2026-04-24
 
 ### Added
