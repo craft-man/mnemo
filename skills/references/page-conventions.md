@@ -13,6 +13,17 @@ updated: YYYY-MM-DD
 ---
 ```
 
+**Optional fields for entity and concept pages:**
+
+```yaml
+superseded_by: "Replacement Page Title"  # this entity/concept was replaced
+supersedes: "Predecessor Page Title"     # this entity/concept replaced another
+```
+
+- `superseded_by`: set when a source indicates this entity has been replaced. Value is the exact H1 title of the replacement page.
+- `supersedes`: set when this entity replaced a predecessor. Value is the exact H1 title of the predecessor page.
+- Both fields are optional — omit when no replacement relationship exists.
+
 **Rules:**
 - Every wiki page must start with YAML frontmatter — no exceptions.
 - `source:` is required for all `wiki/sources/` pages.
@@ -46,6 +57,22 @@ Body text referencing [[Related Concept]] and [[Entity Name]].
 - Always end with a `## Links` section.
 - Wikilinks: `[[Exact H1 Title]]` — always the exact H1 title of the target page, not a filename.
 - Wikilinks are Obsidian-compatible.
+
+**Optional `## History` section** (entities and concepts only):
+
+Required when a page has `superseded_by:` or `supersedes:` in its frontmatter. Place it before `## Links`.
+
+```markdown
+## History
+
+- **YYYY-MM-DD**: Replaced by [[New Tool Title]] — see [[Source Title]]
+- **YYYY-MM-DD**: Earlier name was "Old Name" — see [[Source Title]]
+```
+
+Rules:
+- One bullet per significant change event.
+- Always reference the source that documented the change with a wikilink.
+- Dates use `YYYY-MM-DD` format.
 
 ---
 
