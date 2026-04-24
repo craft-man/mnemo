@@ -7,6 +7,8 @@ Usage:
 """
 import json
 import pathlib
+import shutil
+import subprocess
 import sys
 
 DIRS = [
@@ -95,12 +97,41 @@ def prompt_qmd(mnemo_root: pathlib.Path) -> None:
     print()
     ans = input("Enable hybrid search with qmd? (BM25 + vector, requires Node.js >= 22 or Bun >= 1.0) [y/N]: ").strip().lower()
     if ans in ("y", "yes"):
-        config = {"semantic_search": "qmd", "qmd_collection": "mnemo-wiki"}
+        config = {"search_backend": "qmd", "qmd_collection": "mnemo-wiki"}
         print("  Install qmd if needed:  npm install -g qmd  or  bun add -g qmd")
         print("  Then run: qmd collection add mnemo-wiki .mnemo/wiki \"**/*.md\"")
     else:
-        config = {"semantic_search": "bm25"}
+        config = {"search_backend": "bm25"}
     (mnemo_root / "config.json").write_text(json.dumps(config, indent=2), encoding="utf-8")
+
+
+def prompt_graphify(target: pathlib.Path) -> bool:
+    """Ask the user if they want to map the codebase with graphify. Returns True if graphify ran successfully."""
+    print()
+    ans = input("Map your codebase with graphify? (builds a queryable knowledge graph — no re-reading files each session) [y/N]: ").strip().lower()
+    if ans not in ("y", "yes"):
+        print("  You can run /mnemo:graphify anytime to map your codebase.")
+        return False
+
+    if shutil.which("graphify") is None:
+        print("  graphify is not installed. Install it with:")
+        print("    pip install graphifyy && graphify install")
+        ans2 = input("  Press Enter once installed, or type 's' to skip: ").strip().lower()
+        if ans2 in ("s", "skip"):
+            print("  Skipped. Run /mnemo:graphify manually later.")
+            return False
+        if shutil.which("graphify") is None:
+            print("  graphify still not found — skipping. Run /mnemo:graphify manually later.")
+            return False
+
+    print("  Running graphify on the project (this may take a moment)...")
+    result = subprocess.run(["graphify", "."], cwd=target)
+    if result.returncode != 0:
+        print("  graphify failed — run /mnemo:graphify manually to retry.")
+        return False
+
+    print("  Codebase mapped. Query it with /mnemo:query <term>.")
+    return True
 
 
 def update_gitignore(target: pathlib.Path) -> None:
@@ -154,9 +185,17 @@ def main() -> None:
         if ans in ("", "y", "yes"):
             update_gitignore(target)
 
+    graphify_done = False
+    if choice in ("1", "2"):
+        graphify_done = prompt_graphify(target)
+
     print("\nNext steps:")
-    print("  Run /mnemo:schema to define your domain taxonomy")
-    print("  Drop files into .mnemo/raw/ and run /mnemo:ingest")
+    if graphify_done:
+        print("  Re-run /mnemo:graphify after significant code changes to keep the graph up to date")
+    else:
+        print("  Run /mnemo:graphify to map your codebase into a queryable knowledge graph")
+        print("  Or: run /mnemo:schema to define your domain taxonomy, drop files into .mnemo/raw/, run /mnemo:ingest")
+    print("  Query with /mnemo:query <term>")
 
 
 if __name__ == "__main__":
