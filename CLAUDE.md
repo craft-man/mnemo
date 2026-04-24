@@ -43,6 +43,16 @@ Invoke skills only when the user explicitly asks, or when a skill's own instruct
 
 ---
 
+## Session End Protocol
+
+At the end of any session that produced decisions, new knowledge, or significant work:
+
+1. **Automatically propose `/mnemo:mine`** — do not wait for the user to ask.
+2. Do not propose if the session was purely read-only (queries, lint checks, stats).
+3. Signals that a session was write-worthy: a decision was made, a new concept was explained, architecture was discussed, a bug was diagnosed, a comparison was drawn.
+
+---
+
 ## When to Use Each Skill
 
 ### `/mnemo:init`
@@ -99,7 +109,7 @@ Every wiki page **must** start with YAML frontmatter:
 ```yaml
 ---
 title: Page Title
-category: sources | entities | concepts | synthesis
+category: sources | entities | concepts | synthesis | activity
 tags: [tag1, tag2]
 source: raw/filename.ext   # required for sources category
 created: YYYY-MM-DD
@@ -146,6 +156,7 @@ Body text referencing [[Related Concept]] and [[Entity Name]].
 | `entities/` filename | `<type>-<name>.md` | `tool-redis.md`, `person-karpathy.md` |
 | `concepts/` filename | `<category>-<name>.md` | `pattern-saga.md`, `technique-rag.md` |
 | `synthesis/` filename | `kebab-case.md` | `btree-vs-hash-comparison.md` |
+| `activity/` filename | `YYYY-MM-DD.md` | `2026-04-24.md` |
 | Page title (H1) | Title Case | `Redis — In-Memory Data Store` |
 | Index entry | `- [Title](wiki/<subdir>/file.md)` | `- [Redis](wiki/entities/tool-redis.md)` |
 | Log entry | `- filename \| ISO timestamp` | `- notes.md \| 2026-04-22T14:00:00+00:00` |
@@ -173,6 +184,7 @@ Each tier:
 │   ├── entities/     ← people, tools, projects, systems
 │   ├── concepts/     ← ideas, patterns, techniques
 │   ├── synthesis/    ← cross-source analyses, comparisons
+│   ├── activity/     ← session logs (not searched by default)
 │   └── indexes/      ← index shards (created when >150 pages)
 ├── index.md          ← categorized table of contents
 ├── log.md            ← audit trail (prevents re-processing)
