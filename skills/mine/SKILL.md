@@ -12,7 +12,7 @@ compatibility: >
   invoke by natural language.
 metadata:
   author: mnemo contributors
-  version: "0.5.1"
+  version: "0.6.0"
 allowed-tools: Read Glob
 ---
 
@@ -86,7 +86,7 @@ Enter numbers to save (e.g. "1 3"), "a" for all, "n" to discard all:
 
 ### Step 3 — Save approved items
 
-For each selected number, invoke `/mnemo:save` with:
+For each selected number, invoke the save skill by reading `skills/save/SKILL.md` and following its instructions, with:
 - **title**: suggested title from Step 2
 - **category**: use save's plural category names — `entities`, `concepts`, or `synthesis`. Route Decision candidates to `synthesis`.
 - **content**: the relevant passage(s) from the conversation, formatted as markdown

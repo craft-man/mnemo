@@ -15,7 +15,7 @@ compatibility: >
   (scripts/wiki_lint.py).
 metadata:
   author: mnemo contributors
-  version: "0.5.1"
+  version: "0.6.0"
 allowed-tools: Read Write Edit Glob Grep Bash
 ---
 
@@ -145,7 +145,7 @@ Suggested action:
 Create now? [y]es / [n]o / [s]kip all gaps
 ```
 
-If the user answers `[y]es`, invoke the `/mnemo:save` flow immediately with the suggested title pre-filled, using the source pages as context for the page body.
+If the user answers `[y]es`, invoke the save skill by reading `skills/save/SKILL.md` and following its instructions, with the suggested title pre-filled and source pages as context for the page body.
 
 **Never apply any edit without explicit user approval.**
 

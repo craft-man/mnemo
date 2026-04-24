@@ -12,7 +12,7 @@ compatibility: >
   agents invoke by natural language. No external dependencies.
 metadata:
   author: mnemo contributors
-  version: "0.5.1"
+  version: "0.6.0"
 allowed-tools: Read Write Glob Grep
 ---
 

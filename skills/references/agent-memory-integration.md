@@ -80,3 +80,19 @@ The wiki is the agent's long-term memory — raw files are the ground truth, wik
 ## Cross-Project Global Memory
 
 Place shared knowledge (domain concepts that apply across projects) in `~/.mnemo/` using the same directory structure. The `query` skill searches local first, then falls back to global if no results are found.
+
+---
+
+## Adding Support for a New Agent
+
+mnemo uses an extension file pattern for agent-specific wiring. To add support for a new agent:
+
+1. Create `skills/init/<agent-name>.md` (e.g. `skills/init/cursor.md`)
+2. Follow the structure of existing extensions (`claude-code.md`, `opencode.md`, `gemini.md`):
+   - Frontmatter with `name` and `description`
+   - Ask the user if they want to wire mnemo into their agent's memory config file
+   - If yes: check for an existing stanza, then append it
+   - Confirm when done
+3. The core `skills/init/SKILL.md` will automatically delegate to your file in step 11.
+
+No changes to the core skill are needed.

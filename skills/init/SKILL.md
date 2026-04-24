@@ -1,5 +1,5 @@
 ---
-name: init
+name: mnemo-init
 description: >
   Bootstrap a new mnemo knowledge base with taxonomy directory structure and a
   starter SCHEMA.md. Use when starting a new wiki, setting up a second brain,
@@ -13,7 +13,7 @@ compatibility: >
   agents invoke by natural language. No external dependencies.
 metadata:
   author: mnemo contributors
-  version: "0.5.1"
+  version: "0.6.0"
 allowed-tools: Read Write Edit Glob Bash
 ---
 
@@ -98,13 +98,13 @@ Use `[[Page Title]]` syntax — always the exact H1 title of the target page. Ob
 
 > "Would you like to define your domain taxonomy now? I can read files already in `raw/` to infer entity types and concept categories, then ask a few questions. [y]es / [n]o (you can run `/mnemo:schema` anytime)"
 
-If `[y]es`: invoke `/mnemo:schema` now. Skip the manual SCHEMA.md note in step 5.
+If `[y]es`: invoke the schema skill by reading `skills/schema/SKILL.md` and following its instructions. Skip the manual SCHEMA.md note in step 5.
 
 If `[n]o`: continue — the starter SCHEMA.md from step 3 will be used until the user runs `/mnemo:schema`.
 
 **5. User profile** — ensure the global user profile exists:
 
-Invoke `/mnemo:onboard` now. It will detect whether a profile already exists:
+Invoke the onboard skill by reading `skills/onboard/SKILL.md` and following its instructions. It will detect whether a profile already exists:
 - If no profile exists: run the full interview to create one.
 - If a profile already exists: skip silently (no prompt to the user).
 
@@ -155,80 +155,6 @@ Write `.mnemo/<project-name>/config.json`:
 > Next: drop files into `.mnemo/<project-name>/raw/` and run `/mnemo:ingest`."
 > (If schema was not defined in step 4, add: "Run `/mnemo:schema` to define your domain taxonomy first.")
 
-**8. CLAUDE.md wiring** — offer to persist the wiki in the project's agent memory: — offer to persist the wiki in the project's agent memory:
-
-Ask the user:
-> "Want me to add a memory stanza to `CLAUDE.md` so I remember this wiki in future sessions? [y/n]"
-
-If `[n]`: do nothing. Do not ask again.
-
-If `[y]`:
-
-Check if `CLAUDE.md` already contains the heading `## mnemo`. If yes: skip silently — the stanza is already present.
-
-Otherwise:
-
-Build the stanza based on what was initialized in steps 2–5:
-
-```markdown
-## mnemo
-
-This project has a mnemo knowledge base in `.mnemo/<project-name>/`.
-- Query it with `/mnemo:query <term>` before answering factual questions
-- Ingest new sources with `/mnemo:ingest`
-- When a spec or plan is finalized (e.g. from superpowers brainstorming or writing-plans), move it to `.mnemo/<project-name>/raw/` and run `/mnemo:ingest` to add it to the knowledge base
-```
-
-If graphify was set up in step 9, append this line to the stanza:
-```
-- Run `/mnemo:graphify` after significant code changes to keep the knowledge graph up to date
-```
-
-Then:
-- If `CLAUDE.md` exists: append the stanza at the end of the file, preceded by a blank line.
-- If `CLAUDE.md` does not exist: create it with the stanza as the only content.
-
-Confirm:
-> "Done — stanza added to `CLAUDE.md`. I'll remember this wiki in future sessions."
-
-**8b. Stop hook injection** — wire the session-end reminder into the project's Claude Code settings:
-
-Ensure the `.claude/` directory exists in the current project (create it if needed). Then check if `.claude/settings.local.json` exists.
-
-**Case A — file does not exist:**
-Create `.claude/settings.local.json` with:
-```json
-{
-  "hooks": {
-    "Stop": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "echo 'mnemo — session ending. Run /mnemo:mine to capture insights from this session.'"
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-**Case B — file exists, no `hooks` key yet:**
-Read the file. Add the `"hooks"` key from Case A at the top level, preserving all existing content.
-
-**Case C — file exists, `hooks.Stop` exists but no mnemo entry:**
-Read the file. Append the mnemo hook object to the existing `hooks.Stop` array, preserving all existing hooks.
-
-**Case D — file already contains the mnemo echo command:**
-Skip silently — already wired.
-
-After writing, confirm:
-> "Stop hook added to `.claude/settings.local.json` — you'll be reminded to run `/mnemo:mine` at session end."
-
-If the `.claude/` directory does not exist, create it first.
-
 **9. Graphify setup (optional)** — ask the user:
 
 > "Want to map your codebase with **graphify**? It builds a persistent knowledge graph so I can answer questions about your project without re-reading source files on every session. [y]es / [n]o"
@@ -248,9 +174,9 @@ Check if graphify is installed: run `graphify --version`.
 
 - **If found:** continue immediately.
 
-Invoke `/mnemo:graphify` now.
+Invoke the graphify skill by reading `skills/graphify/SKILL.md` and following its instructions.
 
-After `/mnemo:graphify` completes, report:
+After the graphify skill completes, report:
 > "Codebase mapped. Query it with `/mnemo:query <term>`. Re-run `/mnemo:graphify` after significant code changes to keep the graph up to date."
 
 **10. Obsidian setup (optional)** — ask the user:
@@ -273,3 +199,16 @@ After `/mnemo:graphify` completes, report:
 
 4. Report:
    > "Obsidian vault ready at `.mnemo/<project-name>/`. Clipped pages saved to `raw/` will be ingested with `/mnemo:ingest`."
+
+**11. Agent wiring** — wire mnemo into your agent's memory configuration:
+
+Check if a file `skills/init/<agent-name>.md` exists for your platform and follow its instructions.
+
+Known extension files:
+- `skills/init/claude-code.md` — Claude Code (CLAUDE.md stanza + Stop hook)
+- `skills/init/opencode.md` — OpenCode (AGENTS.md stanza)
+- `skills/init/gemini.md` — Gemini CLI (GEMINI.md stanza)
+- `skills/init/cursor.md` — Cursor (AGENTS.md stanza)
+- `skills/init/codex.md` — Codex (AGENTS.md stanza)
+
+If no extension file exists for your agent, consult `skills/references/agent-memory-integration.md` for manual wiring instructions.
