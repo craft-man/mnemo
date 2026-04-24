@@ -91,6 +91,8 @@ Before parsing modifiers, scan `$ARGUMENTS` for temporal or procedural intent si
 
 `$INCLUDE_ACTIVITY` is consumed in Step 3 to extend the candidate pool.
 
+---
+
 ## Step 1 — Parse all modifiers
 
 Extract all modifiers from `$ARGUMENTS` before searching. The remaining text after removing modifiers is the **search term** (may be empty if only modifiers are given).
@@ -126,7 +128,7 @@ Multiple modifiers can be combined: `tag:redis since:2026-01-01 performance`
 
 Read `.mnemo/index.md`. If shard files exist in `wiki/indexes/` (`sources.md`, `entities.md`, `concepts.md`, `synthesis.md`), read the relevant ones based on the `category:` filter (or all if no filter).
 
-If `$INCLUDE_ACTIVITY` is `true`: also glob `.mnemo/wiki/activity/*.md` and add all found files to the candidate pool. Label these results as "activity log matches" in Step 8.
+If `$INCLUDE_ACTIVITY` is `true`: glob `.mnemo/wiki/activity/*.md`. If the directory does not exist or returns no files, continue without error. Otherwise add all found files to the candidate pool and label them as "activity log matches" in Step 8.
 
 From the index entries, apply filters in order:
 
@@ -190,6 +192,7 @@ Rules for Layer 1:
 - Number each result so the user can request expansion by number.
 - If no results: say so explicitly. Never invent content.
 - Always offer: "Type a number to expand, or ask a follow-up question."
+- Activity log matches (from `wiki/activity/`) use the category badge `activity` in the numbered list: e.g., `3. **[[Session 2026-04-24]]** \`activity\` — *one-line snippet*`
 
 *(`Activity logs included` reflects whether `$INCLUDE_ACTIVITY` was set to true by Step 0c — set to "yes" if activity intent was detected, "no" otherwise.)*
 
