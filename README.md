@@ -1,7 +1,7 @@
 # mnemo
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.2.0-blue)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.3.0-blue)](CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
@@ -14,6 +14,8 @@ If this saves you time, [![GitHub stars](https://img.shields.io/github/stars/cra
 Most AI tools re-derive answers from your raw files on every query. mnemo builds a persistent wiki instead: Claude reads your sources once, synthesizes structured pages, and cross-references them permanently. The longer you use it, the richer the graph gets.
 
 Inspired by Karpathy's [LLM Wiki pattern](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f).
+
+[Why not just RAG?](#why-not-just-rag) · [What it does](#what-it-does) · [Installation](#installation) · [Quick start](#quick-start) · [Search backends](#search-backends) · [Typical workflow](#typical-workflow) · [Skills](#skills) · [Obsidian](#using-mnemo-with-obsidian) · [Contributing](#contributing)
 
 ---
 
