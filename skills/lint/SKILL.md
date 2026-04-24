@@ -23,9 +23,9 @@ allowed-tools: Read Write Edit Glob Grep Bash
 
 1. Use `Glob('**/mnemo/scripts/wiki_lint.py')` to locate the lint script.
 2. If found at `<script_path>`:
-   - Before invoking, pre-read `.mnemo/log.md` and look for a line `# Last lint: <timestamp>`. If found, append `--since <timestamp>` to the command below.
+   - Before invoking, pre-read `.mnemo/<project-name>/log.md` and look for a line `# Last lint: <timestamp>`. If found, append `--since <timestamp>` to the command below.
    ```
-   python3 <script_path> .mnemo [--since <last_lint_ts>]
+   python3 <script_path> .mnemo/<project-name> [--since <last_lint_ts>]
    ```
 3. If exit code is 0: present the script output. Then proceed directly to **Step 12** (interactive approval of proposed edits) — skip steps 0b and 1–11. After step 12 completes, still execute the **Record lint timestamp** step at the end.
 4. If Python is unavailable or script not found, continue to Step 0b below.
@@ -34,38 +34,38 @@ allowed-tools: Read Write Edit Glob Grep Bash
 
 Before step 1, check whether a previous lint run has been recorded:
 
-1. Read `.mnemo/log.md`. Look for a line of the form `# Last lint: <ISO timestamp>`.
+1. Read `.mnemo/<project-name>/log.md`. Look for a line of the form `# Last lint: <ISO timestamp>`.
 2. If found: set `incremental_mode = true`, `last_lint_ts = <timestamp>`.
-   - Build `recent_files`: glob `.mnemo/wiki/**/*.md`, read the `updated:` field from each page's YAML frontmatter. Keep only files where `updated:` ≥ `last_lint_ts`. This is the scoped file set for per-file content checks.
+   - Build `recent_files`: glob `.mnemo/<project-name>/wiki/**/*.md`, read the `updated:` field from each page's YAML frontmatter. Keep only files where `updated:` ≥ `last_lint_ts`. This is the scoped file set for per-file content checks.
    - Structural checks (`missing_structure`, `orphan`, `broken_link`, `unprocessed`, `gap_page`) always run against the full knowledge base regardless of mode.
 3. If not found: set `incremental_mode = false`. All checks run against the full `wiki_files` set (full scan).
 4. Report mode at the start of the audit output: `"Mode: incremental (since <last_lint_ts>), <N> files in scope"` or `"Mode: full scan"`.
 
-Audit `.mnemo/` and report issues as proposed edits.
+Audit `.mnemo/<project-name>/` and report issues as proposed edits.
 
 ## Steps
 
 **1. Check initialization** — verify these paths exist:
-- `.mnemo/wiki/sources/`
-- `.mnemo/wiki/entities/`
-- `.mnemo/wiki/concepts/`
-- `.mnemo/wiki/synthesis/`
-- `.mnemo/wiki/indexes/`
-- `.mnemo/SCHEMA.md`
+- `.mnemo/<project-name>/wiki/sources/`
+- `.mnemo/<project-name>/wiki/entities/`
+- `.mnemo/<project-name>/wiki/concepts/`
+- `.mnemo/<project-name>/wiki/synthesis/`
+- `.mnemo/<project-name>/wiki/indexes/`
+- `.mnemo/<project-name>/SCHEMA.md`
 
 If any are missing, report as `missing_structure` and offer to run `/mnemo:init`.
 
-**2. Read index** — read `.mnemo/index.md`. Extract all wiki paths from lines of the form `- [Title](wiki/<subdir>/filename.md)` → build `indexed_paths` set. If shard files exist in `wiki/indexes/` (`sources.md`, `entities.md`, `concepts.md`, `synthesis.md`), read and include those too.
+**2. Read index** — read `.mnemo/<project-name>/index.md`. Extract all wiki paths from lines of the form `- [Title](wiki/<subdir>/filename.md)` → build `indexed_paths` set. If shard files exist in `wiki/indexes/` (`sources.md`, `entities.md`, `concepts.md`, `synthesis.md`), read and include those too.
 
-**3. List wiki files** — glob `.mnemo/wiki/**/*.md` → build `wiki_files` set (relative paths like `wiki/sources/foo.md`). Exclude `SCHEMA.md` and files under `wiki/indexes/`.
+**3. List wiki files** — glob `.mnemo/<project-name>/wiki/**/*.md` → build `wiki_files` set (relative paths like `wiki/sources/foo.md`). Exclude `SCHEMA.md` and files under `wiki/indexes/`.
 
-**4. Read log** — read `.mnemo/log.md`. Build `processed_files` as the set of raw source filenames that have been ingested. Parse both formats:
+**4. Read log** — read `.mnemo/<project-name>/log.md`. Build `processed_files` as the set of raw source filenames that have been ingested. Parse both formats:
 - **Current format**: `- raw/<filename> | <timestamp> | ingest` → extract `<filename>`
 - **Legacy format**: `- <filename> | <timestamp>` (no third field, no path prefix) → extract `<filename>`
 
 Ignore lines containing `| generated` — those are save-created pages, not raw source files.
 
-**5. List raw files** — glob `.mnemo/raw/*` → build `raw_files` set.
+**5. List raw files** — glob `.mnemo/<project-name>/raw/*` → build `raw_files` set.
 
 **6. Detect all issues (collect, don't act yet):**
 
@@ -153,7 +153,7 @@ After all issues are reviewed:
 - Summary: "X issues found, Y applied, Z skipped."
 - If 0 issues: "Knowledge base is healthy — 0 issues."
 
-**Record lint timestamp** — update `.mnemo/log.md`:
+**Record lint timestamp** — update `.mnemo/<project-name>/log.md`:
 - If a `# Last lint: ...` line already exists: replace it in place with `# Last lint: <current UTC ISO timestamp>`.
 - If no such line exists: prepend it as the first line of `log.md`.
 

@@ -17,25 +17,25 @@ metadata:
 allowed-tools: Read Write Edit Glob Grep Bash
 ---
 
-Ingest all pending files from `.mnemo/raw/` into the wiki.
+Ingest all pending files from `.mnemo/<project-name>/raw/` into the wiki.
 
 ## Flag: `--global`
 
-If `--global` is present in the invocation arguments, substitute every `.mnemo/` path below with `~/.mnemo/`. All reads, writes, and log updates operate on the global knowledge base instead of the local one. This is useful for ingesting sources that should be available across multiple projects.
+If `--global` is present in the invocation arguments, substitute every `.mnemo/<project-name>/` path below with `~/.mnemo/`. All reads, writes, and log updates operate on the global knowledge base instead of the local one. This is useful for ingesting sources that should be available across multiple projects.
 
 ## Steps
 
-**1. Check init** — if `.mnemo/wiki/sources/` does not exist, stop:
+**1. Check init** — if `.mnemo/<project-name>/wiki/sources/` does not exist, stop:
 > "Knowledge base not initialized. Run `/mnemo:init` first."
 
-**2. Read SCHEMA.md** — read `.mnemo/SCHEMA.md`. Use it to guide categorization, entity types, and naming during synthesis.
+**2. Read SCHEMA.md** — read `.mnemo/<project-name>/SCHEMA.md`. Use it to guide categorization, entity types, and naming during synthesis.
 
-**3. Read the log** — read `.mnemo/log.md`. Build a set of already-processed filenames from lines of the form:
+**3. Read the log** — read `.mnemo/<project-name>/log.md`. Build a set of already-processed filenames from lines of the form:
 ```
 - filename.ext | 2026-01-15T10:30:00+00:00
 ```
 
-**4. List raw files** — glob `.mnemo/raw/*`. Skip directories. Skip filenames already in the processed set.
+**4. List raw files** — glob `.mnemo/<project-name>/raw/*`. Skip directories. Skip filenames already in the processed set.
 
 **5. For each unprocessed file — synthesize:**
 
@@ -220,8 +220,8 @@ updated: <YYYY-MM-DD>
    - The 5–8 most distinctive non-stopword nouns from the source's Summary and Key Points
 
 2. **Find related candidates** — two options (use whichever is faster):
-   - **If `wiki_search.py` is available**: run `python3 <script_path> .mnemo/wiki "<terms joined by space>"` and collect the top results.
-   - **Otherwise**: for each term in the term set, use Grep to search `.mnemo/wiki/**/*.md` for that term (case-insensitive). Collect file paths that match 2+ terms.
+   - **If `wiki_search.py` is available**: run `python3 <script_path> .mnemo/<project-name>/wiki "<terms joined by space>"` and collect the top results.
+   - **Otherwise**: for each term in the term set, use Grep to search `.mnemo/<project-name>/wiki/**/*.md` for that term (case-insensitive). Collect file paths that match 2+ terms.
 
    Exclude pages already created or updated in steps b and c.
 
@@ -251,16 +251,16 @@ updated: <YYYY-MM-DD>
    - `skipped_candidates`: count of candidates evaluated but not enriched
 
 **6. Update index** — for each new page written:
-- Count total pages in `.mnemo/wiki/**/*.md`.
-- If total < 150: append to `.mnemo/index.md` under the matching category heading (`## Sources`, `## Entities`, `## Concepts`, `## Synthesis`).
-- If total >= 150: append to `.mnemo/wiki/indexes/<category>.md` (create the file if it doesn't exist). Ensure `.mnemo/index.md` has a link to each shard: `- [Sources Index](wiki/indexes/sources.md)` etc.
+- Count total pages in `.mnemo/<project-name>/wiki/**/*.md`.
+- If total < 150: append to `.mnemo/<project-name>/index.md` under the matching category heading (`## Sources`, `## Entities`, `## Concepts`, `## Synthesis`).
+- If total >= 150: append to `.mnemo/<project-name>/wiki/indexes/<category>.md` (create the file if it doesn't exist). Ensure `.mnemo/<project-name>/index.md` has a link to each shard: `- [Sources Index](wiki/indexes/sources.md)` etc.
 
-**7. Update log** — append to `.mnemo/log.md`:
+**7. Update log** — append to `.mnemo/<project-name>/log.md`:
 ```
 - raw/<original_filename> | <UTC ISO timestamp> | ingest
 ```
 
-**7a. Sync qmd index (if configured)** — read `.mnemo/config.json`. Determine backend: use `search_backend` if present, else `semantic_search` if present, else `"bm25"`. If backend is `"qmd"`: read `qmd_collection` (default `"mnemo-wiki"`), then run:
+**7a. Sync qmd index (if configured)** — read `.mnemo/<project-name>/config.json`. Determine backend: use `search_backend` if present, else `semantic_search` if present, else `"bm25"`. If backend is `"qmd"`: read `qmd_collection` (default `"mnemo-wiki"`), then run:
 ```
 qmd update "$QMD_COLLECTION"
 ```

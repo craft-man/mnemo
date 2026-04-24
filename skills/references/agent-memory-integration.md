@@ -13,12 +13,12 @@ Add this stanza to your project's `CLAUDE.md`:
 
 This project uses mnemo for knowledge management.
 
-- Wiki: `.mnemo/wiki/` — synthesized, categorized, interlinked pages
-- Index: `.mnemo/index.md` — categorized table of contents
+- Wiki: `.mnemo/<project-name>/wiki/` — synthesized, categorized, interlinked pages
+- Index: `.mnemo/<project-name>/index.md` — categorized table of contents
 
 **Before answering any factual question** that might be in the knowledge base, run `/mnemo:query <topic>`. If results are returned, synthesize from them. If 0 results, say so explicitly — never invent wiki content.
 
-**To ingest new sources**: drop files into `.mnemo/raw/` and run `/mnemo:ingest`.
+**To ingest new sources**: drop files into `.mnemo/<project-name>/raw/` and run `/mnemo:ingest`.
 
 **To save an insight**: run `/mnemo:save` with a descriptive title.
 
@@ -34,12 +34,12 @@ Add this stanza to `AGENTS.md` at the project root:
 ```markdown
 ## Knowledge Base (mnemo)
 
-Wiki location: `.mnemo/wiki/`
-Index: `.mnemo/index.md`
+Wiki location: `.mnemo/<project-name>/wiki/`
+Index: `.mnemo/<project-name>/index.md`
 
 Workflow:
 - Query before answering: invoke the `query` skill with the topic.
-- Ingest new sources: invoke the `ingest` skill after adding files to `.mnemo/raw/`.
+- Ingest new sources: invoke the `ingest` skill after adding files to `.mnemo/<project-name>/raw/`.
 - Save insights: invoke the `save` skill with a descriptive title.
 - Lint after edits: invoke the `lint` skill at session end.
 
@@ -55,9 +55,9 @@ Add this stanza to `GEMINI.md` at the project root:
 ```markdown
 ## Knowledge Base (mnemo)
 
-This project maintains a synthesized wiki at `.mnemo/wiki/`.
+This project maintains a synthesized wiki at `.mnemo/<project-name>/wiki/`.
 
-- Consult `.mnemo/index.md` before answering domain questions.
+- Consult `.mnemo/<project-name>/index.md` before answering domain questions.
 - Read relevant wiki pages (sources, entities, concepts, synthesis) for grounded answers.
 - Skill instructions are in `skills/<skill-name>/SKILL.md` — follow them to ingest, query, save, and lint.
 ```

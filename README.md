@@ -38,22 +38,23 @@ The difference compounds over time. At 5 sources it feels similar. At 50, the wi
 
 mnemo gives your agent a two-tier knowledge base:
 
-- **Project** (`.mnemo/`) — knowledge scoped to the current project
+- **Project** (`.mnemo/<project-name>/`) — knowledge scoped to the current project, also the Obsidian vault root
 - **Global** (`~/.mnemo/`) — knowledge shared across all projects
 
 Each tier is a taxonomy-based wiki:
 
 ```
 .mnemo/
-├── raw/              ← drop your source files here (immutable input)
-├── wiki/
-│   ├── sources/      ← one synthesized page per ingested source
-│   ├── entities/     ← people, tools, projects, systems
-│   ├── concepts/     ← patterns, techniques, ideas
-│   └── synthesis/    ← cross-source analyses and comparisons
-├── index.md          ← categorized table of contents
-├── log.md            ← audit trail (prevents duplicate processing)
-└── SCHEMA.md         ← domain conventions (edit per project)
+└── <project-name>/   ← vault root (open this in Obsidian — displays the project name)
+    ├── raw/          ← drop your source files here (immutable input)
+    ├── wiki/
+    │   ├── sources/  ← one synthesized page per ingested source
+    │   ├── entities/ ← people, tools, projects, systems
+    │   ├── concepts/ ← patterns, techniques, ideas
+    │   └── synthesis/← cross-source analyses and comparisons
+    ├── index.md      ← categorized table of contents
+    ├── log.md        ← audit trail (prevents duplicate processing)
+    └── SCHEMA.md     ← domain conventions (edit per project)
 ```
 
 mnemo exposes ten skills that work with any [agentskills.io](https://agentskills.io)-compatible agent — no server, no binary, no dependencies.
@@ -101,7 +102,7 @@ Without an agent — standalone bootstrap (Python 3.10+):
 python3 scripts/init_mnemo.py
 ```
 
-Both paths let you configure **qmd** for hybrid semantic search and choose between project-only, global, or both tiers. Then drop files into `.mnemo/raw/` and:
+Both paths let you configure **qmd** for hybrid semantic search and choose between project-only, global, or both tiers. Then drop files into `.mnemo/<project-name>/raw/` and:
 
 ```
 /mnemo:ingest      # "ingest files in raw/"
@@ -127,7 +128,7 @@ bun add -g qmd
 
 qmd is optional — BM25 remains available as fallback if qmd is unavailable or returns an error.
 
-The active backend is stored in `.mnemo/config.json` under `search_backend` (`"bm25"` or `"qmd"`). Custom backends can be registered by adding a dispatch case to the query skill — see `skills/references/backends.md` for the interface spec.
+The active backend is stored in `.mnemo/<project-name>/config.json` under `search_backend` (`"bm25"` or `"qmd"`). Custom backends can be registered by adding a dispatch case to the query skill — see `skills/references/backends.md` for the interface spec.
 
 ---
 
@@ -162,15 +163,16 @@ Bootstraps a new knowledge base. Run once per project — warns if already initi
 
 ```
 .mnemo/
-├── raw/              ← drop your source files here
-├── wiki/
-│   ├── sources/
-│   ├── entities/
-│   ├── concepts/
-│   └── synthesis/
-├── index.md
-├── log.md            ← ingest audit trail
-└── SCHEMA.md         ← starter taxonomy, ready to edit
+└── <project-name>/   ← vault root (open in Obsidian for a named vault)
+    ├── raw/          ← drop your source files here
+    ├── wiki/
+    │   ├── sources/
+    │   ├── entities/
+    │   ├── concepts/
+    │   └── synthesis/
+    ├── index.md
+    ├── log.md        ← ingest audit trail
+    └── SCHEMA.md     ← starter taxonomy, ready to edit
 ```
 
 `log.md` records every ingested file — filename and ISO timestamp. Before processing anything, `/mnemo:ingest` checks this log and skips files already present. To force a re-ingest, remove the entry from `log.md`.
@@ -187,7 +189,7 @@ The profile persists across all projects and lets mnemo tailor its responses to 
 
 ### `/mnemo:schema`
 
-Builds or revises `.mnemo/SCHEMA.md` — the taxonomy that tells `/mnemo:ingest` how to classify what it finds. No form to fill out: the skill asks questions, proposes a draft, and you refine it. If files are already in `raw/`, it reads them first and brings concrete suggestions rather than a blank slate.
+Builds or revises `.mnemo/<project-name>/SCHEMA.md` — the taxonomy that tells `/mnemo:ingest` how to classify what it finds. No form to fill out: the skill asks questions, proposes a draft, and you refine it. If files are already in `raw/`, it reads them first and brings concrete suggestions rather than a blank slate.
 
 Covers entity types (people, tools, projects, systems), concept categories (techniques, patterns, principles), tagging conventions, and relationship hints. Nothing is written without your explicit confirmation.
 

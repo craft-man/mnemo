@@ -20,7 +20,7 @@ allowed-tools: Read Glob Grep Bash
 
 ## Step 0 — Route by search backend
 
-Read `.mnemo/config.json` (if it exists). Determine the active backend name:
+Read `.mnemo/<project-name>/config.json` (if it exists). Determine the active backend name:
 
 1. If the `search_backend` field is present, use its value.
 2. Else if the `semantic_search` field is present, use its value (backward compatibility).
@@ -50,7 +50,7 @@ Before running the instruction-based search below, attempt the faster Python pat
 1. Use `Glob('**/mnemo/scripts/wiki_search.py')` to locate the search script.
 2. If found at `<script_path>`, run:
    ```
-   python3 <script_path> .mnemo/wiki "$ARGUMENTS"
+   python3 <script_path> .mnemo/<project-name>/wiki "$ARGUMENTS"
    ```
    Append any modifiers extracted from `$ARGUMENTS` as CLI flags:
    - `category:<value>` → `--type <value>`
@@ -112,7 +112,7 @@ Multiple modifiers can be combined: `tag:redis since:2026-01-01 performance`
 ## Step 2 — Handle special modes first
 
 **If `backlinks:<Page Title>` is present:**
-- Grep all `.mnemo/wiki/**/*.md` files for `[[<Page Title>]]` or `[[<Page Title>|`.
+- Grep all `.mnemo/<project-name>/wiki/**/*.md` files for `[[<Page Title>]]` or `[[<Page Title>|`.
 - List every matching file with a snippet showing the wikilink in context.
 - Report: "Pages linking to [[<Page Title>]]: N found." Skip steps 3–7.
 
@@ -126,9 +126,9 @@ Multiple modifiers can be combined: `tag:redis since:2026-01-01 performance`
 
 ## Step 3 — Build the candidate pool (index-first, bounded)
 
-Read `.mnemo/index.md`. If shard files exist in `wiki/indexes/` (`sources.md`, `entities.md`, `concepts.md`, `synthesis.md`), read the relevant ones based on the `category:` filter (or all if no filter).
+Read `.mnemo/<project-name>/index.md`. If shard files exist in `wiki/indexes/` (`sources.md`, `entities.md`, `concepts.md`, `synthesis.md`), read the relevant ones based on the `category:` filter (or all if no filter).
 
-If `$INCLUDE_ACTIVITY` is `true`: glob `.mnemo/wiki/activity/*.md`. If the directory does not exist or returns no files, continue without error. Otherwise add all found files to the candidate pool and label them as "activity log matches" in Step 8.
+If `$INCLUDE_ACTIVITY` is `true`: glob `.mnemo/<project-name>/wiki/activity/*.md`. If the directory does not exist or returns no files, continue without error. Otherwise add all found files to the candidate pool and label them as "activity log matches" in Step 8.
 
 Activity files bypass index-title scoring. Retain them if the search term appears in their body content (+1) or `tags:` frontmatter (+1); apply tag/date filters via their own frontmatter. If `$INCLUDE_ACTIVITY` is true and no search term exists, include all found activity files unfiltered. Activity matches remain labeled as "activity log matches" in Step 8 regardless of score.
 

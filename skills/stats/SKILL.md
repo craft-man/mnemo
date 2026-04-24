@@ -22,20 +22,20 @@ allowed-tools: Read Glob Bash
 1. Use `Glob('**/mnemo/scripts/wiki_stats.py')` to locate the stats script.
 2. If found at `<script_path>`, run:
    ```
-   python3 <script_path> .mnemo
+   python3 <script_path> .mnemo/<project-name>
    ```
 3. If exit code is 0: present the script output and **stop** — do not run steps 1–5.
 4. If Python is unavailable or script not found, continue to Step 1 below.
 
-Display metrics for `.mnemo/`.
+Display metrics for `.mnemo/<project-name>/`.
 
 ## Steps
 
 **1. Count pages per category:**
-- `sources_count` = count of files matching `.mnemo/wiki/sources/*.md`
-- `entities_count` = count of files matching `.mnemo/wiki/entities/*.md`
-- `concepts_count` = count of files matching `.mnemo/wiki/concepts/*.md`
-- `synthesis_count` = count of files matching `.mnemo/wiki/synthesis/*.md`
+- `sources_count` = count of files matching `.mnemo/<project-name>/wiki/sources/*.md`
+- `entities_count` = count of files matching `.mnemo/<project-name>/wiki/entities/*.md`
+- `concepts_count` = count of files matching `.mnemo/<project-name>/wiki/concepts/*.md`
+- `synthesis_count` = count of files matching `.mnemo/<project-name>/wiki/synthesis/*.md`
 - `total_pages` = sum of all four
 
 **2. Count total lines** — for each wiki page, read and count lines. Sum all → `total_lines`.

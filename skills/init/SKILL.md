@@ -21,7 +21,9 @@ Initialize `.mnemo/` with the full taxonomy structure.
 
 ## Steps
 
-**1. Check for existing init** — if `.mnemo/wiki/sources/` already exists, warn:
+**0. Determine vault root** — `<project-name>` = current directory name (`Path.cwd().name`). The local vault root is `.mnemo/<project-name>/`.
+
+**1. Check for existing init** — if `.mnemo/<project-name>/wiki/sources/` already exists, warn:
 > "Knowledge base already initialized. Run `/mnemo:lint` to check its health."
 
 Stop here.
@@ -29,20 +31,21 @@ Stop here.
 **2. Create directory structure:**
 ```
 .mnemo/
-├── raw/                    ← source files (immutable input)
-├── wiki/
-│   ├── sources/            ← one page per ingested source
-│   ├── entities/           ← people, tools, projects, systems
-│   ├── concepts/           ← ideas, patterns, techniques
-│   ├── synthesis/          ← cross-source analyses, comparisons
-│   ├── activity/           ← session logs (not searched by default)
-│   └── indexes/            ← index shards (created when >150 pages)
-├── index.md
-├── log.md
-└── SCHEMA.md
+└── <project-name>/             ← vault root (open this folder in Obsidian)
+    ├── raw/                    ← source files (immutable input)
+    ├── wiki/
+    │   ├── sources/            ← one page per ingested source
+    │   ├── entities/           ← people, tools, projects, systems
+    │   ├── concepts/           ← ideas, patterns, techniques
+    │   ├── synthesis/          ← cross-source analyses, comparisons
+    │   ├── activity/           ← session logs (not searched by default)
+    │   └── indexes/            ← index shards (created when >150 pages)
+    ├── index.md
+    ├── log.md
+    └── SCHEMA.md
 ```
 
-Write `.mnemo/index.md`:
+Write `.mnemo/<project-name>/index.md`:
 ```markdown
 # Index
 
@@ -55,12 +58,12 @@ Write `.mnemo/index.md`:
 ## Synthesis
 ```
 
-Write `.mnemo/log.md`:
+Write `.mnemo/<project-name>/log.md`:
 ```markdown
 # Log
 ```
 
-**3. Write `.mnemo/SCHEMA.md`** — starter schema the user should customize:
+**3. Write `.mnemo/<project-name>/SCHEMA.md`** — starter schema the user should customize:
 ```markdown
 # Knowledge Base Schema
 
@@ -123,11 +126,11 @@ Invoke `/mnemo:onboard` now. It will detect whether a profile already exists:
 
 2. Register the wiki as a qmd collection:
    ```
-   qmd collection add mnemo-wiki .mnemo/wiki "**/*.md"
+   qmd collection add mnemo-wiki .mnemo/<project-name>/wiki "**/*.md"
    ```
    If this command fails, report the error and skip the rest of step 6 — the user can retry manually.
 
-3. Write `.mnemo/config.json`:
+3. Write `.mnemo/<project-name>/config.json`:
    ```json
    {
      "search_backend": "qmd",
@@ -139,7 +142,7 @@ Invoke `/mnemo:onboard` now. It will detect whether a profile already exists:
 
 **If no:**
 
-Write `.mnemo/config.json`:
+Write `.mnemo/<project-name>/config.json`:
 ```json
 {
   "search_backend": "bm25"
@@ -147,9 +150,9 @@ Write `.mnemo/config.json`:
 ```
 
 **7. Report:**
-> "Knowledge base initialized at `.mnemo/`.
+> "Knowledge base initialized at `.mnemo/<project-name>/`.
 > Search backend: **<qmd | BM25>**.
-> Next: drop files into `.mnemo/raw/` and run `/mnemo:ingest`."
+> Next: drop files into `.mnemo/<project-name>/raw/` and run `/mnemo:ingest`."
 > (If schema was not defined in step 4, add: "Run `/mnemo:schema` to define your domain taxonomy first.")
 
 **8. CLAUDE.md wiring** — offer to persist the wiki in the project's agent memory: — offer to persist the wiki in the project's agent memory:
@@ -170,10 +173,10 @@ Build the stanza based on what was initialized in steps 2–5:
 ```markdown
 ## mnemo
 
-This project has a mnemo knowledge base in `.mnemo/`.
+This project has a mnemo knowledge base in `.mnemo/<project-name>/`.
 - Query it with `/mnemo:query <term>` before answering factual questions
 - Ingest new sources with `/mnemo:ingest`
-- When a spec or plan is finalized (e.g. from superpowers brainstorming or writing-plans), move it to `.mnemo/raw/` and run `/mnemo:ingest` to add it to the knowledge base
+- When a spec or plan is finalized (e.g. from superpowers brainstorming or writing-plans), move it to `.mnemo/<project-name>/raw/` and run `/mnemo:ingest` to add it to the knowledge base
 ```
 
 If graphify was set up in step 9, append this line to the stanza:
@@ -255,18 +258,18 @@ After `/mnemo:graphify` completes, report:
 > "Want to open this wiki in **Obsidian**? It gives you a visual graph, full-text search, and lets the Web Clipper send pages directly into your ingest queue. [y]es / [n]o"
 
 **If `[n]o`:** do nothing. Report:
-> "You can open `.mnemo/` as an Obsidian vault anytime — it's compatible out of the box."
+> "You can open `.mnemo/<project-name>/` as an Obsidian vault anytime — it's compatible out of the box."
 
 **If `[y]es`:**
 
 1. Since Obsidian cannot be detected from a shell, show the install instructions immediately:
    > "If Obsidian is not yet installed, download it from **https://obsidian.md/** (free, available on macOS, Windows, Linux, iOS, Android). No sign-up required for local vaults."
 
-2. Instruct the user to open Obsidian and set the vault root to `.mnemo/` (not `.mnemo/wiki/`) — this keeps both `raw/` and `wiki/` visible inside the app:
-   > "In Obsidian: **Open folder as vault** → select `.mnemo/` in this project (or `~/.mnemo/` for the global vault)."
+2. Instruct the user to open Obsidian and set the vault root to `.mnemo/<project-name>/` — this gives the vault a meaningful name and keeps both `raw/` and `wiki/` visible inside the app:
+   > "In Obsidian: **Open folder as vault** → select `.mnemo/<project-name>/` in this project (or `~/.mnemo/` for the global vault)."
 
 3. Offer to set up the **Obsidian Web Clipper** browser extension so clipped pages land directly in the ingest queue:
    > "Install the Obsidian Web Clipper: https://https://obsidian.md//clipper#more-browsers — then set its default save location to `raw/` inside this vault. Pages you clip will be picked up automatically by `/mnemo:ingest`."
 
 4. Report:
-   > "Obsidian vault ready at `.mnemo/`. Clipped pages saved to `raw/` will be ingested with `/mnemo:ingest`."
+   > "Obsidian vault ready at `.mnemo/<project-name>/`. Clipped pages saved to `raw/` will be ingested with `/mnemo:ingest`."

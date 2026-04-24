@@ -1,7 +1,7 @@
 ---
 name: schema
 description: >
-  Interactively create or revise .mnemo/SCHEMA.md — the domain taxonomy that
+  Interactively create or revise .mnemo/<project-name>/SCHEMA.md — the domain taxonomy that
   guides ingest categorization. If raw/ files are present, infers entity types
   and concept categories from their content before asking questions. Use when the
   user says "define my schema", "set up my taxonomy", "what entity types should I
@@ -18,19 +18,19 @@ allowed-tools: Read Write Glob Grep
 
 Arguments: $ARGUMENTS
 
-Create or revise `.mnemo/SCHEMA.md` for this project's domain.
+Create or revise `.mnemo/<project-name>/SCHEMA.md` for this project's domain.
 
 ## Steps
 
 **1. Check init** — if `.mnemo/` does not exist, stop:
 > "Knowledge base not initialized. Run `/mnemo:init` first."
 
-**2. Check for existing SCHEMA.md** — read `.mnemo/SCHEMA.md` if it exists. If it contains domain content beyond the starter template (i.e. the `## Domain` section is filled in), inform the user:
+**2. Check for existing SCHEMA.md** — read `.mnemo/<project-name>/SCHEMA.md` if it exists. If it contains domain content beyond the starter template (i.e. the `## Domain` section is filled in), inform the user:
 > "A schema already exists. I'll show you the current version and propose updates."
 
 Keep the existing content in context for the revision flow below.
 
-**3. Scan raw/ for inference signals** — glob `.mnemo/raw/*`. If files are found:
+**3. Scan raw/ for inference signals** — glob `.mnemo/<project-name>/raw/*`. If files are found:
 
 Inform the user:
 > "I found N file(s) in raw/. I'll read them to infer your domain before asking questions."
@@ -106,13 +106,13 @@ Ask: "Write this schema? [y]es / [e]dit"
 
 If `[e]dit`: ask what to change, update the draft, show it again. Repeat until approved.
 
-**7. Write `.mnemo/SCHEMA.md`** — on approval, write the file.
+**7. Write `.mnemo/<project-name>/SCHEMA.md`** — on approval, write the file.
 
 **8. Report:**
-> "Schema written to `.mnemo/SCHEMA.md`.
+> "Schema written to `.mnemo/<project-name>/SCHEMA.md`.
 > Entity types: <list>
 > Concept categories: <list>
-> Next: drop files into `.mnemo/raw/` and run `/mnemo:ingest` — the schema will guide categorization."
+> Next: drop files into `.mnemo/<project-name>/raw/` and run `/mnemo:ingest` — the schema will guide categorization."
 
-If ingest has already run (check `.mnemo/log.md` for existing entries), add:
+If ingest has already run (check `.mnemo/<project-name>/log.md` for existing entries), add:
 > "Note: already-ingested pages used the previous schema. Run `/mnemo:ingest` on new files to apply the updated taxonomy."

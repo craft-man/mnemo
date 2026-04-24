@@ -6,6 +6,14 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.5.1] — 2026-04-24
+
+### Changed
+
+- **Project-name vault level** — the local knowledge base now lives at `.mnemo/<project-name>/` instead of `.mnemo/`. Opening `.mnemo/<project-name>/` as an Obsidian vault now displays the project name rather than `.mnemo`. The global vault (`~/.mnemo/`) is unchanged. All skills, `scripts/init_mnemo.py`, and CLAUDE.md updated accordingly. Existing installs are unaffected (new structure applies only to fresh `/mnemo:init` runs).
+
+---
+
 ## [0.5.0] — 2026-04-24
 
 ### Added

@@ -75,18 +75,19 @@ def create_structure(root: pathlib.Path) -> None:
 
 
 def guard(target: pathlib.Path) -> bool:
-    return (target / ".mnemo").exists()
+    project_name = target.name
+    return (target / ".mnemo" / project_name).exists()
 
 
 def prompt_choice() -> str:
     print("mnemo -- Agentic Knowledge Management System\n")
     print("How would you like to initialize mnemo?\n")
     print("  [1] Project + Global (recommended)")
-    print("      -> .mnemo/   knowledge specific to this project")
+    print("      -> .mnemo/<project-name>/   knowledge specific to this project")
     print("      -> ~/.mnemo/ knowledge reusable across all projects")
     print("      Best when you work across multiple projects.\n")
     print("  [2] Project only")
-    print("      -> .mnemo/   self-contained knowledge base for this project\n")
+    print("      -> .mnemo/<project-name>/   self-contained knowledge base for this project\n")
     print("  [3] Global only")
     print("      -> ~/.mnemo/ single vault shared across all projects\n")
     raw = input("Choice [1/2/3] (default: 1): ").strip()
@@ -148,11 +149,11 @@ def update_gitignore(target: pathlib.Path) -> None:
     print("[ok] .mnemo/ added to .gitignore")
 
 
-def prompt_obsidian(mnemo_root: pathlib.Path) -> None:
+def prompt_obsidian(vault_root: pathlib.Path) -> None:
     print()
     ans = input("Open this wiki in Obsidian? (visual graph, full-text search, Web Clipper integration) [y/N]: ").strip().lower()
     if ans not in ("y", "yes"):
-        print("  You can open .mnemo/ as an Obsidian vault anytime — it's compatible out of the box.")
+        print(f"  You can open {vault_root} as an Obsidian vault anytime — it's compatible out of the box.")
         return
 
     print()
@@ -160,21 +161,22 @@ def prompt_obsidian(mnemo_root: pathlib.Path) -> None:
     print("  (free, available on macOS, Windows, Linux, iOS, Android — no sign-up for local vaults)")
     print()
     print("  In Obsidian: Open folder as vault → select:")
-    print(f"    {mnemo_root}")
-    print("  (use ~/.mnemo/ for the global vault instead)")
+    print(f"    {vault_root}")
+    print("  (use ~/.mnemo/ for the global vault)")
     print()
     print("  For the Web Clipper browser extension:")
     print("    Install from: https://obsidian.md//clipper#more-browsers")
-    print(f"    Set the default save location to: raw/")
+    print("    Set the default save location to: raw/")
     print("    Pages you clip will be picked up automatically by /mnemo:ingest")
 
 
 def main() -> None:
     target = pathlib.Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else pathlib.Path.cwd()
+    project_name = target.name
 
     if guard(target):
-        print(".mnemo/ already exists.")
-        print("To start over, delete .mnemo/ and re-run this script.")
+        print(f".mnemo/{project_name}/ already exists.")
+        print(f"To start over, delete .mnemo/{project_name}/ and re-run this script.")
         print("If you have Claude Code, run /mnemo:schema to revise the taxonomy.")
         sys.exit(0)
 
@@ -182,8 +184,9 @@ def main() -> None:
     initialized: list[str] = []
 
     if choice in ("1", "2"):
-        create_structure(target / ".mnemo")
-        initialized.append(f"[ok] .mnemo/ initialized in {target}")
+        local_root = target / ".mnemo" / project_name
+        create_structure(local_root)
+        initialized.append(f"[ok] .mnemo/{project_name}/ initialized in {target}")
 
     if choice in ("1", "3"):
         global_root = pathlib.Path.home() / ".mnemo"
@@ -198,7 +201,7 @@ def main() -> None:
         print(line)
 
     if choice in ("1", "2"):
-        prompt_qmd(target / ".mnemo")
+        prompt_qmd(local_root)
 
     if choice in ("1", "2") and (target / ".git").exists():
         print()
@@ -211,14 +214,14 @@ def main() -> None:
         graphify_done = prompt_graphify(target)
 
     if choice in ("1", "2"):
-        prompt_obsidian(target / ".mnemo")
+        prompt_obsidian(local_root)
 
     print("\nNext steps:")
     if graphify_done:
         print("  Re-run /mnemo:graphify after significant code changes to keep the graph up to date")
     else:
         print("  Run /mnemo:graphify to map your codebase into a queryable knowledge graph")
-        print("  Or: run /mnemo:schema to define your domain taxonomy, drop files into .mnemo/raw/, run /mnemo:ingest")
+        print(f"  Or: run /mnemo:schema to define your domain taxonomy, drop files into .mnemo/{project_name}/raw/, run /mnemo:ingest")
     print("  Query with /mnemo:query <term>")
 
 

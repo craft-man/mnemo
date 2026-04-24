@@ -69,12 +69,12 @@ At the end of any session that produced decisions, new knowledge, or significant
 ### `/mnemo:ingest`
 
 - When the user invokes it explicitly
-- After the user drops new files into `raw/`
+- After the user drops new files into `<project-name>/raw/`
 
 ### `/mnemo:query`
 
 - Before answering any factual question that might be in the knowledge base
-- Search **local first** (`.mnemo/`), then global (`~/.mnemo/`) if no results
+- Search **local first** (`.mnemo/<project-name>/`), then global (`~/.mnemo/`) if no results
 - If query returns 0 results, say so explicitly — never hallucinate wiki content
 
 ### `/mnemo:lint`
@@ -174,21 +174,27 @@ Body text referencing [[Related Concept]] and [[Entity Name]].
 ## Memory Structure
 
 ```
-.mnemo/               (local — per project)
-~/.mnemo/             (global — cross-project)
+.mnemo/                        (local — per project)
+└── <project-name>/            ← vault root (open this in Obsidian)
+    ├── raw/                   ← source files (immutable input)
+    ├── wiki/
+    │   ├── sources/           ← one page per ingested raw source
+    │   ├── entities/          ← people, tools, projects, systems
+    │   ├── concepts/          ← ideas, patterns, techniques
+    │   ├── synthesis/         ← cross-source analyses, comparisons
+    │   ├── activity/          ← session logs (not searched by default)
+    │   └── indexes/           ← index shards (created when >150 pages)
+    ├── index.md               ← categorized table of contents
+    ├── log.md                 ← audit trail (prevents re-processing)
+    └── SCHEMA.md              ← domain conventions (edit per project)
 
-Each tier:
-├── raw/              ← source files (immutable input)
+~/.mnemo/                      (global — cross-project, flat structure)
+├── raw/
 ├── wiki/
-│   ├── sources/      ← one page per ingested raw source
-│   ├── entities/     ← people, tools, projects, systems
-│   ├── concepts/     ← ideas, patterns, techniques
-│   ├── synthesis/    ← cross-source analyses, comparisons
-│   ├── activity/     ← session logs (not searched by default)
-│   └── indexes/      ← index shards (created when >150 pages)
-├── index.md          ← categorized table of contents
-├── log.md            ← audit trail (prevents re-processing)
-└── SCHEMA.md         ← domain conventions (edit per project)
+│   └── ...
+├── index.md
+├── log.md
+└── SCHEMA.md
 ```
 
 ---

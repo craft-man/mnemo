@@ -23,7 +23,7 @@ Map the current project codebase into a queryable mnemo knowledge graph.
 
 ## Prerequisites
 
-**1. mnemo initialized** — check if `.mnemo/wiki/sources/` exists. If not:
+**1. mnemo initialized** — check if `.mnemo/<project-name>/wiki/sources/` exists. If not:
 > "Knowledge base not initialized. Run `/mnemo:init` first."
 Stop.
 
@@ -59,7 +59,7 @@ Report: "Created `.graphifyignore` with default exclusions."
 Report only what was added: "Updated `.graphifyignore` — added: `.mnemo/`, `graphify-out/`."
 If nothing was missing: no report.
 
-Note: if `.mnemo/graph.json` already exists, this is an incremental re-run. Graphify will use its SHA256 cache automatically — only changed files are reprocessed.
+Note: if `.mnemo/<project-name>/graph.json` already exists, this is an incremental re-run. Graphify will use its SHA256 cache automatically — only changed files are reprocessed.
 
 ## Step 2 — Run graphify
 
@@ -88,9 +88,9 @@ Read `graphify-out/graph.json`.
 
 | graphify node type | mnemo category | Target directory |
 |---|---|---|
-| `class`, `function`, `module`, `file`, `system`, `project`, `person`, `tool` | `entities` | `.mnemo/wiki/entities/` |
-| `concept`, `pattern`, `technique`, `idea`, `problem` | `concepts` | `.mnemo/wiki/concepts/` |
-| Any unrecognized type | `entities` | `.mnemo/wiki/entities/` |
+| `class`, `function`, `module`, `file`, `system`, `project`, `person`, `tool` | `entities` | `.mnemo/<project-name>/wiki/entities/` |
+| `concept`, `pattern`, `technique`, `idea`, `problem` | `concepts` | `.mnemo/<project-name>/wiki/concepts/` |
+| Any unrecognized type | `entities` | `.mnemo/<project-name>/wiki/entities/` |
 
 ### Filename
 
@@ -151,9 +151,9 @@ If a node has no relations, omit the `## Relations` section entirely.
 
 ### Incremental update (re-run)
 
-If `.mnemo/graph.json` exists (prior run detected in Step 1):
+If `.mnemo/<project-name>/graph.json` exists (prior run detected in Step 1):
 
-1. Load old graph from `.mnemo/graph.json` and new graph from `graphify-out/graph.json`.
+1. Load old graph from `.mnemo/<project-name>/graph.json` and new graph from `graphify-out/graph.json`.
 2. Compute delta:
    - **Added nodes** — write new wiki pages.
    - **Modified nodes** (description or edges changed) — update the existing page:
@@ -176,7 +176,7 @@ Write all nodes as new pages. Track count for the Step 5 report.
 
 If `graphify-out/GRAPH_REPORT.md` does not exist, skip this step and note it in the final report.
 
-Read `graphify-out/GRAPH_REPORT.md`. Write `.mnemo/wiki/synthesis/codebase-graph-report.md`:
+Read `graphify-out/GRAPH_REPORT.md`. Write `.mnemo/<project-name>/wiki/synthesis/codebase-graph-report.md`:
 
 ```markdown
 ---
@@ -206,16 +206,16 @@ Update `created:` only if the file is new; always update `updated:`.
 
 ## Step 5 — Integrate
 
-**Persist graph** — copy `graphify-out/graph.json` → `.mnemo/graph.json`. This is the baseline for the next incremental run.
+**Persist graph** — copy `graphify-out/graph.json` → `.mnemo/<project-name>/graph.json`. This is the baseline for the next incremental run.
 
-**Update index** — for each new page written, append to `.mnemo/index.md` under the matching heading (`## Entities`, `## Concepts`, `## Synthesis`):
+**Update index** — for each new page written, append to `.mnemo/<project-name>/index.md` under the matching heading (`## Entities`, `## Concepts`, `## Synthesis`):
 ```
 - [<Page Title>](wiki/<category>/<filename>.md)
 ```
 If a heading (`## Entities`, `## Concepts`, or `## Synthesis`) does not exist in `index.md`, append it before adding the entry.
-If total wiki pages ≥ 150: write to `wiki/indexes/<category>.md` shard (create if absent). Ensure `.mnemo/index.md` has a link to each shard: `- [Entities Index](wiki/indexes/entities.md)`.
+If total wiki pages ≥ 150: write to `wiki/indexes/<category>.md` shard (create if absent). Ensure `.mnemo/<project-name>/index.md` has a link to each shard: `- [Entities Index](wiki/indexes/entities.md)`.
 
-**Update log** — append to `.mnemo/log.md`:
+**Update log** — append to `.mnemo/<project-name>/log.md`:
 ```
 - graphify-out/graph.json | <UTC ISO timestamp> | graphify
 ```

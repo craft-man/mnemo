@@ -11,7 +11,7 @@ A mnemo search backend is a command that accepts a query and returns ranked resu
 
 ## Config Format
 
-`.mnemo/config.json` for BM25 (default):
+`.mnemo/<project-name>/config.json` for BM25 (default):
 
 ```json
 {"search_backend": "bm25"}
@@ -27,7 +27,7 @@ For qmd:
 
 Configs written by older versions of mnemo use `"semantic_search"` instead of `"search_backend"`. Both are supported — the query skill reads `semantic_search` as a fallback when `search_backend` is absent. New installs always write `search_backend`.
 
-To migrate, rename `"semantic_search"` to `"search_backend"` in `.mnemo/config.json`. No other changes needed.
+To migrate, rename `"semantic_search"` to `"search_backend"` in `.mnemo/<project-name>/config.json`. No other changes needed.
 
 ## Adding a Custom Backend
 
@@ -37,7 +37,7 @@ To migrate, rename `"semantic_search"` to `"search_backend"` in `.mnemo/config.j
    - Exit 0 on success, non-zero on failure (triggers BM25 fallback)
    - Note: `$ARGUMENTS` includes raw modifiers (`tag:redis`, `since:2026-01-01`, etc.). If your backend doesn't handle them, Step 0b re-runs the search and applies filters post-hoc.
 
-2. **Register in `.mnemo/config.json`**:
+2. **Register in `.mnemo/<project-name>/config.json`**:
    ```json
    {"search_backend": "my-backend"}
    ```

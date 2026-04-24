@@ -21,7 +21,7 @@ Arguments: $ARGUMENTS
 
 ## Flag: `--global`
 
-If `--global` is present in `$ARGUMENTS`, substitute every `.mnemo/` path below with `~/.mnemo/`. All reads, writes, index updates, and log entries operate on the global knowledge base. Strip `--global` from `$ARGUMENTS` before using it as the page title.
+If `--global` is present in `$ARGUMENTS`, substitute every `.mnemo/<project-name>/` path below with `~/.mnemo/`. All reads, writes, index updates, and log entries operate on the global knowledge base. Strip `--global` from `$ARGUMENTS` before using it as the page title.
 
 Save generated content to the wiki.
 
@@ -36,9 +36,9 @@ Save generated content to the wiki.
 
 **3. Slugify** — derive filename: lowercase, spaces and underscores → hyphens, remove non-alphanumeric chars except hyphens. Example: `"Python vs. JS (2024)"` → `python-vs-js-2024.md`.
 
-**4. Check for existing page** — check if `.mnemo/wiki/<category>/<slug>.md` exists. If yes, confirm overwrite with the user. On overwrite: keep the original `created:` date, set `updated:` to today's date.
+**4. Check for existing page** — check if `.mnemo/<project-name>/wiki/<category>/<slug>.md` exists. If yes, confirm overwrite with the user. On overwrite: keep the original `created:` date, set `updated:` to today's date.
 
-**5. Write YAML frontmatter + page** — write `.mnemo/wiki/<category>/<slug>.md`:
+**5. Write YAML frontmatter + page** — write `.mnemo/<project-name>/wiki/<category>/<slug>.md`:
 
 ```markdown
 ---
@@ -71,8 +71,8 @@ updated: <YYYY-MM-DD>
    - The 5–8 most distinctive non-stopword nouns from the page title and first two paragraphs
 
 2. **Find related candidates** — two options (use whichever is faster):
-   - **If `wiki_search.py` is available**: run `python3 <script_path> .mnemo/wiki "<terms joined by space>"` and collect the top results.
-   - **Otherwise**: for each term in the term set, Grep `.mnemo/wiki/**/*.md` for that term (case-insensitive). Collect file paths matching 2+ terms.
+   - **If `wiki_search.py` is available**: run `python3 <script_path> .mnemo/<project-name>/wiki "<terms joined by space>"` and collect the top results.
+   - **Otherwise**: for each term in the term set, Grep `.mnemo/<project-name>/wiki/**/*.md` for that term (case-insensitive). Collect file paths matching 2+ terms.
 
    Exclude the newly saved page itself.
 
@@ -98,11 +98,11 @@ updated: <YYYY-MM-DD>
 5. Report enriched pages: list names (or "none enriched").
 
 **7. Update index** — if the file is new (not an overwrite):
-- Count total pages in `.mnemo/wiki/**/*.md`.
-- If total < 150: append to `.mnemo/index.md` under the `## <Category>` heading (capitalize the category name).
-- If total >= 150: append to `.mnemo/wiki/indexes/<category>.md` (create if needed). Ensure `index.md` links to it: `- [<Category> Index](wiki/indexes/<category>.md)`.
+- Count total pages in `.mnemo/<project-name>/wiki/**/*.md`.
+- If total < 150: append to `.mnemo/<project-name>/index.md` under the `## <Category>` heading (capitalize the category name).
+- If total >= 150: append to `.mnemo/<project-name>/wiki/indexes/<category>.md` (create if needed). Ensure `index.md` links to it: `- [<Category> Index](wiki/indexes/<category>.md)`.
 
-**8. Update log** — append to `.mnemo/log.md`:
+**8. Update log** — append to `.mnemo/<project-name>/log.md`:
 ```
 - wiki/<category>/<slug>.md | <UTC ISO timestamp> | generated
 ```

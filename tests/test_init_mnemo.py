@@ -69,7 +69,7 @@ class TestGuard(unittest.TestCase):
     def test_returns_true_when_mnemo_exists(self):
         with tempfile.TemporaryDirectory() as tmp:
             target = pathlib.Path(tmp)
-            (target / ".mnemo").mkdir()
+            (target / ".mnemo" / target.name).mkdir(parents=True)
             self.assertTrue(guard(target))
 
     def test_returns_false_when_mnemo_absent(self):
@@ -81,20 +81,20 @@ class TestMainProjectOnly(unittest.TestCase):
     def test_choice_2_creates_local_structure(self):
         with tempfile.TemporaryDirectory() as tmp:
             target = pathlib.Path(tmp)
-            # inputs: choice=2, qmd=n, graphify=n
-            with patch("builtins.input", side_effect=["2", "n", "n"]), \
+            # inputs: choice=2, qmd=n, graphify=n, obsidian=n
+            with patch("builtins.input", side_effect=["2", "n", "n", "n"]), \
                  patch("sys.argv", ["init_mnemo.py", str(target)]):
                 from init_mnemo import main
                 main()
-            self.assertTrue((target / ".mnemo" / "wiki" / "sources").is_dir())
+            self.assertTrue((target / ".mnemo" / target.name / "wiki" / "sources").is_dir())
 
     def test_choice_2_does_not_create_global(self):
         with tempfile.TemporaryDirectory() as tmp:
             target = pathlib.Path(tmp)
             fake_home = pathlib.Path(tmp) / "fakehome"
             fake_home.mkdir()
-            # inputs: choice=2, qmd=n, graphify=n
-            with patch("builtins.input", side_effect=["2", "n", "n"]), \
+            # inputs: choice=2, qmd=n, graphify=n, obsidian=n
+            with patch("builtins.input", side_effect=["2", "n", "n", "n"]), \
                  patch("sys.argv", ["init_mnemo.py", str(target)]), \
                  patch("pathlib.Path.home", return_value=fake_home):
                 from init_mnemo import main
@@ -123,13 +123,13 @@ class TestMainBoth(unittest.TestCase):
             target = pathlib.Path(tmp)
             fake_home = pathlib.Path(tmp) / "fakehome"
             fake_home.mkdir()
-            # inputs: choice=1, qmd=n, graphify=n
-            with patch("builtins.input", side_effect=["1", "n", "n"]), \
+            # inputs: choice=1, qmd=n, graphify=n, obsidian=n
+            with patch("builtins.input", side_effect=["1", "n", "n", "n"]), \
                  patch("sys.argv", ["init_mnemo.py", str(target)]), \
                  patch("pathlib.Path.home", return_value=fake_home):
                 from init_mnemo import main
                 main()
-            self.assertTrue((target / ".mnemo" / "wiki" / "sources").is_dir())
+            self.assertTrue((target / ".mnemo" / target.name / "wiki" / "sources").is_dir())
             self.assertTrue((fake_home / ".mnemo" / "wiki" / "sources").is_dir())
 
     def test_default_choice_is_1(self):
@@ -137,13 +137,13 @@ class TestMainBoth(unittest.TestCase):
             target = pathlib.Path(tmp)
             fake_home = pathlib.Path(tmp) / "fakehome"
             fake_home.mkdir()
-            # inputs: choice="" (→1), qmd="", graphify=""
-            with patch("builtins.input", side_effect=["", "", ""]), \
+            # inputs: choice="" (→1), qmd="", graphify="", obsidian=""
+            with patch("builtins.input", side_effect=["", "", "", ""]), \
                  patch("sys.argv", ["init_mnemo.py", str(target)]), \
                  patch("pathlib.Path.home", return_value=fake_home):
                 from init_mnemo import main
                 main()
-            self.assertTrue((target / ".mnemo" / "wiki" / "sources").is_dir())
+            self.assertTrue((target / ".mnemo" / target.name / "wiki" / "sources").is_dir())
             self.assertTrue((fake_home / ".mnemo" / "wiki" / "sources").is_dir())
 
 
@@ -151,7 +151,7 @@ class TestGuardClause(unittest.TestCase):
     def test_guard_prints_message_and_exits(self):
         with tempfile.TemporaryDirectory() as tmp:
             target = pathlib.Path(tmp)
-            (target / ".mnemo").mkdir()
+            (target / ".mnemo" / target.name).mkdir(parents=True)
             printed = []
             with patch("builtins.input", return_value="2"), \
                  patch("sys.argv", ["init_mnemo.py", str(target)]), \
@@ -193,12 +193,12 @@ class TestPromptQmd(unittest.TestCase):
     def test_main_creates_config_json_for_project(self):
         with tempfile.TemporaryDirectory() as tmp:
             target = pathlib.Path(tmp)
-            # inputs: choice=2, qmd=n, graphify=n
-            with patch("builtins.input", side_effect=["2", "n", "n"]), \
+            # inputs: choice=2, qmd=n, graphify=n, obsidian=n
+            with patch("builtins.input", side_effect=["2", "n", "n", "n"]), \
                  patch("sys.argv", ["init_mnemo.py", str(target)]):
                 from init_mnemo import main
                 main()
-            self.assertTrue((target / ".mnemo" / "config.json").exists())
+            self.assertTrue((target / ".mnemo" / target.name / "config.json").exists())
 
 
 class TestPromptGraphify(unittest.TestCase):
@@ -312,8 +312,8 @@ class TestUpdateGitignore(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             target = pathlib.Path(tmp)
             (target / ".git").mkdir()
-            # inputs: choice=2, qmd=n, gitignore=y, graphify=n
-            with patch("builtins.input", side_effect=["2", "n", "y", "n"]), \
+            # inputs: choice=2, qmd=n, gitignore=y, graphify=n, obsidian=n
+            with patch("builtins.input", side_effect=["2", "n", "y", "n", "n"]), \
                  patch("sys.argv", ["init_mnemo.py", str(target)]):
                 from init_mnemo import main
                 main()
@@ -322,8 +322,8 @@ class TestUpdateGitignore(unittest.TestCase):
     def test_main_skips_gitignore_when_no_git_repo(self):
         with tempfile.TemporaryDirectory() as tmp:
             target = pathlib.Path(tmp)
-            # inputs: choice=2, qmd=n, graphify=n (no gitignore prompt — no .git)
-            with patch("builtins.input", side_effect=["2", "n", "n"]), \
+            # inputs: choice=2, qmd=n, graphify=n, obsidian=n (no gitignore prompt — no .git)
+            with patch("builtins.input", side_effect=["2", "n", "n", "n"]), \
                  patch("sys.argv", ["init_mnemo.py", str(target)]):
                 from init_mnemo import main
                 main()
@@ -333,8 +333,8 @@ class TestUpdateGitignore(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             target = pathlib.Path(tmp)
             (target / ".git").mkdir()
-            # inputs: choice=2, qmd=n, gitignore=n, graphify=n
-            with patch("builtins.input", side_effect=["2", "n", "n", "n"]), \
+            # inputs: choice=2, qmd=n, gitignore=n, graphify=n, obsidian=n
+            with patch("builtins.input", side_effect=["2", "n", "n", "n", "n"]), \
                  patch("sys.argv", ["init_mnemo.py", str(target)]):
                 from init_mnemo import main
                 main()

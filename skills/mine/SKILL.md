@@ -18,7 +18,7 @@ allowed-tools: Read Glob
 
 ## Flag: `--global`
 
-If `--global` is present in the invocation arguments, substitute every `.mnemo/` path below with `~/.mnemo/`. All reads and saves operate on the global knowledge base instead of the local one.
+If `--global` is present in the invocation arguments, substitute every `.mnemo/<project-name>/` path below with `~/.mnemo/`. All reads and saves operate on the global knowledge base instead of the local one.
 
 ## Trigger Patterns
 
@@ -40,13 +40,13 @@ The user expresses intent to retain or save: phrases meaning "remember this", "n
 
 ### Step 0 — Read the knowledge base index and schema
 
-Read `.mnemo/SCHEMA.md` to understand the domain's entity types and concept categories. Use these throughout Steps 1–3 to guide candidate extraction and categorization.
+Read `.mnemo/<project-name>/SCHEMA.md` to understand the domain's entity types and concept categories. Use these throughout Steps 1–3 to guide candidate extraction and categorization.
 
-Read `.mnemo/index.md`. If shard files exist under `wiki/indexes/` (sources.md, entities.md,
+Read `.mnemo/<project-name>/index.md`. If shard files exist under `wiki/indexes/` (sources.md, entities.md,
 concepts.md, synthesis.md), read those too. Build a set of known page titles from all index
 lines of the form `- [Title](wiki/...)`.
 
-If `.mnemo/index.md` does not exist, skip this step — the wiki is empty, everything is new.
+If `.mnemo/<project-name>/index.md` does not exist, skip this step — the wiki is empty, everything is new.
 
 ### Step 1 — Scan the conversation for candidates
 
@@ -114,7 +114,7 @@ If the user declines, skip silently.
 If the user confirms:
 
 1. Determine today's date in `YYYY-MM-DD` format.
-2. Set target path: `.mnemo/wiki/activity/YYYY-MM-DD.md` (substitute `--global` path `~/.mnemo/wiki/activity/YYYY-MM-DD.md` if the `--global` flag was set).
+2. Set target path: `.mnemo/<project-name>/wiki/activity/YYYY-MM-DD.md` (substitute `--global` path `~/.mnemo/wiki/activity/YYYY-MM-DD.md` if the `--global` flag was set).
 3. If the file already exists (multiple mine runs in one day): read it, locate the `## Items Saved` heading, and insert the new bullet lines directly before the `## Links` heading. Also update the `updated:` field in the YAML frontmatter to today's date.
 4. If the file does not exist, create it with this exact structure:
 
