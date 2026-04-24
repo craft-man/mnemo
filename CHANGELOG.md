@@ -6,6 +6,14 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.3.0] — 2026-04-24
+
+### Added
+
+- **`/mnemo:graphify`** — new skill that maps the current project codebase into a queryable knowledge graph using [graphify](https://github.com/safishamsi/graphify). Converts `graph.json` directly into mnemo wiki pages (entities, concepts, synthesis report) with full frontmatter and wikilinks. Re-runs are incremental — only nodes whose description or edges changed are updated. Persists `graph.json` to `.mnemo/graph.json` as the baseline for future diffs.
+
+---
+
 ## [0.2.0] — 2026-04-24
 
 ### Added
