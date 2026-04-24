@@ -27,3 +27,6 @@ dist/
 *.egg-info/
 .venv/
 .worktrees/
+
+# Superpowers internal — specs and plans, never commit
+docs/superpowers/
