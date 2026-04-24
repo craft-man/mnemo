@@ -49,7 +49,7 @@ Each tier is a taxonomy-based wiki:
 └── SCHEMA.md         ← domain conventions (edit per project)
 ```
 
-mnemo exposes eight skills that work with any [agentskills.io](https://agentskills.io)-compatible agent — no server, no binary, no dependencies.
+mnemo exposes nine skills that work with any [agentskills.io](https://agentskills.io)-compatible agent — no server, no binary, no dependencies.
 
 ---
 
@@ -137,6 +137,7 @@ Slash commands work in any agent. Natural language alternatives are shown in com
 /mnemo:ingest                        # "ingest files in raw/"
 /mnemo:query database indexing       # "what does my wiki say about database indexing?"
 /mnemo:mine                          # "remember this" — extract knowledge from current session
+/mnemo:graphify                      # "map my codebase" — build a persistent knowledge graph from the project
 /mnemo:save B-tree vs Hash Index     # "save this as a wiki page titled B-tree vs Hash Index"
 /mnemo:lint                          # "audit my wiki"
 /mnemo:stats                         # "show wiki stats"
@@ -238,6 +239,22 @@ Saves Claude-generated content (summaries, comparisons, analyses) as a permanent
 Scans the current session for knowledge worth persisting — decisions, new entities, concepts, and conclusions. Presents a numbered candidate list; approved items are routed to `/mnemo:save`.
 
 Triggered explicitly (`/mnemo:mine`) or by intent — the user expressing a desire to save something ("remember this", "note that", "important") or the agent detecting high-value signals ("we decided", "in conclusion", "key insight") — in any language.
+
+### `/mnemo:graphify`
+
+Maps the current project codebase into a queryable knowledge graph using [graphify](https://github.com/safishamsi/graphify).
+
+**Prerequisites:** graphify installed (`pip install graphifyy && graphify install`). mnemo initialized.
+
+What it does:
+
+- Runs `graphify .` on the project root (respects `.graphifyignore` — `.mnemo/` is always excluded)
+- Reads `graphify-out/graph.json` and converts each node into a mnemo wiki page with full frontmatter and wikilinks
+- Routes nodes to the correct category: code nodes (`class`, `module`, `file`) → `entities/`, conceptual nodes (`pattern`, `technique`) → `concepts/`
+- Converts `GRAPH_REPORT.md` into a synthesis page at `wiki/synthesis/codebase-graph-report.md`
+- Persists `graph.json` to `.mnemo/graph.json` — re-runs are incremental (only changed nodes update their pages)
+
+**Why this matters:** instead of Claude reading hundreds of source files at session start, it queries pre-built wiki pages. The result is persistent across sessions and queryable via `/mnemo:query`.
 
 ### `/mnemo:stats`
 
