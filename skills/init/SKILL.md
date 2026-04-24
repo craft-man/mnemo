@@ -190,7 +190,7 @@ Confirm:
 
 **8b. Stop hook injection** — wire the session-end reminder into the project's Claude Code settings:
 
-Check if `.claude/settings.local.json` exists in the current project directory.
+Ensure the `.claude/` directory exists in the current project (create it if needed). Then check if `.claude/settings.local.json` exists.
 
 **Case A — file does not exist:**
 Create `.claude/settings.local.json` with:
@@ -239,7 +239,7 @@ Check if graphify is installed: run `graphify --version`.
 
 - **If not found:** show the install command and wait for the user to run it:
   ```
-  pip install graphifyy && graphify install
+  pip install graphify && graphify install
   ```
   Once the user confirms graphify is installed (or `graphify --version` succeeds): continue.
 
