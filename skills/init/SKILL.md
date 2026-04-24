@@ -208,5 +208,7 @@ Known extension files:
 - `skills/init/claude-code.md` — Claude Code (CLAUDE.md stanza + Stop hook)
 - `skills/init/opencode.md` — OpenCode (AGENTS.md stanza)
 - `skills/init/gemini.md` — Gemini CLI (GEMINI.md stanza)
+- `skills/init/cursor.md` — Cursor (AGENTS.md stanza)
+- `skills/init/codex.md` — Codex (AGENTS.md stanza)
 
 If no extension file exists for your agent, consult `skills/references/agent-memory-integration.md` for manual wiring instructions.
