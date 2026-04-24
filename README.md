@@ -138,7 +138,7 @@ The active backend is stored in `.mnemo/config.json` under `search_backend` (`"b
 Slash commands work in any agent. Natural language alternatives are shown in comments — use whichever your agent prefers.
 
 ```
-/mnemo:init                          # "initialize mnemo" — bootstrap; guides graphify + schema setup
+/mnemo:init                          # "initialize mnemo"
 # drop files into .mnemo/raw/
 /mnemo:ingest                        # "ingest files in raw/"
 /mnemo:query database indexing       # "what does my wiki say about database indexing?"
