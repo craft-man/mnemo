@@ -96,18 +96,9 @@ Without an agent — standalone bootstrap (Python 3.10+):
 python3 scripts/init_mnemo.py
 ```
 
-Both paths let you configure **qmd** for hybrid semantic search and choose between project-only, global, or both tiers. Then:
+Both paths let you configure **qmd** for hybrid semantic search and choose between project-only, global, or both tiers. Then drop files into `.mnemo/raw/` and:
 
-**For a code project:**
 ```
-/mnemo:graphify    # map the codebase into a queryable knowledge graph
-/mnemo:query <term>
-```
-
-**For document-based knowledge:**
-```
-/mnemo:schema      # "define my wiki taxonomy"
-# drop files into .mnemo/raw/
 /mnemo:ingest      # "ingest files in raw/"
 /mnemo:query <term>
 ```
