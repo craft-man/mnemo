@@ -42,11 +42,13 @@ Write `~/.mnemo/index.md` and `~/.mnemo/log.md` with empty stubs (same format as
 
   If `[n]o`: stop. Report: "Profile unchanged."
 
-  If `[y]es`: enter **update mode** — go through each section below and for each one show the current value and ask "Still correct? [y]es / [e]dit". Skip unchanged sections.
+  If `[y]es`: enter **update mode** — go through each section below and for each one show the current value and ask "Still correct? [y]es / [e]dit". Skip unchanged sections. If a section is missing from the existing profile (e.g. `Proactivity` or `Register` on profiles created before v0.4.0), ask it as a new question instead of showing an empty prompt.
 
 - **If it does not exist**: enter **full interview mode** — run all questions below.
 
 **3. Interview** — ask one question at a time. Wait for the answer before asking the next.
+
+**Language:** Conduct the interview in the language detected from the conversation. All stored values must be in English. Q1–Q3 and Q5–Q6 use English-labeled options so they are already English. Q4 (domains) is free-text and may require translation — normalize it to English before writing.
 
 **Q1 — Role:**
 > "Which best describes your role?
@@ -75,19 +77,20 @@ If not clear from context, ask:
 **Q4 — Main domains of interest:**
 > "What are your main domains or topics? List them — e.g. 'distributed systems, Rust, personal finance' or 'UX research, product management'"
 
-**Q5 — Knowledge base goal:**
-> "What's the primary goal for your mnemo knowledge base?
-> 1. Research and literature review
-> 2. Project and code documentation
-> 3. Personal learning and notes
-> 4. Team knowledge sharing
-> 5. Other — describe it"
+**Q5 — Proactivity:**
+> "When you query or we work together, how proactive should I be?
+> 1. High — suggest related pages, flag connections, propose saves even without being asked
+> 2. Moderate — only when clearly relevant to your question
+> 3. Low — stay strictly within the scope of what you asked"
 
-**Q6 — Response style preference:**
-> "How do you prefer responses?
-> 1. Concise — short answers, minimal explanation
-> 2. Balanced — enough detail to understand, not more
-> 3. Detailed — full context, edge cases included"
+Store the label only: `High`, `Moderate`, or `Low`.
+
+**Q6 — Register:**
+> "How do you prefer to work together?
+> 1. Direct — answer first, no preamble, no follow-up questions
+> 2. Collaborative — I can rephrase your question, suggest angles, guide if you seem to be exploring"
+
+Store the label only: `Direct` or `Collaborative`.
 
 **4. Preview and confirm** — show the profile before writing:
 
@@ -98,8 +101,8 @@ Role: <answer>
 Technical level: <answer>
 Language: <answer>
 Domains: <answer>
-Goal: <answer>
-Response style: <answer>
+Proactivity: <answer>
+Register: <answer>
 
 Write this profile? [y]es / [e]dit
 ```
@@ -131,11 +134,11 @@ updated: <YYYY-MM-DD>
 ## Domains
 <domains as a comma-separated list or bullet list>
 
-## Goal
-<goal>
+## Proactivity
+<proactivity>
 
-## Response Style
-<style>
+## Register
+<register>  <!-- Direct: answers only | Collaborative: guides and explores -->
 
 ## Links
 ```
