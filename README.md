@@ -1,4 +1,6 @@
-# mnemo
+<p align="center">
+  <img src="mnemo.png" alt="mnemo" width="300" />
+</p>
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-0.4.1-blue)](CHANGELOG.md)
