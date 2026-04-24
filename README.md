@@ -94,7 +94,7 @@ Without an agent — standalone bootstrap (Python 3.10+):
 python3 scripts/init_mnemo.py
 ```
 
-Both paths offer to configure **qmd** for hybrid semantic search and prompt you to choose between project-only, global, or both tiers. Then:
+Both paths let you configure **qmd** for hybrid semantic search and choose between project-only, global, or both tiers. Then:
 
 **For a code project:**
 ```
@@ -162,8 +162,6 @@ python3 scripts/init_mnemo.py        # requires Python 3.10+
 
 Bootstraps a new knowledge base. Run once per project — warns if already initialized.
 
-What it creates:
-
 ```
 .mnemo/
 ├── raw/              ← drop your source files here
@@ -177,29 +175,17 @@ What it creates:
 └── SCHEMA.md         ← starter taxonomy, ready to edit
 ```
 
-`log.md` records every file that has been ingested — filename and ISO timestamp. Before processing any file, `/mnemo:ingest` checks this log and skips anything already present. This prevents duplicate pages, avoids re-billing the LLM for the same source, and makes reruns safe. To force a re-ingest of a file, remove its entry from `log.md`.
+`log.md` records every ingested file — filename and ISO timestamp. Before processing anything, `/mnemo:ingest` checks this log and skips files already present. To force a re-ingest, remove the entry from `log.md`.
 
-During init you choose which tiers to activate (project, global, or both) and optionally configure **qmd** for hybrid semantic search. Init then offers two optional next steps:
-
-- **`/mnemo:schema`** — define your domain taxonomy before the first ingest (document-based knowledge)
-- **`/mnemo:graphify`** — map the codebase into a queryable knowledge graph immediately. If graphify isn't installed yet, init shows the install command and waits before proceeding.
+Pick which tiers to activate (project, global, or both) and whether to enable **qmd** for hybrid semantic search. After that, init offers two paths: run `/mnemo:schema` to define a taxonomy before your first ingest, or run `/mnemo:graphify` to map the codebase right now — it walks you through the graphify install if you don't have it yet.
 
 ### `/mnemo:schema`
 
-A guided conversation that builds or revises `.mnemo/SCHEMA.md` — the taxonomy that tells `/mnemo:ingest` how to classify what it finds.
+Builds or revises `.mnemo/SCHEMA.md` — the taxonomy that tells `/mnemo:ingest` how to classify what it finds. No form to fill out: the skill asks questions, proposes a draft, and you refine it. If files are already in `raw/`, it reads them first and brings concrete suggestions rather than a blank slate.
 
-You don't fill in a form. The skill asks you questions, listens to your answers, and proposes a taxonomy draft that you can refine before anything is written. If files are already in `raw/`, it reads them first and comes to the conversation with concrete proposals inferred from your content — so you're reacting and adjusting rather than inventing from scratch.
+Covers entity types (people, tools, projects, systems), concept categories (techniques, patterns, principles), tagging conventions, and relationship hints. Nothing is written without your explicit confirmation.
 
-The conversation covers:
-
-- **Entity types** — the named things in your domain (people, tools, projects, systems…)
-- **Concept categories** — the ideas and patterns that recur (techniques, patterns, principles…)
-- **Tagging conventions** — which tags to apply and when
-- **Relationship hints** — how entities and concepts typically relate to each other
-
-Once the draft looks right, you approve it and the skill writes `SCHEMA.md`. Nothing is saved without your explicit confirmation.
-
-Run it at any time, not just at init. Useful when the domain evolves, new source types arrive, or the initial taxonomy turns out to be too coarse.
+Run it any time, not just at init — useful when the domain evolves or the initial taxonomy turns out too coarse.
 
 ### `/mnemo:ingest`
 
@@ -250,19 +236,15 @@ Triggered explicitly (`/mnemo:mine`) or by intent — the user expressing a desi
 
 ### `/mnemo:graphify`
 
-Maps the current project codebase into a queryable knowledge graph using [graphify](https://github.com/safishamsi/graphify).
-
-**Prerequisites:** graphify installed (`pip install graphifyy && graphify install`). mnemo initialized.
-
-What it does:
+Maps the project codebase into a knowledge graph using [graphify](https://github.com/safishamsi/graphify). Requires graphify installed (`pip install graphifyy && graphify install`) and mnemo initialized.
 
 - Runs `graphify .` on the project root (respects `.graphifyignore` — `.mnemo/` is always excluded)
-- Reads `graphify-out/graph.json` and converts each node into a mnemo wiki page with full frontmatter and wikilinks
-- Routes nodes to the correct category: code nodes (`class`, `module`, `file`) → `entities/`, conceptual nodes (`pattern`, `technique`) → `concepts/`
+- Reads `graphify-out/graph.json` and converts each node into a mnemo wiki page with frontmatter and wikilinks
+- Routes nodes to the right category: code nodes (`class`, `module`, `file`) → `entities/`, conceptual nodes (`pattern`, `technique`) → `concepts/`
 - Converts `GRAPH_REPORT.md` into a synthesis page at `wiki/synthesis/codebase-graph-report.md`
-- Persists `graph.json` to `.mnemo/graph.json` — re-runs are incremental (only changed nodes update their pages)
+- Persists `graph.json` to `.mnemo/graph.json` — re-runs are incremental, only changed nodes get updated
 
-**Why this matters:** instead of Claude reading hundreds of source files at session start, it queries pre-built wiki pages. The result is persistent across sessions and queryable via `/mnemo:query`.
+The point: Claude stops re-reading your source files every session and queries the wiki instead. Persistent across sessions, queryable via `/mnemo:query`.
 
 ### `/mnemo:stats`
 
@@ -272,22 +254,11 @@ Displays page counts per category, total lines, top 5 largest pages, and index s
 
 ## Using mnemo with Obsidian
 
-mnemo's wiki format is natively Obsidian-compatible — no conversion needed.
-
-- **Wikilinks** (`[[Page Title]]`) resolve directly in Obsidian's graph view
-- **YAML frontmatter** (`title`, `tags`, `category`) surfaces in Obsidian's properties panel
-- **Bidirectional links** built by `/mnemo:ingest` appear automatically in the backlinks panel
-
-To open your knowledge base in Obsidian, point a vault at `.mnemo/wiki/` (or `~/.mnemo/wiki/` for the global tier).
+mnemo's wiki format works directly in Obsidian — point a vault at `.mnemo/wiki/` (or `~/.mnemo/wiki/` for the global tier). Wikilinks resolve in the graph view, YAML frontmatter shows up in the properties panel, and the bidirectional links from `/mnemo:ingest` appear in the backlinks panel without any setup.
 
 ### Obsidian Web Clipper
 
-[Obsidian Web Clipper](https://obsidian.md/clipper) lets you clip web pages, articles, and highlights directly from your browser. Use it as a capture front-end for mnemo:
-
-1. Configure Web Clipper to save clips into `.mnemo/raw/` (or `~/.mnemo/raw/` for the global knowledge base)
-2. Run `/mnemo:ingest` — mnemo synthesizes each clip into a structured wiki page, extracts entities and concepts, and links it into the graph
-
-This turns casual web browsing into a compounding knowledge base: clip once, query forever.
+[Obsidian Web Clipper](https://obsidian.md/clipper) lets you clip web pages and articles directly from your browser. Configure it to save clips into `.mnemo/raw/`, then run `/mnemo:ingest` — mnemo synthesizes each clip into a structured wiki page, extracts entities and concepts, and links it into the graph.
 
 ---
 
