@@ -20,14 +20,24 @@ allowed-tools: Read Glob Grep Bash
 
 ## Step 0 — Route by search backend
 
-Before anything else, read `.mnemo/config.json` (if it exists) and check the `semantic_search` field:
+Read `.mnemo/config.json` (if it exists). Determine the active backend name:
 
+1. If the `search_backend` field is present, use its value.
+2. Else if the `semantic_search` field is present, use its value (backward compatibility).
+3. Else default to `"bm25"`.
+
+Route by backend name:
 - **`"qmd"`** — attempt the qmd path below.
-- **`"bm25"`** or file absent — skip to Step 0b.
+- **`"bm25"`** — skip to Step 0b.
+- **Any other value** — warn: `"Unknown search backend '<name>' in config.json — falling back to BM25."` then skip to Step 0b.
 
-**qmd path**: verify qmd is available (`qmd --version`). If available, run:
+**qmd path**: verify qmd is available (`qmd --version`). If available:
+
+Read `qmd_collection` from `config.json` (default: `"mnemo-wiki"` if absent). Set `$QMD_COLLECTION` to this value.
+
+Then run:
 ```
-qmd query --collection mnemo-wiki "$ARGUMENTS"
+qmd query --collection "$QMD_COLLECTION" "$ARGUMENTS"
 ```
 If exit code is 0: present the results directly and **stop** — skip steps 0b through 8. If qmd is unavailable or returns a non-zero exit code, warn the user and fall through to Step 0b.
 

@@ -3,7 +3,8 @@ name: lint
 description: >
   Audit the mnemo knowledge base for structural issues: orphaned pages, broken
   index links, missing YAML frontmatter, missing source citations, oversized pages,
-  pages with no inbound wikilinks, stale temporal claims, and unprocessed raw files.
+  pages with no inbound wikilinks, stale temporal claims, superseded pages missing
+  a History section, and unprocessed raw files.
   Presents each finding as a proposed edit awaiting user approval. Use when the user
   says "check my wiki", "audit the knowledge base", "lint my notes", "find broken
   links", or "health check". Run periodically and after any batch ingest.
@@ -79,6 +80,7 @@ Ignore lines containing `| generated` — those are save-created pages, not raw 
 | `missing_source_citation` | Page in `wiki/sources/` has no `source:` field in frontmatter |
 | `no_inbound_links` | Entity or concept page has no `[[wikilink]]` pointing to it from any other page |
 | `stale_claim` | Wiki page contains temporal language that may be outdated (see step 10) |
+| `superseded_without_history` | Entity or concept page has `superseded_by:` or `supersedes:` in frontmatter but no `## History` section |
 | `gap_page` | Term appears in 3+ source pages but has no dedicated entity or concept page (see step 11b) |
 
 **7. Check oversized pages** — **Incremental scope**: if `incremental_mode` is active, use `recent_files` instead of all `wiki_files`. For each file in scope, read and count lines. Flag any exceeding 800 as `oversized`.
@@ -96,6 +98,8 @@ Ignore lines containing `| generated` — those are save-created pages, not raw 
 - Phrases: `currently`, `recently`, `as of`, `at the time of writing`, `in <year>` where year < (current year - 1), `the latest`, `upcoming`, `will be`, `is planned`
 - If found, flag as `stale_claim` with the matched phrase and the line number.
 - Do not flag content inside `## Quotes & Excerpts` sections (verbatim citations are expected to be historical).
+
+**11c. Superseded without history** — entity or concept pages with `superseded_by:` or `supersedes:` in frontmatter but no `## History` section. Offer to insert an empty `## History` section before `## Links`.
 
 **11b. Detect page gaps (`suggest-pages`)** — identify topics that appear frequently across sources but have no dedicated page:
 

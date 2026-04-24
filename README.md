@@ -49,7 +49,7 @@ Each tier is a taxonomy-based wiki:
 └── SCHEMA.md         ← domain conventions (edit per project)
 ```
 
-mnemo exposes seven skills that work with any [agentskills.io](https://agentskills.io)-compatible agent — no server, no binary, no dependencies.
+mnemo exposes eight skills that work with any [agentskills.io](https://agentskills.io)-compatible agent — no server, no binary, no dependencies.
 
 ---
 
@@ -122,6 +122,8 @@ bun add -g qmd
 
 qmd is optional — BM25 remains available as fallback if qmd is unavailable or returns an error.
 
+The active backend is stored in `.mnemo/config.json` under `search_backend` (`"bm25"` or `"qmd"`). Custom backends can be registered by adding a dispatch case to the query skill — see `skills/references/backends.md` for the interface spec.
+
 ---
 
 ## Typical workflow
@@ -134,6 +136,7 @@ Slash commands work in any agent. Natural language alternatives are shown in com
 # drop files into .mnemo/raw/
 /mnemo:ingest                        # "ingest files in raw/"
 /mnemo:query database indexing       # "what does my wiki say about database indexing?"
+/mnemo:mine                          # "remember this" — extract knowledge from current session
 /mnemo:save B-tree vs Hash Index     # "save this as a wiki page titled B-tree vs Hash Index"
 /mnemo:lint                          # "audit my wiki"
 /mnemo:stats                         # "show wiki stats"
@@ -199,6 +202,7 @@ Processes all pending files from `raw/` via LLM synthesis.
 - Enriches up to 15 related existing pages per ingest run
 - Enforces `source:` citation in frontmatter — no silent provenance loss
 - Checks page size; warns at 400 lines, splits at 800
+- Detects contradictions with existing content — offers `[u]pdate / [k]eep both / [h]istory / [s]kip`. The `[h]istory` option marks an entity as superseded: it adds `superseded_by:` to the old page's frontmatter, appends a `## History` entry, and adds `supersedes:` to the new page
 
 ### `/mnemo:query <term>`
 
@@ -221,12 +225,19 @@ Audits the knowledge base and proposes fixes for:
 | `no_inbound_links` | Entity or concept with no wikilinks pointing to it |
 | `stale_claim` | Temporal language that may be outdated |
 | `gap_page` | Term in 3+ sources but no dedicated page |
+| `superseded_without_history` | Entity/concept with `superseded_by:` or `supersedes:` but no `## History` section |
 
 Every proposed fix requires explicit approval before being applied.
 
 ### `/mnemo:save <title>`
 
 Saves Claude-generated content (summaries, comparisons, analyses) as a permanent wiki page with YAML frontmatter, routed to the correct category and indexed automatically.
+
+### `/mnemo:mine`
+
+Scans the current session for knowledge worth persisting — decisions, new entities, concepts, and conclusions. Presents a numbered candidate list; approved items are routed to `/mnemo:save`.
+
+Triggered explicitly (`/mnemo:mine`) or by intent — the user expressing a desire to save something ("remember this", "note that", "important") or the agent detecting high-value signals ("we decided", "in conclusion", "key insight") — in any language.
 
 ### `/mnemo:stats`
 
