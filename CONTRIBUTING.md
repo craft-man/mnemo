@@ -16,6 +16,8 @@ mnemo/
 │   ├── query/SKILL.md
 │   ├── lint/SKILL.md
 │   ├── save/SKILL.md
+│   ├── mine/SKILL.md
+│   ├── graphify/SKILL.md
 │   └── stats/SKILL.md
 ├── scripts/
 │   └── init_mnemo.py      ← standalone bootstrap (no agent required)
@@ -47,9 +49,10 @@ Tests cover `create_structure`, `guard`, `prompt_qmd`, `update_gitignore`, and t
 
 mnemo follows [Semantic Versioning](https://semver.org/). The version appears in:
 - `.claude-plugin/plugin.json` → `"version"`
+- `README.md` → version badge
 - All `skills/*/SKILL.md` → `version:` frontmatter field
 
-Update both when bumping.
+Update all three when bumping.
 
 ## License
 
