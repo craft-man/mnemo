@@ -19,6 +19,8 @@ allowed-tools: Read Write Edit Glob Bash
 
 Map the current project codebase into a queryable mnemo knowledge graph.
 
+> **Scope:** This skill operates on the local `.mnemo/` knowledge base only. The `--global` flag is not supported.
+
 ## Prerequisites
 
 **1. mnemo initialized** — check if `.mnemo/wiki/sources/` exists. If not:
@@ -76,6 +78,10 @@ On success, graphify produces:
 
 ## Step 3 — Convert nodes to wiki pages
 
+If `graphify-out/graph.json` does not exist: report "graphify produced no output file. Nothing was written to the wiki." and stop.
+
+After reading the file, if `nodes` is empty or absent: report "graphify produced no nodes. The project may have no recognized code structure. Nothing was written to the wiki." and stop.
+
 Read `graphify-out/graph.json`.
 
 ### Node type mapping
@@ -92,6 +98,18 @@ Read `graphify-out/graph.json`.
 
 Collision rule: if two nodes produce the same slug, append the community ID: `<type>-<slug>-c<community_id>.md`.
 
+> Note: graphify node types (`class`, `function`, `module`, etc.) are used directly as filename type-prefixes. They are not required to match the SCHEMA.md entity vocabulary.
+
+### Field mapping
+
+| Template variable | graph.json field | Fallback |
+|---|---|---|
+| `<node label>` | `node.label` | — (required, skip node if absent) |
+| `<node description>` | `node.description` | `"No description available."` |
+| `<community_id>` | `node.community` | omit tag, write `Community: unknown` in byline |
+| Relation tag (`EXTRACTED`/`INFERRED`/`AMBIGUOUS`) | `edge.type` | `EXTRACTED` |
+| Confidence score | `edge.confidence` | omit the `*(confidence: X)*` fragment |
+
 ### Page format
 
 ```markdown
@@ -99,7 +117,6 @@ Collision rule: if two nodes produce the same slug, append the community ID: `<t
 title: <node label>
 category: <entities | concepts>
 tags: [graphify, <node type>, c<community_id>]
-source: graphify
 created: <YYYY-MM-DD>
 updated: <YYYY-MM-DD>
 ---
@@ -113,6 +130,10 @@ updated: <YYYY-MM-DD>
 ## Description
 
 <node description from graph.json>
+
+## Sources
+
+- [[Codebase Graph Report]]
 
 ## Relations
 
@@ -139,7 +160,9 @@ If `.mnemo/graph.json` exists (prior run detected in Step 1):
      1. Replace the `## Description` section body.
      2. Replace the `## Relations` section body (or add/remove the section if it appears/disappears).
      3. Update `updated:` frontmatter field to today.
+     If `## Description` or `## Relations` cannot be located in the existing page, append the updated content at the end of the file and update `updated:` in the frontmatter. Warn: "`Section not found in <filename> — content appended.`"
    - **Removed nodes** — do not delete the page. Append this block before `## Links`:
+     Before appending, check whether a line matching `> **Note (` already appears above `## Links` in the page. If it does, skip the append.
      ```
      > **Note (<YYYY-MM-DD>):** This node was removed from the graphify graph on re-run. Content may be stale.
      ```
@@ -150,6 +173,8 @@ If `.mnemo/graph.json` exists (prior run detected in Step 1):
 Write all nodes as new pages. Track count for the Step 5 report.
 
 ## Step 4 — Convert GRAPH_REPORT.md to synthesis page
+
+If `graphify-out/GRAPH_REPORT.md` does not exist, skip this step and note it in the final report.
 
 Read `graphify-out/GRAPH_REPORT.md`. Write `.mnemo/wiki/synthesis/codebase-graph-report.md`:
 
@@ -187,11 +212,12 @@ Update `created:` only if the file is new; always update `updated:`.
 ```
 - [<Page Title>](wiki/<category>/<filename>.md)
 ```
+If a heading (`## Entities`, `## Concepts`, or `## Synthesis`) does not exist in `index.md`, append it before adding the entry.
 If total wiki pages ≥ 150: write to `wiki/indexes/<category>.md` shard (create if absent). Ensure `.mnemo/index.md` has a link to each shard: `- [Entities Index](wiki/indexes/entities.md)`.
 
 **Update log** — append to `.mnemo/log.md`:
 ```
-- graphify | <UTC ISO timestamp> | graphify
+- graphify-out/graph.json | <UTC ISO timestamp> | graphify
 ```
 
 **Report:**
