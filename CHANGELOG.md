@@ -6,6 +6,14 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.4.1] — 2026-04-24
+
+### Changed
+
+- **`/mnemo:onboard` interview** — replaced Q5 (knowledge base goal) and Q6 (response style) with **Proactivity** (`High` / `Moderate` / `Low`) and **Register** (`Direct` / `Collaborative`). Both questions drive observable behavior in query and session responses. Added interview language note (interview in user's language, values stored in English, Q4 domains normalized). Added migration handling for profiles created before this version.
+
+---
+
 ## [0.4.0] — 2026-04-24
 
 ### Added
