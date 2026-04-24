@@ -6,6 +6,23 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.6.0] — 2026-04-24
+
+### Added
+
+- **Multi-agent support** — mnemo skills now run on Claude Code, OpenCode, Gemini CLI, Cursor, and any agentskills.io-compatible agent. Agent-specific wiring (CLAUDE.md stanza, Stop hook) is extracted into extension files (`skills/init/claude-code.md`, `skills/init/opencode.md`, `skills/init/gemini.md`) loaded automatically at the end of `/mnemo:init`.
+- **`skills/init/claude-code.md`** — Claude Code extension: CLAUDE.md stanza + Stop hook injection (identical behavior to previous versions).
+- **`skills/init/opencode.md`** — OpenCode extension: AGENTS.md stanza.
+- **`skills/init/gemini.md`** — Gemini CLI extension: GEMINI.md stanza.
+- **Extension contributor guide** — `skills/references/agent-memory-integration.md` now documents how to add support for new agents by creating a single extension file.
+
+### Changed
+
+- **`skills/init/SKILL.md`** renamed from `init` to `mnemo-init` to avoid collisions with built-in agent commands.
+- Sub-skill invocations in `init`, `mine`, and `lint` converted from slash-command syntax (`/mnemo:schema`) to natural-language delegation (`read skills/schema/SKILL.md and follow its instructions`) — compatible with all agents.
+
+---
+
 ## [0.5.1] — 2026-04-24
 
 ### Changed
