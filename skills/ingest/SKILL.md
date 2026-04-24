@@ -260,11 +260,11 @@ updated: <YYYY-MM-DD>
 - raw/<original_filename> | <UTC ISO timestamp> | ingest
 ```
 
-**7a. Sync qmd index** — read `.mnemo/config.json`. If `semantic_search == "qmd"`: run:
+**7a. Sync qmd index (if configured)** — read `.mnemo/config.json`. Determine backend: use `search_backend` if present, else `semantic_search` if present, else `"bm25"`. If backend is `"qmd"`: read `qmd_collection` (default `"mnemo-wiki"`), then run:
 ```
-qmd update mnemo-wiki
+qmd update "$QMD_COLLECTION"
 ```
-This indexes all pages written or modified during this ingest session. If qmd returns a non-zero exit code, warn in the step 8 report ("qmd index sync failed — run `qmd update mnemo-wiki` manually") but do not abort. BM25 search remains available.
+This indexes all pages written or modified during this ingest session. If qmd returns a non-zero exit code, warn in the step 8 report ("qmd index sync failed — run `qmd update $QMD_COLLECTION` manually") but do not abort. BM25 search remains available.
 
 **7b. Suggest synthesis pages** — after updating the log, identify entity and concept pages that now have enough sources to justify a synthesis but don't have one yet:
 

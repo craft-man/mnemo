@@ -86,9 +86,11 @@ Enter numbers to save (e.g. "1 3"), "a" for all, "n" to discard all:
 
 For each selected number, invoke `/mnemo:save` with:
 - **title**: suggested title from Step 2
-- **category**: `entity`, `concept`, or `synthesis` as suggested
+- **category**: use save's plural category names — `entities`, `concepts`, or `synthesis`. Route Decision candidates to `synthesis`.
 - **content**: the relevant passage(s) from the conversation, formatted as markdown
 - **tags**: 2–3 tags inferred from context and `SCHEMA.md`
+
+**Decision candidates** from Step 1 map to `synthesis` (resolved design choices are AI-generated insights about the project).
 
 Never save without user approval. Never batch-save without showing the numbered list first.
 
