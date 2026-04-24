@@ -65,6 +65,32 @@ Arguments: $ARGUMENTS
 
 Search the knowledge base for "$ARGUMENTS".
 
+---
+
+## Step 0c — Activity intent detection
+
+Before parsing modifiers, scan `$ARGUMENTS` for temporal or procedural intent signals. This determines whether `wiki/activity/` is included in the candidate pool.
+
+**Temporal signals** (match in any language):
+- Relative time words: hier, yesterday, ieri, gestern, ayer, avant-hier, the other day, vorgestern, l'altro ieri, anteayer, 先日, 昨日, 昨天, недавно, вчера
+- Relative period words: cette semaine, last week, la semaine dernière, esta semana, diese Woche, la settimana scorsa, 今週, 上週, на этой неделе
+- Absolute date patterns: a digit following "le", "on", "el", "am", or a full date like "12 avril", "April 12", "12. April"
+- Recency words: récemment, recently, recentemente, kürzlich, recientemente, ultimamente, 最近
+
+**Procedural signals** (match in any language):
+- Work verbs: travaillé sur, worked on, lavorato su, gearbeitet an, trabajado en, 作業した, 处理了, работали над
+- Action verbs: fait, done, fatto, gemacht, hecho, changé, changed, modificato, geändert, cambiado
+- Session/activity nouns: session, séance, sitzung, sessione, セッション, 会话
+- "What did we do" forms: qu'est-ce qu'on a fait, what did we do, cosa abbiamo fatto, was haben wir gemacht, qué hicimos, 何をしたか, 我们做了什么
+- "What happened" forms: ce qui s'est passé, what happened, cosa è successo, was ist passiert, qué pasó
+- "When did we" forms: quand est-ce qu'on a, when did we, quando abbiamo, wann haben wir, cuándo hicimos
+
+**Decision:**
+- If **any** signal above is detected in `$ARGUMENTS`: set `$INCLUDE_ACTIVITY = true`
+- Otherwise: set `$INCLUDE_ACTIVITY = false`
+
+`$INCLUDE_ACTIVITY` is consumed in Step 3 to extend the candidate pool.
+
 ## Step 1 — Parse all modifiers
 
 Extract all modifiers from `$ARGUMENTS` before searching. The remaining text after removing modifiers is the **search term** (may be empty if only modifiers are given).
@@ -99,6 +125,8 @@ Multiple modifiers can be combined: `tag:redis since:2026-01-01 performance`
 ## Step 3 — Build the candidate pool (index-first, bounded)
 
 Read `.mnemo/index.md`. If shard files exist in `wiki/indexes/` (`sources.md`, `entities.md`, `concepts.md`, `synthesis.md`), read the relevant ones based on the `category:` filter (or all if no filter).
+
+If `$INCLUDE_ACTIVITY` is `true`: also glob `.mnemo/wiki/activity/*.md` and add all found files to the candidate pool. Label these results as "activity log matches" in Step 8.
 
 From the index entries, apply filters in order:
 
