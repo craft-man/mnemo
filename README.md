@@ -141,13 +141,13 @@ Slash commands work in any agent. Natural language alternatives are shown in com
 /mnemo:init                          # "initialize mnemo" — bootstrap, optional qmd + graphify setup
 ```
 
-**For a code project** — init offers to run graphify immediately, or run it manually:
+**For a code project:**
 ```
 /mnemo:graphify                      # "map my codebase" — builds a persistent knowledge graph
 /mnemo:query <term>                  # "what does my wiki say about X?"
 ```
 
-**For document-based knowledge** — init offers to run schema immediately, or run it manually:
+**For document-based knowledge:**
 ```
 /mnemo:schema                        # "define my wiki taxonomy"
 # drop files into .mnemo/raw/
