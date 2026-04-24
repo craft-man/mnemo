@@ -101,9 +101,22 @@ updated: <YYYY-MM-DD>
   - **Re-read the original raw file** (the current file being ingested) to ground the update in the source — never synthesize from memory alone.
   - **Contradiction check** — before making any edit, scan the existing entity page body (skip `## Sources` and `## Links` sections) for sentences containing the entity name alongside an affirmative claim. Compare with the new source content. A contradiction is present when the new source contains a negation word (`not`, `no longer`, `unlike`, `contrary`, `incorrect`, `actually`, `however`) adjacent to the same subject as an existing claim. If found:
     - Surface the conflict: show the existing claim (file + line number) and the conflicting statement from the new source.
-    - **Do not proceed with the surgical edit.** Ask the user: "Potential contradiction detected — [u]pdate existing claim / [k]eep both / [s]kip this file?"
+    - **Do not proceed with the surgical edit.** Check whether the contradiction contains replacement language (`replaced by`, `superseded by`, `deprecated in favor of`, `no longer used`, `remplacé par`, `obsolète`):
+      - If replacement language is present, ask: `"Potential contradiction detected — [u]pdate existing claim / [k]eep both / [h]istory (mark superseded) / [s]kip this file?"`
+      - Otherwise, ask: `"Potential contradiction detected — [u]pdate existing claim / [k]eep both / [s]kip this file?"`
     - If `[u]pdate`: apply a targeted replacement fixing the contradicted sentence, then proceed with the surgical edit.
     - If `[k]eep both`: add a `> **Note:** [[<New Source Title>]] presents a differing view.` line below the conflicting sentence, then proceed with the surgical edit.
+    - If `[h]istory` (replacement scenario only):
+      1. In the existing page's YAML frontmatter, insert `superseded_by: "<New Entity Title>"` after the last existing frontmatter field (before the closing `---`).
+      2. Append a `## History` section before `## Links` in the existing page body:
+         ```
+         ## History
+
+         - **<today-YYYY-MM-DD>**: Replaced by [[<New Entity Title>]] — see [[<New Source Title>]]
+         ```
+         If a `## History` section already exists, append the new bullet to it instead.
+      3. On the new entity page being created for the replacement, add `supersedes: "<Old Entity Title>"` to its frontmatter (insert after the `updated:` field).
+      4. Then proceed with the surgical edit (append source bullet, update `updated:` field).
     - If `[s]kip`: log the filename as processed but do not modify the entity page. Note the skipped contradiction in the step 8 report.
   - **Surgical edit only**: two targeted string replacements:
     1. Append `- [[<New Source Title>]]` as a new bullet in the existing `## Sources` section.
@@ -145,9 +158,22 @@ updated: <YYYY-MM-DD>
   - **Re-read the original raw file** to ground the update in the source — never synthesize from memory alone.
   - **Contradiction check** — before making any edit, scan the existing concept page body (skip `## Sources` and `## Links` sections) for sentences containing the concept name alongside a definitional or behavioral claim. Compare with the new source content. A contradiction is present when the new source contains a negation word (`not`, `no longer`, `unlike`, `contrary`, `incorrect`, `actually`, `however`) adjacent to the same subject as an existing claim. If found:
     - Surface the conflict: show the existing claim (file + line number) and the conflicting statement from the new source.
-    - **Do not proceed with the surgical edit.** Ask the user: "Potential contradiction detected — [u]pdate existing claim / [k]eep both / [s]kip this file?"
+    - **Do not proceed with the surgical edit.** Check whether the contradiction contains replacement language (`replaced by`, `superseded by`, `deprecated in favor of`, `no longer used`, `remplacé par`, `obsolète`):
+      - If replacement language is present, ask: `"Potential contradiction detected — [u]pdate existing claim / [k]eep both / [h]istory (mark superseded) / [s]kip this file?"`
+      - Otherwise, ask: `"Potential contradiction detected — [u]pdate existing claim / [k]eep both / [s]kip this file?"`
     - If `[u]pdate`: apply a targeted replacement fixing the contradicted sentence, then proceed with the surgical edit.
     - If `[k]eep both`: add a `> **Note:** [[<New Source Title>]] presents a differing view.` line below the conflicting sentence, then proceed with the surgical edit.
+    - If `[h]istory` (replacement scenario only):
+      1. In the existing page's YAML frontmatter, insert `superseded_by: "<New Concept Name>"` after the last existing frontmatter field (before the closing `---`).
+      2. Append a `## History` section before `## Links` in the existing page body:
+         ```
+         ## History
+
+         - **<today-YYYY-MM-DD>**: Replaced by [[<New Concept Name>]] — see [[<New Source Title>]]
+         ```
+         If a `## History` section already exists, append the new bullet to it instead.
+      3. On the new concept page being created for the replacement, add `supersedes: "<Old Concept Name>"` to its frontmatter (insert after the `updated:` field).
+      4. Then proceed with the surgical edit (append source bullet, update `updated:` field).
     - If `[s]kip`: log the filename as processed but do not modify the concept page. Note the skipped contradiction in the step 8 report.
   - **Surgical edit only**: two targeted string replacements:
     1. Append `- [[<New Source Title>]]` as a new bullet in the existing `## Sources` section.
