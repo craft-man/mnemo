@@ -18,6 +18,7 @@ This document is your operating contract — follow it strictly.
 | `/mnemo:save` | Persist generated content as a wiki page |
 | `/mnemo:stats` | Display size metrics and scaling thresholds |
 | `/mnemo:mine` | Extract knowledge from the current session worth persisting |
+| `/mnemo:graphify` | Map the project codebase into a queryable knowledge graph via graphify |
 
 ---
 
