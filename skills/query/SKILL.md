@@ -138,6 +138,8 @@ If coverage is insufficient (< 2 strong matches and a search term exists), proce
 
 If no local results after steps 3–6, repeat steps 3–6 in `~/.mnemo/` if it exists.
 
+Then proceed to Step 8 to present results.
+
 ---
 
 ## Step 8 — Present results (Layer 1 — compact index)
@@ -161,6 +163,10 @@ Rules for Layer 1:
 - If no results: say so explicitly. Never invent content.
 - Always offer: "Type a number to expand, or ask a follow-up question."
 
+*(`Activity logs included` reflects whether `$INCLUDE_ACTIVITY` was set to true by Step 0c — set to "yes" if activity intent was detected, "no" otherwise.)*
+
+---
+
 ## Step 9 — Layer 2: expand on demand
 
 Trigger: user types a result number (e.g. "2"), "expand 2", "show me #3", "détaille le 1", "mostra il 2", "zeig mir 3", "muéstrame el 2", or any equivalent in any language.
@@ -170,4 +176,6 @@ Action: re-read the full page for that result number and present:
 - Full page body
 - All wikilinks in `## Links`
 
-Do not re-run the search. Use the page path already found in Steps 3–6.
+Do not re-run the search. Use the page path already found in Steps 0, 0b, or 3–6 (whichever ran).
+
+If the requested number is outside the result set (e.g., user asks for result 7 but only 3 were returned): say so and offer the valid range.
