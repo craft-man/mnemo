@@ -13,7 +13,7 @@ compatibility: >
   agents invoke by natural language. No external dependencies.
 metadata:
   author: mnemo contributors
-  version: "0.4.1"
+  version: "0.4.2"
 allowed-tools: Read Write Glob
 ---
 
@@ -210,3 +210,24 @@ Invoke `/mnemo:graphify` now.
 
 After `/mnemo:graphify` completes, report:
 > "Codebase mapped. Query it with `/mnemo:query <term>`. Re-run `/mnemo:graphify` after significant code changes to keep the graph up to date."
+
+**10. Obsidian setup (optional)** — ask the user:
+
+> "Want to open this wiki in **Obsidian**? It gives you a visual graph, full-text search, and lets the Web Clipper send pages directly into your ingest queue. [y]es / [n]o"
+
+**If `[n]o`:** do nothing. Report:
+> "You can open `.mnemo/` as an Obsidian vault anytime — it's compatible out of the box."
+
+**If `[y]es`:**
+
+1. Since Obsidian cannot be detected from a shell, show the install instructions immediately:
+   > "If Obsidian is not yet installed, download it from **https://obsidian.md/** (free, available on macOS, Windows, Linux, iOS, Android). No sign-up required for local vaults."
+
+2. Instruct the user to open Obsidian and set the vault root to `.mnemo/` (not `.mnemo/wiki/`) — this keeps both `raw/` and `wiki/` visible inside the app:
+   > "In Obsidian: **Open folder as vault** → select `.mnemo/` in this project (or `~/.mnemo/` for the global vault)."
+
+3. Offer to set up the **Obsidian Web Clipper** browser extension so clipped pages land directly in the ingest queue:
+   > "Install the Obsidian Web Clipper: https://https://obsidian.md//clipper#more-browsers — then set its default save location to `raw/` inside this vault. Pages you clip will be picked up automatically by `/mnemo:ingest`."
+
+4. Report:
+   > "Obsidian vault ready at `.mnemo/`. Clipped pages saved to `raw/` will be ingested with `/mnemo:ingest`."

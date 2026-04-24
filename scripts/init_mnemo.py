@@ -148,6 +148,27 @@ def update_gitignore(target: pathlib.Path) -> None:
     print("[ok] .mnemo/ added to .gitignore")
 
 
+def prompt_obsidian(mnemo_root: pathlib.Path) -> None:
+    print()
+    ans = input("Open this wiki in Obsidian? (visual graph, full-text search, Web Clipper integration) [y/N]: ").strip().lower()
+    if ans not in ("y", "yes"):
+        print("  You can open .mnemo/ as an Obsidian vault anytime — it's compatible out of the box.")
+        return
+
+    print()
+    print("  If Obsidian is not yet installed, download it from: https://obsidian.md/")
+    print("  (free, available on macOS, Windows, Linux, iOS, Android — no sign-up for local vaults)")
+    print()
+    print("  In Obsidian: Open folder as vault → select:")
+    print(f"    {mnemo_root}")
+    print("  (use ~/.mnemo/ for the global vault instead)")
+    print()
+    print("  For the Web Clipper browser extension:")
+    print("    Install from: https://obsidian.md//clipper#more-browsers")
+    print(f"    Set the default save location to: raw/")
+    print("    Pages you clip will be picked up automatically by /mnemo:ingest")
+
+
 def main() -> None:
     target = pathlib.Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else pathlib.Path.cwd()
 
@@ -188,6 +209,9 @@ def main() -> None:
     graphify_done = False
     if choice in ("1", "2"):
         graphify_done = prompt_graphify(target)
+
+    if choice in ("1", "2"):
+        prompt_obsidian(target / ".mnemo")
 
     print("\nNext steps:")
     if graphify_done:

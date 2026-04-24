@@ -6,6 +6,14 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.4.2] — 2026-04-24
+
+### Added
+
+- **`/mnemo:init` step 10** — optional Obsidian setup: proposes opening `.mnemo/` as a vault and installing the Web Clipper (https://obsidian.md/clipper#more-browsers) with `raw/` as the default save location so clipped pages feed directly into `/mnemo:ingest`.
+
+---
+
 ## [0.4.1] — 2026-04-24
 
 ### Changed
