@@ -169,9 +169,38 @@ This project has a mnemo knowledge base in `.mnemo/`.
 - When a spec or plan is finalized (e.g. from superpowers brainstorming or writing-plans), move it to `.mnemo/raw/` and run `/mnemo:ingest` to add it to the knowledge base
 ```
 
+If graphify was set up in step 8, append this line to the stanza:
+```
+- Run `/mnemo:graphify` after significant code changes to keep the knowledge graph up to date
+```
+
 Then:
 - If `CLAUDE.md` exists: append the stanza at the end of the file, preceded by a blank line.
 - If `CLAUDE.md` does not exist: create it with the stanza as the only content.
 
 Confirm:
 > "Done — stanza added to `CLAUDE.md`. I'll remember this wiki in future sessions."
+
+**8. Graphify setup (optional)** — ask the user:
+
+> "Want to map your codebase with **graphify**? It builds a persistent knowledge graph so I can answer questions about your project without re-reading source files on every session. [y]es / [n]o"
+
+**If `[n]o`:** do nothing. Report:
+> "You can run `/mnemo:graphify` anytime to map your codebase."
+
+**If `[y]es`:**
+
+Check if graphify is installed: run `graphify --version`.
+
+- **If not found:** show the install command and wait for the user to run it:
+  ```
+  pip install graphifyy && graphify install
+  ```
+  Once the user confirms graphify is installed (or `graphify --version` succeeds): continue.
+
+- **If found:** continue immediately.
+
+Invoke `/mnemo:graphify` now.
+
+After `/mnemo:graphify` completes, report:
+> "Codebase mapped. Query it with `/mnemo:query <term>`. Re-run `/mnemo:graphify` after significant code changes to keep the graph up to date."

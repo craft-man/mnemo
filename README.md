@@ -181,10 +181,10 @@ What it creates:
 
 `log.md` records every file that has been ingested — filename and ISO timestamp. Before processing any file, `/mnemo:ingest` checks this log and skips anything already present. This prevents duplicate pages, avoids re-billing the LLM for the same source, and makes reruns safe. To force a re-ingest of a file, remove its entry from `log.md`.
 
-During init you choose which tiers to activate (project, global, or both) and optionally configure **qmd** for hybrid semantic search. After bootstrapping:
+During init you choose which tiers to activate (project, global, or both) and optionally configure **qmd** for hybrid semantic search. Init then offers two optional next steps:
 
-- **Code project?** Run `/mnemo:graphify` to map the codebase into a queryable knowledge graph — no raw files needed.
-- **Document-based knowledge?** Init offers to run `/mnemo:schema` immediately so you can define your domain before the first ingest.
+- **`/mnemo:schema`** — define your domain taxonomy before the first ingest (document-based knowledge)
+- **`/mnemo:graphify`** — map the codebase into a queryable knowledge graph immediately. If graphify isn't installed yet, init shows the install command and waits before proceeding.
 
 ### `/mnemo:schema`
 
