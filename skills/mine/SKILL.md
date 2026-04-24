@@ -100,3 +100,53 @@ Never save without user approval. Never batch-save without showing the numbered 
 
 After all saves complete, list the titles saved. If 3 or more items were saved, suggest
 running `/mnemo:lint` to verify integration.
+
+---
+
+### Step 5 — Offer activity log
+
+After Step 4, if at least one item was saved OR if the session produced significant work (even without saves), offer to write a session activity log.
+
+Ask the user: "Log this session in `wiki/activity/`? (y/n)"
+
+If the user declines, skip silently.
+
+If the user confirms:
+
+1. Determine today's date in `YYYY-MM-DD` format.
+2. Set target path: `.mnemo/wiki/activity/YYYY-MM-DD.md` (substitute `--global` path `~/.mnemo/wiki/activity/YYYY-MM-DD.md` if the `--global` flag was set).
+3. If the file already exists (multiple mine runs in one day): read it, then **append** new items to its `## Items Saved` section rather than overwriting.
+4. If the file does not exist, create it with this exact structure:
+
+```yaml
+---
+title: Session YYYY-MM-DD
+category: activity
+tags: [session, YYYY-MM-DD]
+created: YYYY-MM-DD
+updated: YYYY-MM-DD
+---
+```
+
+```markdown
+# Session YYYY-MM-DD
+
+> *Generated: <ISO-8601 timestamp>*
+
+---
+
+## Summary
+
+[2–3 sentences: what was worked on, problems solved, decisions made]
+
+## Items Saved
+
+[One line per item saved in Step 3:]
+- [[Page Title]] (`category`)
+
+## Links
+
+[Wikilinks to the most relevant entities or concepts referenced today]
+```
+
+5. Report: "Activity log written to `wiki/activity/YYYY-MM-DD.md`."
