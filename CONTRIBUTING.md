@@ -11,6 +11,7 @@ mnemo/
 ├── commands/mnemo/        ← slash-command stubs (one .md per skill)
 ├── skills/
 │   ├── init/SKILL.md
+│   ├── onboard/SKILL.md
 │   ├── schema/SKILL.md
 │   ├── ingest/SKILL.md
 │   ├── query/SKILL.md
@@ -47,12 +48,13 @@ Tests cover `create_structure`, `guard`, `prompt_qmd`, `update_gitignore`, and t
 
 ## Versioning
 
-mnemo follows [Semantic Versioning](https://semver.org/). The version lives in three places:
+mnemo follows [Semantic Versioning](https://semver.org/). The version lives in four places:
 - `.claude-plugin/plugin.json` → `"version"`
 - `README.md` → version badge
 - All `skills/*/SKILL.md` → `version:` frontmatter field
+- `CHANGELOG.md` → new section header
 
-Update all three when bumping.
+Update all four when bumping.
 
 ## License
 

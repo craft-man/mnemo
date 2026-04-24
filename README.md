@@ -1,7 +1,7 @@
 # mnemo
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.3.0-blue)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.4.0-blue)](CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
@@ -51,7 +51,7 @@ Each tier is a taxonomy-based wiki:
 └── SCHEMA.md         ← domain conventions (edit per project)
 ```
 
-mnemo exposes nine skills that work with any [agentskills.io](https://agentskills.io)-compatible agent — no server, no binary, no dependencies.
+mnemo exposes ten skills that work with any [agentskills.io](https://agentskills.io)-compatible agent — no server, no binary, no dependencies.
 
 ---
 
@@ -171,6 +171,14 @@ Bootstraps a new knowledge base. Run once per project — warns if already initi
 `log.md` records every ingested file — filename and ISO timestamp. Before processing anything, `/mnemo:ingest` checks this log and skips files already present. To force a re-ingest, remove the entry from `log.md`.
 
 Pick which tiers to activate (project, global, or both) and whether to enable **qmd** for hybrid semantic search. After that, init offers two paths: run `/mnemo:schema` to define a taxonomy before your first ingest, or run `/mnemo:graphify` to map the codebase right now — it walks you through the graphify install if you don't have it yet.
+
+### `/mnemo:onboard`
+
+Creates or updates your global user profile at `~/.mnemo/wiki/entities/person-user.md`. Run automatically on first `/mnemo:init` — skipped silently if a profile already exists. Run directly to update it.
+
+A short interview covers your role (solo dev, team lead, researcher…), technical level, preferred language for notes and responses, main domains of interest, knowledge base goal, and response style preference. Answers are inferred from the conversation where possible (e.g. language) — you only confirm rather than type them.
+
+The profile persists across all projects and lets mnemo tailor its responses to your context without re-asking every session.
 
 ### `/mnemo:schema`
 

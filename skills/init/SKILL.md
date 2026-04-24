@@ -13,7 +13,7 @@ compatibility: >
   agents invoke by natural language. No external dependencies.
 metadata:
   author: mnemo contributors
-  version: "0.2.0"
+  version: "0.4.0"
 allowed-tools: Read Write Glob
 ---
 
@@ -98,7 +98,13 @@ If `[y]es`: invoke `/mnemo:schema` now. Skip the manual SCHEMA.md note in step 5
 
 If `[n]o`: continue — the starter SCHEMA.md from step 3 will be used until the user runs `/mnemo:schema`.
 
-**5. Semantic search setup (optional)** — ask the user:
+**5. User profile** — ensure the global user profile exists:
+
+Invoke `/mnemo:onboard` now. It will detect whether a profile already exists:
+- If no profile exists: run the full interview to create one.
+- If a profile already exists: skip silently (no prompt to the user).
+
+**6. Semantic search setup (optional)** — ask the user:
 
 > "Would you like to enable semantic search via **qmd**? It adds hybrid BM25 + vector search locally — no API key required. Needs: Node.js ≥ 22 (or Bun ≥ 1.0) + ~2 GB disk for models (downloaded once on first use). [y]es / [n]o"
 
@@ -118,7 +124,7 @@ If `[n]o`: continue — the starter SCHEMA.md from step 3 will be used until the
    ```
    qmd collection add mnemo-wiki .mnemo/wiki "**/*.md"
    ```
-   If this command fails, report the error and skip the rest of step 4 — the user can retry manually.
+   If this command fails, report the error and skip the rest of step 6 — the user can retry manually.
 
 3. Write `.mnemo/config.json`:
    ```json
@@ -139,13 +145,13 @@ Write `.mnemo/config.json`:
 }
 ```
 
-**6. Report:**
+**7. Report:**
 > "Knowledge base initialized at `.mnemo/`.
 > Search backend: **<qmd | BM25>**.
 > Next: drop files into `.mnemo/raw/` and run `/mnemo:ingest`."
 > (If schema was not defined in step 4, add: "Run `/mnemo:schema` to define your domain taxonomy first.")
 
-**7. CLAUDE.md wiring** — offer to persist the wiki in the project's agent memory:
+**8. CLAUDE.md wiring** — offer to persist the wiki in the project's agent memory: — offer to persist the wiki in the project's agent memory:
 
 Ask the user:
 > "Want me to add a memory stanza to `CLAUDE.md` so I remember this wiki in future sessions? [y/n]"
@@ -169,7 +175,7 @@ This project has a mnemo knowledge base in `.mnemo/`.
 - When a spec or plan is finalized (e.g. from superpowers brainstorming or writing-plans), move it to `.mnemo/raw/` and run `/mnemo:ingest` to add it to the knowledge base
 ```
 
-If graphify was set up in step 8, append this line to the stanza:
+If graphify was set up in step 9, append this line to the stanza:
 ```
 - Run `/mnemo:graphify` after significant code changes to keep the knowledge graph up to date
 ```
@@ -181,7 +187,7 @@ Then:
 Confirm:
 > "Done — stanza added to `CLAUDE.md`. I'll remember this wiki in future sessions."
 
-**8. Graphify setup (optional)** — ask the user:
+**9. Graphify setup (optional)** — ask the user:
 
 > "Want to map your codebase with **graphify**? It builds a persistent knowledge graph so I can answer questions about your project without re-reading source files on every session. [y]es / [n]o"
 

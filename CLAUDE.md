@@ -11,6 +11,7 @@ This document is your operating contract — follow it strictly.
 | Skill | Purpose |
 |---|---|
 | `/mnemo:init` | Bootstrap taxonomy structure + SCHEMA.md |
+| `/mnemo:onboard` | Create or update the global user profile in `~/.mnemo/` |
 | `/mnemo:schema` | Interactively create or revise the domain taxonomy (SCHEMA.md) |
 | `/mnemo:ingest` | Synthesize `raw/` files → categorized `wiki/` |
 | `/mnemo:query` | Search the knowledge base |

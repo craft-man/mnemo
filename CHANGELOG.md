@@ -6,6 +6,18 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.4.0] — 2026-04-24
+
+### Added
+
+- **`/mnemo:onboard`** — new skill that creates or updates a global user profile at `~/.mnemo/wiki/entities/person-user.md`. Conducts a short interview (role, technical level, language, domains, goal, response style) and saves answers as a structured wiki entity. Auto-detects whether a profile already exists: runs the full interview if absent, skips silently if present. Invoked automatically during `/mnemo:init` (placed right after schema setup, before the technical configuration steps).
+
+### Changed
+
+- **`/mnemo:init` step order** — user profile (onboard) now runs as step 5, immediately after schema setup (step 4), grouping the two context-setting questions together before technical configuration (semantic search, CLAUDE.md wiring, graphify).
+
+---
+
 ## [0.3.0] — 2026-04-24
 
 ### Added
