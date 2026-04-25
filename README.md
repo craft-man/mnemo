@@ -261,6 +261,20 @@ Displays page counts per category, total lines, top 5 largest pages, and index s
 
 ---
 
+## Agents
+
+Pour les opérations lourdes, mnemo dispatche automatiquement des sub-agents dédiés qui exécutent le workflow en contexte isolé. Le contexte de ta session reste intact quelle que soit la taille du job.
+
+| Agent | Modèle | Dispatché par | Comportements clés |
+|---|---|---|---|
+| `mnemo-ingestor` | Opus | `/mnemo:ingest` | Discuss before write — propose TL;DR + pages prévues avant d'écrire |
+| `mnemo-archivist` | Sonnet | `/mnemo:query` | Format adaptatif + offer to file back après chaque réponse substantielle |
+| `mnemo-linter` | Opus | `/mnemo:lint` | Audit mécanique + graphe (hubs, sinks, composantes) + sémantique |
+
+Les agents sont définis dans `agents/` à la racine du plugin — chaque fichier est self-contained et peut être lu indépendamment comme spec de référence.
+
+---
+
 ## Using mnemo with Obsidian
 
 mnemo's wiki format works directly in Obsidian — point a vault at `.mnemo/wiki/` (or `~/.mnemo/wiki/` for the global tier). Wikilinks resolve in the graph view, YAML frontmatter shows up in the properties panel, and the bidirectional links from `/mnemo:ingest` appear in the backlinks panel without any setup.
