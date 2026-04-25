@@ -48,6 +48,7 @@ Each tier is a taxonomy-based wiki:
 └── <project-name>/   ← vault root (open this in Obsidian — displays the project name)
     ├── raw/          ← drop your source files here (immutable input)
     ├── wiki/
+    │   ├── activity/ ← session activity log per day
     │   ├── sources/  ← one synthesized page per ingested source
     │   ├── entities/ ← people, tools, projects, systems
     │   ├── concepts/ ← patterns, techniques, ideas
