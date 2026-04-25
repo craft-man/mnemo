@@ -167,6 +167,7 @@ Bootstraps a new knowledge base. Run once per project — warns if already initi
 └── <project-name>/   ← vault root (open in Obsidian for a named vault)
     ├── raw/          ← drop your source files here
     ├── wiki/
+    │   ├── activity/
     │   ├── sources/
     │   ├── entities/
     │   ├── concepts/
