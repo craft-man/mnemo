@@ -18,21 +18,22 @@ allowed-tools: Read Write Edit Glob Grep Bash
 
 ## Step 1 — Check init
 
-Si `.mnemo/<project-name>/wiki/sources/` n'existe pas, stopper :
+Si `{vault}/wiki/sources/` n'existe pas, stopper :
 > "Knowledge base not initialized. Run `/mnemo:init` first."
 
 ## Step 2 — Read SCHEMA.md
 
-Lire `.mnemo/<project-name>/SCHEMA.md`. Utiliser pour guider catégorisation,
+Lire `{vault}/SCHEMA.md`. Utiliser pour guider catégorisation,
 types d'entités, et naming pendant la synthèse.
 
 ## Step 3 — Read the log
 
-Lire `.mnemo/<project-name>/log.md`. Construire l'ensemble des fichiers déjà
+Lire `{vault}/log.md`. Construire l'ensemble des fichiers déjà
 traités depuis les lignes de la forme :
 ```
 - raw/<filename> | <timestamp> | ingest
 ```
+→ stocker dans `processed_files`
 
 ## Step 4 — Verify source
 
@@ -57,7 +58,9 @@ Depuis le contenu complet (ou consolidé), extraire :
 - Contradictions potentielles : comparer les claims de la source avec les pages
   existantes pertinentes (lire les pages concernées si nécessaire)
 
-## Step 5-DISCUSS — Rapport pré-écriture
+> **Note :** Les steps 5a et 5b sont des sous-étapes de Step 5. Ne pas passer au Step 6 sans avoir reçu confirmation à 5b.
+
+## Step 5a — Rapport pré-écriture
 
 **Avant d'écrire quoi que ce soit**, reporter à l'utilisateur :
 
@@ -85,15 +88,16 @@ Depuis le contenu complet (ou consolidé), extraire :
   (ou "Aucune" si rien détecté)
 ```
 
-## Step 5-CONFIRM — Attendre confirmation
+## Step 5b — Attendre confirmation
 
 Attendre la réponse de l'utilisateur avant d'écrire :
 
 - `ok` / `oui` / `go` / aucune objection → exécuter le workflow complet (steps 6+)
 - Redirection partielle (ex: "skip les entités", "ignore le concept X") →
   ajuster le plan en conséquence, confirmer l'ajustement, puis exécuter
-- `stop` / `cancel` / `non` → n'écrire rien, logger `skipped` dans log.md,
-  reporter à l'utilisateur et terminer
+- `stop` / `cancel` / `non` → n'écrire rien, ajouter dans `{vault}/log.md` :
+  `- raw/<original_filename> | <UTC ISO timestamp> | skipped`
+  Reporter à l'utilisateur et terminer.
 
 ## Step 6 — Source page
 
@@ -170,7 +174,7 @@ Pour chaque entité significative extraite :
   Si la source est déjà dans `## Sources`, ignorer.
 
 **Si la page n'existe pas :**
-- Vérifier que la source page liste l'entité dans `## Entities Mentioned`.
+- S'assurer que `## Entities Mentioned` a bien été écrite au Step 6 avant de créer cette page.
 - Créer `wiki/entities/<type>-<slug>.md` :
 
 ```markdown
@@ -249,7 +253,8 @@ Après chaque page écrite :
 1. Construire un set de 10–20 termes représentatifs (entités + concepts extraits
    + 5–8 noms distincts du Summary et Key Points).
 2. Trouver les pages candidates :
-   - Si `wiki_search.py` disponible : `python3 <path> .mnemo/<project>/wiki "<terms>"`
+   - Si `wiki_search.py` disponible (utiliser Glob pour le localiser : `**/mnemo/scripts/wiki_search.py`) :
+     `python3 <script_path> {vault}/wiki "<terms>"`
    - Sinon : Grep sur chaque terme, collecter les fichiers avec ≥ 2 correspondances.
    Exclure les pages déjà créées ou mises à jour aux steps 7–8.
 3. Retenir les 10–15 mieux classés par recoupements.
@@ -270,14 +275,14 @@ Pour chaque nouvelle page :
 
 ## Step 12 — Update log
 
-Ajouter dans `.mnemo/<project-name>/log.md` :
+Ajouter dans `{vault}/log.md` :
 ```
 - raw/<original_filename> | <UTC ISO timestamp> | ingest
 ```
 
 ## Step 12a — Sync qmd index (if configured)
 
-Lire `.mnemo/<project-name>/config.json`. Si `search_backend` = `"qmd"` :
+Lire `{vault}/config.json`. Si `search_backend` = `"qmd"` :
 lire `qmd_collection` (défaut : `"mnemo-wiki"`), puis :
 ```
 qmd update "$QMD_COLLECTION"
