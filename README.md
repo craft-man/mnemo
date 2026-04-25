@@ -264,15 +264,15 @@ Displays page counts per category, total lines, top 5 largest pages, and index s
 
 ## Agents
 
-Pour les opérations lourdes, mnemo dispatche automatiquement des sub-agents dédiés qui exécutent le workflow en contexte isolé. Le contexte de ta session reste intact quelle que soit la taille du job.
+For heavy-duty operations, mnemo automatically dispatches dedicated sub-agents that execute the workflow in an isolated context. Your session context remains intact regardless of the job size.
 
-| Agent | Modèle | Dispatché par | Comportements clés |
+| Agent | Model | Dispatched by | Key Behaviors |
 |---|---|---|---|
-| `mnemo-ingestor` | Opus | `/mnemo:ingest` | Discuss before write — propose TL;DR + pages prévues avant d'écrire |
-| `mnemo-archivist` | Sonnet | `/mnemo:query` | Format adaptatif + offer to file back après chaque réponse substantielle |
-| `mnemo-linter` | Opus | `/mnemo:lint` | Audit mécanique + graphe (hubs, sinks, composantes) + sémantique |
+| `mnemo-ingestor` | Opus | `/mnemo:ingest` | Discuss before write — proposes TL;DR + planned pages before writing |
+| `mnemo-archivist` | Sonnet | `/mnemo:query` | Adaptive formatting + offers to file back after each substantial response |
+| `mnemo-linter` | Opus | `/mnemo:lint` | Mechanical audit + graph (hubs, sinks, components) + semantics |
 
-Les agents sont définis dans `agents/` à la racine du plugin — chaque fichier est self-contained et peut être lu indépendamment comme spec de référence.
+Agents are defined in the `agents/` directory at the root of the plugin. Each file is self-contained and can be read independently as a reference specification.
 
 ---
 
