@@ -1,107 +1,107 @@
 ---
 name: mnemo-ingestor
 description: >
-  Sub-agent dispatché par /mnemo:ingest. Exécute le workflow d'ingest complet
-  en contexte isolé : lit la source, propose un rapport pré-écriture (TL;DR,
-  pages touchées, contradictions), attend confirmation, puis écrit source page,
-  entités, concepts, enrichit le graphe, met à jour index et log.
+  Sub-agent dispatched by /mnemo:ingest. Executes the full ingest workflow
+  in an isolated context: reads the source, proposes a pre-write report (TL;DR,
+  pages affected, contradictions), waits for confirmation, then writes the source page,
+  entities, concepts, enriches the graph, and updates the index and log.
 model: opus
 allowed-tools: Read Write Edit Glob Grep Bash
 ---
 
-## Inputs (transmis par le skill parent)
+## Inputs (passed by the parent skill)
 
-- `vault`: chemin du vault local, ex. `.mnemo/<project-name>/`
-- `source`: chemin du fichier à ingérer (dans `raw/`)
+- `vault`: path to the local vault, e.g. `.mnemo/<project-name>/`
+- `source`: path to the file to ingest (inside `raw/`)
 
 ---
 
 ## Step 1 — Check init
 
-Si `{vault}/wiki/sources/` n'existe pas, stopper :
+If `{vault}/wiki/sources/` does not exist, stop:
 > "Knowledge base not initialized. Run `/mnemo:init` first."
 
 ## Step 2 — Read SCHEMA.md
 
-Lire `{vault}/SCHEMA.md`. Utiliser pour guider catégorisation,
-types d'entités, et naming pendant la synthèse.
+Read `{vault}/SCHEMA.md`. Use it to guide categorization,
+entity types, and naming during synthesis.
 
 ## Step 3 — Read the log
 
-Lire `{vault}/log.md`. Construire l'ensemble des fichiers déjà
-traités depuis les lignes de la forme :
+Read `{vault}/log.md`. Build the set of files already
+processed from lines of the form:
 ```
 - raw/<filename> | <timestamp> | ingest
 ```
-→ stocker dans `processed_files`
+→ store in `processed_files`
 
 ## Step 4 — Verify source
 
-Vérifier que le fichier source transmis en input existe dans `raw/`. Si le
-fichier est déjà dans le log (`processed_files`), arrêter :
+Verify that the source file passed as input exists in `raw/`. If the
+file is already in the log (`processed_files`), stop:
 > "Source already ingested. Remove its entry from log.md to force re-ingest."
 
 ## Step 5 — Read and analyze source
 
-**File size check :**
-- **≤ 500 lignes** : lire le fichier en une fois.
-- **> 500 lignes** : lire en chunks de ~200 lignes. Pour chaque chunk, extraire
-  points clés, entités, concepts. Consolider l'accumulateur avant d'avancer.
-  Ne jamais synthétiser depuis un chunk partiel seul.
+**File size check:**
+- **≤ 500 lines**: read the file in one pass.
+- **> 500 lines**: read in chunks of ~200 lines. For each chunk, extract
+  key points, entities, concepts. Consolidate the accumulator before moving on.
+  Never synthesize from a single partial chunk alone.
 
-Depuis le contenu complet (ou consolidé), extraire :
-- Titre, auteur(s), date de la source
-- TL;DR (2-3 phrases)
-- Points clés (3-7 bullets)
-- Entités significatives (personnes, outils, projets, systèmes)
-- Concepts significatifs (patterns, techniques, idées)
-- Contradictions potentielles : comparer les claims de la source avec les pages
-  existantes pertinentes (lire les pages concernées si nécessaire)
+From the full (or consolidated) content, extract:
+- Title, author(s), date of the source
+- TL;DR (2-3 sentences)
+- Key points (3-7 bullets)
+- Significant entities (people, tools, projects, systems)
+- Significant concepts (patterns, techniques, ideas)
+- Potential contradictions: compare the source's claims against relevant
+  existing pages (read the relevant pages if necessary)
 
-> **Note :** Les steps 5a et 5b sont des sous-étapes de Step 5. Ne pas passer au Step 6 sans avoir reçu confirmation à 5b.
+> **Note:** Steps 5a and 5b are sub-steps of Step 5. Do not proceed to Step 6 without having received confirmation at 5b.
 
-## Step 5a — Rapport pré-écriture
+## Step 5a — Pre-write report
 
-**Avant d'écrire quoi que ce soit**, reporter à l'utilisateur :
+**Before writing anything**, report to the user:
 
 ```
-📄 Source : <titre> — <auteur> — <date>
+📄 Source: <title> — <author> — <date>
 
-💡 TL;DR : <2-3 phrases>
+💡 TL;DR: <2-3 sentences>
 
-🔑 Points clés :
+🔑 Key Points:
 - <point 1>
 - <point 2>
 ...
 
-📂 Pages à créer :
+📂 Pages to create:
 - [[sources/<slug>]] (source summary)
-- [[entities/<type>-<slug>]] — <description courte>
-- [[concepts/<cat>-<slug>]] — <description courte>
+- [[entities/<type>-<slug>]] — <short description>
+- [[concepts/<cat>-<slug>]] — <short description>
 
-📂 Pages à mettre à jour :
-- [[entities/<existing>]] — ajout de source
-- [[concepts/<existing>]] — claim révisé
+📂 Pages to update:
+- [[entities/<existing>]] — adding source
+- [[concepts/<existing>]] — revised claim
 
-⚠️ Contradictions détectées :
-- Claim existant dans [[entities/foo]] : "<texte>" vs claim entrant : "<texte>"
-  (ou "Aucune" si rien détecté)
+⚠️ Contradictions detected:
+- Existing claim in [[entities/foo]]: "<text>" vs incoming claim: "<text>"
+  (or "None" if nothing detected)
 ```
 
-## Step 5b — Attendre confirmation
+## Step 5b — Wait for confirmation
 
-Attendre la réponse de l'utilisateur avant d'écrire :
+Wait for the user's response before writing:
 
-- `ok` / `oui` / `go` / aucune objection → exécuter le workflow complet (steps 6+)
-- Redirection partielle (ex: "skip les entités", "ignore le concept X") →
-  ajuster le plan en conséquence, confirmer l'ajustement, puis exécuter
-- `stop` / `cancel` / `non` → n'écrire rien, ajouter dans `{vault}/log.md` :
+- `ok` / `yes` / `go` / no objection → execute the full workflow (steps 6+)
+- Partial redirect (e.g. "skip entities", "ignore concept X") →
+  adjust the plan accordingly, confirm the adjustment, then execute
+- `stop` / `cancel` / `no` → write nothing, add to `{vault}/log.md`:
   `- raw/<original_filename> | <UTC ISO timestamp> | skipped`
-  Reporter à l'utilisateur et terminer.
+  Report to the user and stop.
 
 ## Step 6 — Source page
 
-Écrire `wiki/sources/<slug>.md` :
+Write `wiki/sources/<slug>.md`:
 
 ```markdown
 ---
@@ -148,34 +148,34 @@ updated: <YYYY-MM-DD>
 
 ## Step 7 — Entity pages
 
-Pour chaque entité significative extraite :
+For each significant entity extracted:
 
-**Si la page existe déjà :**
-- Re-lire le fichier source original pour ancrer la mise à jour.
-- **Contradiction check** : scanner le corps de la page (hors `## Sources` et
-  `## Links`) pour des phrases contenant le nom de l'entité avec une assertion
-  affirmative. Une contradiction est présente si la nouvelle source contient
-  un mot de négation (`not`, `no longer`, `unlike`, `contrary`, `incorrect`,
-  `actually`, `however`) adjacent au même sujet.
-  - Si contradiction : afficher le claim existant (fichier + numéro de ligne)
-    et le claim entrant. Vérifier si la contradiction contient du langage de
-    remplacement (`replaced by`, `superseded by`, `deprecated in favor of`,
-    `no longer used`, `remplacé par`, `obsolète`) :
-    - Si oui : demander `"Contradiction — [u]pdate / [k]eep both / [h]istory / [s]kip"`
-    - Sinon : demander `"Contradiction — [u]pdate / [k]eep both / [s]kip"`
-  - `[u]pdate` : remplacer le claim contradictoire, puis surgical edit
-  - `[k]eep both` : ajouter `> **Note:** [[<New Source>]] présente un point de vue différent.`
-  - `[h]istory` : ajouter `superseded_by:` au frontmatter + `## History`, ajouter
-    `supersedes:` à la nouvelle page
-  - `[s]kip` : logger sans modifier, noter dans le rapport final
-- **Surgical edit uniquement** (si pas de contradiction ou contradiction résolue) :
-  1. Ajouter `- [[<New Source Title>]]` dans `## Sources`
-  2. Mettre à jour `updated:` dans le frontmatter
-  Si la source est déjà dans `## Sources`, ignorer.
+**If the page already exists:**
+- Re-read the original source file to anchor the update.
+- **Contradiction check**: scan the page body (excluding `## Sources` and
+  `## Links`) for sentences containing the entity name with an affirmative assertion.
+  A contradiction is present if the new source contains a negation word (`not`,
+  `no longer`, `unlike`, `contrary`, `incorrect`, `actually`, `however`) adjacent
+  to the same subject.
+  - If contradiction: display the existing claim (file + line number)
+    and the incoming claim. Check whether the contradiction contains replacement
+    language (`replaced by`, `superseded by`, `deprecated in favor of`,
+    `no longer used`, `remplacé par`, `obsolète`):
+    - If yes: ask `"Contradiction — [u]pdate / [k]eep both / [h]istory / [s]kip"`
+    - Otherwise: ask `"Contradiction — [u]pdate / [k]eep both / [s]kip"`
+  - `[u]pdate`: replace the contradicting claim, then surgical edit
+  - `[k]eep both`: add `> **Note:** [[<New Source>]] presents a different perspective.`
+  - `[h]istory`: add `superseded_by:` to frontmatter + `## History`, add
+    `supersedes:` to the new page
+  - `[s]kip`: log without modifying, note in the final report
+- **Surgical edit only** (if no contradiction or contradiction resolved):
+  1. Add `- [[<New Source Title>]]` in `## Sources`
+  2. Update `updated:` in the frontmatter
+  If the source is already in `## Sources`, skip.
 
-**Si la page n'existe pas :**
-- S'assurer que `## Entities Mentioned` a bien été écrite au Step 6 avant de créer cette page.
-- Créer `wiki/entities/<type>-<slug>.md` :
+**If the page does not exist:**
+- Ensure that `## Entities Mentioned` has been written in Step 6 before creating this page.
+- Create `wiki/entities/<type>-<slug>.md`:
 
 ```markdown
 ---
@@ -207,11 +207,11 @@ updated: <YYYY-MM-DD>
 
 ## Step 8 — Concept pages
 
-Même logique que les entity pages (step 7), appliquée aux concepts.
+Same logic as entity pages (step 7), applied to concepts.
 
-Fichier cible : `wiki/concepts/<category>-<slug>.md`
+Target file: `wiki/concepts/<category>-<slug>.md`
 
-Template :
+Template:
 
 ```markdown
 ---
@@ -243,68 +243,68 @@ updated: <YYYY-MM-DD>
 
 ## Step 9 — Page size check
 
-Après chaque page écrite :
-- > 800 lignes : splitter en `<slug>-part-1.md` et `<slug>-part-2.md`. Mettre à
-  jour `## Links` de la source page. Alerter l'utilisateur.
-- 400–800 lignes : avertir.
+After each page written:
+- > 800 lines: split into `<slug>-part-1.md` and `<slug>-part-2.md`. Update
+  `## Links` in the source page. Alert the user.
+- 400–800 lines: warn.
 
 ## Step 10 — Enrich existing graph
 
-1. Construire un set de 10–20 termes représentatifs (entités + concepts extraits
-   + 5–8 noms distincts du Summary et Key Points).
-2. Trouver les pages candidates :
-   - Si `wiki_search.py` disponible (utiliser Glob pour le localiser : `**/mnemo/scripts/wiki_search.py`) :
+1. Build a set of 10–20 representative terms (extracted entities + concepts
+   + 5–8 distinct names from the Summary and Key Points).
+2. Find candidate pages:
+   - If `wiki_search.py` is available (use Glob to locate it: `**/mnemo/scripts/wiki_search.py`):
      `python3 <script_path> {vault}/wiki "<terms>"`
-   - Sinon : Grep sur chaque terme, collecter les fichiers avec ≥ 2 correspondances.
-   Exclure les pages déjà créées ou mises à jour aux steps 7–8.
-3. Retenir les 10–15 mieux classés par recoupements.
-4. Pour chaque candidat, lire la page. L'enrichir seulement si la source apporte
-   au moins un de : exemple concret, raffinement ou contradiction, technique liée,
-   auteur déjà référencé. Sinon, skip.
-5. Si enrichissement : un seul edit chirurgical — ajouter `- [[<New Source>]]`
-   dans `## Sources` / `## Related Sources` / `## See Also` / `## Links`.
-   Jamais réécrire le corps. Maximum un ajout par page.
+   - Otherwise: Grep for each term, collect files with ≥ 2 matches.
+   Exclude pages already created or updated in steps 7–8.
+3. Keep the 10–15 best ranked by overlap.
+4. For each candidate, read the page. Enrich it only if the source contributes
+   at least one of: a concrete example, a refinement or contradiction, a related
+   technique, an already-referenced author. Otherwise, skip.
+5. If enriching: one surgical edit only — add `- [[<New Source>]]`
+   in `## Sources` / `## Related Sources` / `## See Also` / `## Links`.
+   Never rewrite the body. Maximum one addition per page.
 
 ## Step 11 — Update index
 
-Pour chaque nouvelle page :
-- Total pages dans `wiki/**/*.md` < 150 : ajouter dans `index.md` sous la bonne
-  catégorie (`## Sources`, `## Entities`, `## Concepts`, `## Synthesis`).
-- ≥ 150 : ajouter dans `wiki/indexes/<category>.md`. S'assurer que `index.md`
-  pointe vers les shards.
+For each new page:
+- Total pages in `wiki/**/*.md` < 150: add to `index.md` under the correct
+  category (`## Sources`, `## Entities`, `## Concepts`, `## Synthesis`).
+- ≥ 150: add to `wiki/indexes/<category>.md`. Ensure `index.md`
+  points to the shards.
 
 ## Step 12 — Update log
 
-Ajouter dans `{vault}/log.md` :
+Add to `{vault}/log.md`:
 ```
 - raw/<original_filename> | <UTC ISO timestamp> | ingest
 ```
 
 ## Step 12a — Sync qmd index (if configured)
 
-Lire `{vault}/config.json`. Si `search_backend` = `"qmd"` :
-lire `qmd_collection` (défaut : `"mnemo-wiki"`), puis :
+Read `{vault}/config.json`. If `search_backend` = `"qmd"`:
+read `qmd_collection` (default: `"mnemo-wiki"`), then:
 ```
 qmd update "$QMD_COLLECTION"
 ```
-Si code de sortie non-zéro : avertir dans le rapport mais ne pas avorter.
+If exit code is non-zero: warn in the report but do not abort.
 
 ## Step 12b — Suggest synthesis pages
 
-Pour chaque page entité/concept créée ou mise à jour, compter les bullets dans
-`## Sources`. Si ≥ 3 et aucune page `synthesis/` n'existe pour ce sujet :
-ajouter à `synthesis_candidates`.
+For each entity/concept page created or updated, count the bullets in
+`## Sources`. If ≥ 3 and no `synthesis/` page exists for that subject:
+add to `synthesis_candidates`.
 
 ## Step 13 — Report
 
-Résumer :
-- Pages source créées
-- Pages entités créées ou mises à jour
-- Pages concepts créées ou mises à jour
-- Pages existantes enrichies (step 10)
-- Candidats évalués mais skippés (count)
-- Contradictions détectées et résolutions
-- Fichiers skippés
-- Avertissements de taille
-- Suggestions de synthèse (si synthesis_candidates non vide)
-- "Run `/mnemo:lint` pour vérifier la santé de la base."
+Summarize:
+- Source pages created
+- Entity pages created or updated
+- Concept pages created or updated
+- Existing pages enriched (step 10)
+- Candidates evaluated but skipped (count)
+- Contradictions detected and resolutions
+- Skipped files
+- Size warnings
+- Synthesis suggestions (if synthesis_candidates is non-empty)
+- "Run `/mnemo:lint` to check the health of the knowledge base."

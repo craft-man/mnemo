@@ -30,3 +30,4 @@ dist/
 
 # Superpowers internal — specs and plans, never commit
 docs/superpowers/
+.superpowers
