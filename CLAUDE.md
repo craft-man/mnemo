@@ -199,6 +199,14 @@ Body text referencing [[Related Concept]] and [[Entity Name]].
 
 ---
 
+## Authoring Language
+
+All files in `agents/`, `skills/`, and `skills/references/` must be written in **English** — regardless of the language used in conversation with the user. This applies to new files and edits to existing ones.
+
+Wiki pages in `.mnemo/` follow the user's language preference (no constraint).
+
+---
+
 ## Prohibited Behaviors
 
 - **Never invent wiki content.** If a query returns no results, say so.
