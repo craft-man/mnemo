@@ -6,6 +6,21 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.7.0] — 2026-04-25
+
+### Added
+
+- **Sub-agents** — les skills lourds (`ingest`, `query`, `lint`) dispatche désormais un agent dédié en contexte isolé, libérant le contexte principal pour la conversation.
+- **`agents/ingestor.md`** (Opus) — workflow d'ingest complet avec une nouvelle phase *discuss before write* : l'agent propose TL;DR, pages prévues, et contradictions détectées, puis attend confirmation avant d'écrire. Annulation partielle possible ("skip les entités", "ignore X").
+- **`agents/archivist.md`** (Sonnet) — workflow de query complet avec format adaptatif (tableau pour A vs B, timeline pour requêtes temporelles, explication pour définitions) et *offer to file back* systématique après chaque réponse substantielle.
+- **`agents/linter.md`** (Opus) — workflow de lint complet avec une nouvelle Pass 2 graphe intégrant les métriques de `/mnemo:graphify` (hubs, sinks, composantes connexes, densité) directement dans le rapport de lint.
+
+### Changed
+
+- **`skills/ingest/SKILL.md`**, **`skills/query/SKILL.md`**, **`skills/lint/SKILL.md`** — réduits à un Step 0 de dispatch. Les workflows complets ont migré dans les fichiers agents correspondants. Comportement externe inchangé.
+
+---
+
 ## [0.6.0] — 2026-04-24
 
 ### Added
