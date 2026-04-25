@@ -8,6 +8,10 @@ Each skill is a plain Markdown file (`SKILL.md`) with instructions the agent fol
 mnemo/
 ├── .claude-plugin/
 │   └── plugin.json        ← Claude Code marketplace manifest
+├── agents/                ← sub-agents dispatché par les skills lourds
+│   ├── ingestor.md        ← Opus — ingest complet + discuss before write
+│   ├── archivist.md       ← Sonnet — query + format adaptatif + file back
+│   └── linter.md          ← Opus — lint 3 passes + graph analytics
 ├── commands/mnemo/        ← slash-command stubs (one .md per skill)
 ├── skills/
 │   ├── init/
@@ -19,9 +23,9 @@ mnemo/
 │   │   └── codex.md       ← Codex extension (AGENTS.md stanza)
 │   ├── onboard/SKILL.md
 │   ├── schema/SKILL.md
-│   ├── ingest/SKILL.md
-│   ├── query/SKILL.md
-│   ├── lint/SKILL.md
+│   ├── ingest/SKILL.md    ← Step 0 dispatch → agents/ingestor.md
+│   ├── query/SKILL.md     ← Step 0 dispatch → agents/archivist.md
+│   ├── lint/SKILL.md      ← Step 0 dispatch → agents/linter.md
 │   ├── save/SKILL.md
 │   ├── mine/SKILL.md
 │   ├── graphify/SKILL.md
@@ -50,6 +54,45 @@ Each agent gets one extension file alongside the core skill. The core (`skills/i
 
 No changes to the core skill needed. Run `bash scripts/check_skill_invocations.sh` before opening a PR to verify no slash-command syntax leaked in.
 
+## Adding or modifying agents
+
+Les agents (`agents/*.md`) sont des specs self-contained lus par l'outil Agent de Claude Code. Ils ne dépendent d'aucun autre fichier à l'exécution.
+
+**Structure de fichier obligatoire :**
+
+```markdown
+---
+name: mnemo-<role>
+description: >
+  Une phrase sur ce que fait l'agent et quand il est dispatché.
+model: opus   # ou sonnet selon la charge
+allowed-tools: Read Write Edit Grep Glob Bash
+---
+
+## Inputs
+
+- `vault`: chemin du vault
+- <autres inputs transmis par le skill parent>
+
+---
+
+## Step 1 — ...
+## Step N — Report
+```
+
+**Conventions :**
+- `model: opus` pour les workflows lourds (ingest complet, lint, graph analytics)
+- `model: sonnet` pour les workflows de lecture/synthèse (query, save)
+- Chaque agent est self-contained — ne pas importer ni référencer le SKILL.md parent
+- Les inputs sont explicitement listés dans la section `## Inputs` du prompt de dispatch
+- Terminer par un step Report qui résume les actions effectuées
+
+**Mise à jour du skill parent :**
+Quand tu ajoutes ou modifies un agent, vérifier que le Step 0 dans le SKILL.md correspondant transmet bien tous les inputs nécessaires à l'agent.
+
+**Versioning :**
+Les fichiers agents ne portent pas de version individuelle. La version du plugin (`0.x.y`) couvre l'ensemble skills + agents.
+
 ## Skill authoring tips
 
 - Write explicit stop conditions. Agents follow instructions literally — vague wording leads to over-eager behaviour, like ingesting files twice.
@@ -73,7 +116,7 @@ mnemo follows [Semantic Versioning](https://semver.org/). The version lives in f
 - All `skills/*/SKILL.md` → `version:` frontmatter field
 - `CHANGELOG.md` → new section header
 
-Update all four when bumping. Agent extension files (`skills/init/*.md` other than `SKILL.md`) do not carry version numbers.
+Update all four when bumping. Agent extension files (`skills/init/*.md` other than `SKILL.md`) and agent files (`agents/*.md`) do not carry individual version numbers.
 
 ## License
 
