@@ -121,9 +121,9 @@ For better results, both `/mnemo:init` and `python3 scripts/init_mnemo.py` offer
 
 ```bash
 # with npm
-npm install -g qmd
-# or with Bun
-bun add -g qmd
+npm install -g @tobilu/qmd
+# or
+bun install -g @tobilu/qmd
 ```
 
 qmd is optional — BM25 remains available as fallback if qmd is unavailable or returns an error.
