@@ -116,7 +116,15 @@ mnemo follows [Semantic Versioning](https://semver.org/). The version lives in f
 - All `skills/*/SKILL.md` → `version:` frontmatter field
 - `CHANGELOG.md` → new section header
 
-Update all four when bumping. Agent extension files (`skills/init/*.md` other than `SKILL.md`) and agent files (`agents/*.md`) do not carry individual version numbers.
+Use the bump script to update all four atomically and create a git commit:
+
+```bash
+python3 scripts/bump_version.py 0.8.0          # bump + commit
+python3 scripts/bump_version.py 0.8.0 --tag     # bump + commit + git tag v0.8.0
+python3 scripts/bump_version.py 0.8.0 --tag --push  # also push the tag
+```
+
+The script inserts a placeholder section in `CHANGELOG.md` — fill in the release notes before pushing. Agent extension files (`skills/init/*.md` other than `SKILL.md`) and agent files (`agents/*.md`) do not carry individual version numbers.
 
 ## License
 
