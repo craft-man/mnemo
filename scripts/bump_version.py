@@ -108,7 +108,7 @@ def main() -> None:
     if old == new:
         sys.exit(f"error: already at version {new}")
 
-    print(f"Bumping {old} → {new}\n")
+    print(f"Bumping {old} -> {new}\n")
 
     changed: list[Path] = []
 
@@ -126,7 +126,7 @@ def main() -> None:
     changed.extend(skill_files)
 
     path = bump_changelog(new)
-    print(f"  {path.relative_to(ROOT)}  ← fill in the release notes")
+    print(f"  {path.relative_to(ROOT)}  (fill in the release notes)")
     changed.append(path)
 
     print()
