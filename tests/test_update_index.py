@@ -50,7 +50,7 @@ class TestEmptyVault(unittest.TestCase):
             vault = _make_vault(pathlib.Path(tmp))
             r = _run("--vault", str(vault))
             self.assertEqual(r.returncode, 0)
-            index = (vault / "wiki" / "index.md").read_text(encoding="utf-8")
+            index = (vault / "index.md").read_text(encoding="utf-8")
             self.assertIn("# Index", index)
 
 
@@ -60,7 +60,7 @@ class TestRegenerateFromFrontmatter(unittest.TestCase):
             vault = _make_vault(pathlib.Path(tmp), {"entities/tool-redis.md": SAMPLE_PAGE})
             r = _run("--vault", str(vault))
             self.assertEqual(r.returncode, 0)
-            index = (vault / "wiki" / "index.md").read_text(encoding="utf-8")
+            index = (vault / "index.md").read_text(encoding="utf-8")
             self.assertIn("Redis — In-Memory Store", index)
             self.assertIn("wiki/entities/tool-redis.md", index)
             self.assertIn("Fast key-value store", index)
@@ -70,7 +70,7 @@ class TestRegenerateFromFrontmatter(unittest.TestCase):
             vault = _make_vault(pathlib.Path(tmp), {"entities/tool-redis.md": SAMPLE_PAGE})
             r = _run("--vault", str(vault))
             self.assertEqual(r.returncode, 0)
-            index = (vault / "wiki" / "index.md").read_text(encoding="utf-8")
+            index = (vault / "index.md").read_text(encoding="utf-8")
             self.assertIn("upd 2026-04-20", index)
 
 
@@ -81,7 +81,7 @@ class TestTitleInference(unittest.TestCase):
             vault = _make_vault(pathlib.Path(tmp), {"concepts/my-concept.md": page})
             r = _run("--vault", str(vault))
             self.assertEqual(r.returncode, 0)
-            index = (vault / "wiki" / "index.md").read_text(encoding="utf-8")
+            index = (vault / "index.md").read_text(encoding="utf-8")
             self.assertIn("My Concept", index)
 
 
@@ -91,7 +91,7 @@ class TestExclusions(unittest.TestCase):
             vault = _make_vault(pathlib.Path(tmp), {"activity/2026-04-26.md": SAMPLE_PAGE})
             r = _run("--vault", str(vault))
             self.assertEqual(r.returncode, 0)
-            index = (vault / "wiki" / "index.md").read_text(encoding="utf-8")
+            index = (vault / "index.md").read_text(encoding="utf-8")
             self.assertNotIn("Redis", index)
 
     def test_excludes_indexes_dir(self):
@@ -99,7 +99,7 @@ class TestExclusions(unittest.TestCase):
             vault = _make_vault(pathlib.Path(tmp), {"indexes/entities.md": SAMPLE_PAGE})
             r = _run("--vault", str(vault))
             self.assertEqual(r.returncode, 0)
-            index = (vault / "wiki" / "index.md").read_text(encoding="utf-8")
+            index = (vault / "index.md").read_text(encoding="utf-8")
             self.assertNotIn("Redis", index)
 
     def test_excludes_index_md_itself(self):
@@ -115,10 +115,10 @@ class TestDryRun(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             vault = _make_vault(pathlib.Path(tmp), {"sources/foo.md": SAMPLE_PAGE})
             original = "# Index\n"
-            (vault / "wiki" / "index.md").write_text(original, encoding="utf-8")
+            (vault / "index.md").write_text(original, encoding="utf-8")
             r = _run("--vault", str(vault), "--dry-run")
             self.assertEqual(r.returncode, 0)
-            self.assertEqual((vault / "wiki" / "index.md").read_text(encoding="utf-8"), original)
+            self.assertEqual((vault / "index.md").read_text(encoding="utf-8"), original)
 
     def test_dry_run_prints_to_stdout(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -144,7 +144,7 @@ class TestShardingThreshold(unittest.TestCase):
     def test_sharding_at_150_pages(self):
         with tempfile.TemporaryDirectory() as tmp:
             vault = _make_vault(pathlib.Path(tmp))
-            for i in range(150):
+            for i in range(151):
                 cat = ["sources", "entities", "concepts", "synthesis"][i % 4]
                 content = f"---\ntitle: Page {i}\ncategory: {cat}\n---\n# Page {i}\n"
                 (vault / "wiki" / cat / f"page-{i}.md").write_text(content)
@@ -153,6 +153,8 @@ class TestShardingThreshold(unittest.TestCase):
             data = json.loads(r.stdout)
             self.assertTrue(data["sharded"])
             self.assertTrue((vault / "wiki" / "indexes" / "sources.md").exists())
+            index = (vault / "index.md").read_text(encoding="utf-8")
+            self.assertIn("wiki/indexes/sources.md", index)
 
 
 class TestVaultNotFound(unittest.TestCase):

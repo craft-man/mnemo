@@ -155,7 +155,7 @@ def main() -> None:
 
     pages = scan_wiki(vault)
     total = sum(len(v) for v in pages.values())
-    sharded = total >= 150
+    sharded = total > 150
 
     content = render_sharded_master(pages) if sharded else render_index(pages)
     summary = {
@@ -175,7 +175,7 @@ def main() -> None:
             print(content)
         return
 
-    index_path = vault / "wiki" / "index.md"
+    index_path = vault / "index.md"
     try:
         index_path.write_text(content, encoding="utf-8")
         if sharded:
