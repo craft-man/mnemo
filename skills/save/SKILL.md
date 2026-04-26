@@ -105,9 +105,10 @@ If found at `<script_path>`, run:
 python3 <script_path> --vault .mnemo/<project-name>
 ```
 If exit 0 — proceed to Step 8.
-If exit non-zero — emit `⚠ fast path failed (exit <code>) — falling back to LLM.` then apply LLM fallback:
+If exit non-zero — emit `⚠ fast path failed (exit <code>) — falling back to LLM.` then apply LLM fallback.
+If script not found → apply LLM fallback below.
 
-LLM fallback: count total pages in `.mnemo/<project-name>/wiki/**/*.md`.
+LLM fallback: if the file is new (not an overwrite), count total pages in `.mnemo/<project-name>/wiki/**/*.md`.
 - If total < 150: append to `.mnemo/<project-name>/index.md` under the `## <Category>` heading.
 - If total >= 150: append to `.mnemo/<project-name>/wiki/indexes/<category>.md` (create if needed). Ensure `index.md` links to it: `- [<Category> Index](wiki/indexes/<category>.md)`.
 
@@ -119,7 +120,8 @@ If found at `<script_path>`, run:
 python3 <script_path> --vault .mnemo/<project-name> --file wiki/<category>/<slug>.md --op generated
 ```
 If exit 0 — proceed to Step 9.
-If exit non-zero — emit `⚠ fast path failed (exit <code>) — falling back to LLM.` then apply LLM fallback:
+If exit non-zero — emit `⚠ fast path failed (exit <code>) — falling back to LLM.` then apply LLM fallback.
+If script not found → apply LLM fallback below.
 
 LLM fallback: append to `.mnemo/<project-name>/log.md`:
 ```

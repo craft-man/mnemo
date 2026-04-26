@@ -248,7 +248,8 @@ If found at `<script_path>`, run:
 python3 <script_path> --vault {vault} --op lint
 ```
 If exit 0 — done.
-If exit non-zero — emit `⚠ fast path failed (exit <code>) — falling back to LLM.` then apply LLM fallback:
+If exit non-zero — emit `⚠ fast path failed (exit <code>) — falling back to LLM.` then apply LLM fallback.
+If script not found → apply LLM fallback below.
 
 LLM fallback — update `{vault}/log.md`:
 - If `# Last lint: ...` exists: replace with `# Last lint: <UTC ISO timestamp>`

@@ -273,7 +273,8 @@ If found at `<script_path>`, run:
 python3 <script_path> --vault {vault}
 ```
 If exit 0 — proceed to Step 12.
-If exit non-zero — emit `⚠ fast path failed (exit <code>) — falling back to LLM.` then apply LLM fallback:
+If exit non-zero — emit `⚠ fast path failed (exit <code>) — falling back to LLM.` then apply LLM fallback.
+If script not found → apply LLM fallback below.
 
 LLM fallback — for each new page:
 - Total pages in `wiki/**/*.md` < 150: add to `index.md` under the correct category (`## Sources`, `## Entities`, `## Concepts`, `## Synthesis`).
@@ -287,7 +288,8 @@ If found at `<script_path>`, run:
 python3 <script_path> --vault {vault} --file raw/<original_filename> --op ingest
 ```
 If exit 0 — proceed to Step 12a.
-If exit non-zero — emit `⚠ fast path failed (exit <code>) — falling back to LLM.` then apply LLM fallback:
+If exit non-zero — emit `⚠ fast path failed (exit <code>) — falling back to LLM.` then apply LLM fallback.
+If script not found → apply LLM fallback below.
 
 LLM fallback — add to `{vault}/log.md`:
 ```
