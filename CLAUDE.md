@@ -20,6 +20,7 @@ This document is your operating contract — follow it strictly.
 | `/mnemo:stats` | Display size metrics and scaling thresholds |
 | `/mnemo:mine` | Extract knowledge from the current session worth persisting |
 | `/mnemo:graphify` | Map the project codebase into a queryable knowledge graph via graphify |
+| `/mnemo:log` | Query the audit log (log.md) — filter by op, date range, or recency |
 
 ---
 

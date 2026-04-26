@@ -139,13 +139,14 @@ Slash commands work in any agent. Natural language alternatives are shown in com
 
 ```
 /mnemo:init                          # "initialize mnemo" — guides qmd, graphify, and schema setup
-# drop files into .mnemo/raw/
+# drop files into .mnemo/<project-name>/raw/
 /mnemo:ingest                        # "ingest files in raw/"
 /mnemo:query database indexing       # "what does my wiki say about database indexing?"
 /mnemo:mine                          # "remember this" — extract knowledge from current session
 /mnemo:save B-tree vs Hash Index     # "save this as a wiki page titled B-tree vs Hash Index"
 /mnemo:lint                          # "audit my wiki"
 /mnemo:stats                         # "show wiki stats"
+/mnemo:log                           # "show the audit log" — filter by op, date, or last N entries
 ```
 
 No agent? Bootstrap with the standalone script:
@@ -183,7 +184,7 @@ Pick which tiers to activate (project, global, or both) and whether to enable **
 
 ### `/mnemo:onboard`
 
-Creates or updates your global user profile at `~/.mnemo/wiki/entities/person-user.md`. Run automatically on first `/mnemo:init` — skipped silently if a profile already exists. Run directly to update it.
+Creates or updates your global user profile at `~/.mnemo/<project-name>/wiki/entities/person-user.md`. Run automatically on first `/mnemo:init` — skipped silently if a profile already exists. Run directly to update it.
 
 A short interview covers your role (solo dev, team lead, researcher…), technical level, preferred language for notes and responses, main domains of interest, knowledge base goal, and response style preference. Answers are inferred from the conversation where possible (e.g. language) — you only confirm rather than type them.
 
@@ -252,13 +253,17 @@ Maps the project codebase into a knowledge graph using [graphify](https://github
 - Reads `graphify-out/graph.json` and converts each node into a mnemo wiki page with frontmatter and wikilinks
 - Routes nodes to the right category: code nodes (`class`, `module`, `file`) → `entities/`, conceptual nodes (`pattern`, `technique`) → `concepts/`
 - Converts `GRAPH_REPORT.md` into a synthesis page at `wiki/synthesis/codebase-graph-report.md`
-- Persists `graph.json` to `.mnemo/graph.json` — re-runs are incremental, only changed nodes get updated
+- Persists `graph.json` to `.mnemo/<project-name>/graph.json` — re-runs are incremental, only changed nodes get updated
 
 The point: Claude stops re-reading your source files every session and queries the wiki instead. Persistent across sessions, queryable via `/mnemo:query`.
 
 ### `/mnemo:stats`
 
 Displays page counts per category, total lines, top 5 largest pages, and index scaling status.
+
+### `/mnemo:log`
+
+Queries `log.md` in natural language. Displays ingest, skipped, generated, and lint entries as a sorted markdown table. Supports filtering by operation type, recency (`last N`), and date range (`since YYYY-MM-DD` or `since Monday`). Read-only — never writes to `log.md`.
 
 ---
 
@@ -278,11 +283,11 @@ Agents are defined in the `agents/` directory at the root of the plugin. Each fi
 
 ## Using mnemo with Obsidian
 
-mnemo's wiki format works directly in Obsidian — point a vault at `.mnemo/wiki/` (or `~/.mnemo/wiki/` for the global tier). Wikilinks resolve in the graph view, YAML frontmatter shows up in the properties panel, and the bidirectional links from `/mnemo:ingest` appear in the backlinks panel without any setup.
+mnemo's wiki format works directly in Obsidian — point a vault at `.mnemo/<project-name>/wiki/` (or `~/.mnemo/wiki/` for the global tier). Wikilinks resolve in the graph view, YAML frontmatter shows up in the properties panel, and the bidirectional links from `/mnemo:ingest` appear in the backlinks panel without any setup.
 
 ### Obsidian Web Clipper
 
-[Obsidian Web Clipper](https://obsidian.md/clipper) lets you clip web pages and articles directly from your browser. Configure it to save clips into `.mnemo/raw/`, then run `/mnemo:ingest` — mnemo synthesizes each clip into a structured wiki page, extracts entities and concepts, and links it into the graph.
+[Obsidian Web Clipper](https://obsidian.md/clipper) lets you clip web pages and articles directly from your browser. Configure it to save clips into `.mnemo/<project-name>/raw/`, then run `/mnemo:ingest` — mnemo synthesizes each clip into a structured wiki page, extracts entities and concepts, and links it into the graph.
 
 ---
 

@@ -34,6 +34,7 @@ Stop here.
 └── <project-name>/             ← vault root (open this folder in Obsidian)
     ├── raw/                    ← source files (immutable input)
     ├── wiki/
+    │   ├── activity/           ← session activity log per day
     │   ├── sources/            ← one page per ingested source
     │   ├── entities/           ← people, tools, projects, systems
     │   ├── concepts/           ← ideas, patterns, techniques
