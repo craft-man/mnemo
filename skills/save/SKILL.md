@@ -97,12 +97,31 @@ updated: <YYYY-MM-DD>
 
 5. Report enriched pages: list names (or "none enriched").
 
-**7. Update index** — if the file is new (not an overwrite):
-- Count total pages in `.mnemo/<project-name>/wiki/**/*.md`.
-- If total < 150: append to `.mnemo/<project-name>/index.md` under the `## <Category>` heading (capitalize the category name).
+**7. Update index**
+
+Fast path: use `Glob('**/mnemo/scripts/update_index.py')` to locate the script.
+If found at `<script_path>`, run:
+```
+python3 <script_path> --vault .mnemo/<project-name>
+```
+If exit 0 — proceed to Step 8.
+If exit non-zero — emit `⚠ fast path failed (exit <code>) — falling back to LLM.` then apply LLM fallback:
+
+LLM fallback: count total pages in `.mnemo/<project-name>/wiki/**/*.md`.
+- If total < 150: append to `.mnemo/<project-name>/index.md` under the `## <Category>` heading.
 - If total >= 150: append to `.mnemo/<project-name>/wiki/indexes/<category>.md` (create if needed). Ensure `index.md` links to it: `- [<Category> Index](wiki/indexes/<category>.md)`.
 
-**8. Update log** — append to `.mnemo/<project-name>/log.md`:
+**8. Update log**
+
+Fast path: use `Glob('**/mnemo/scripts/update_log.py')` to locate the script.
+If found at `<script_path>`, run:
+```
+python3 <script_path> --vault .mnemo/<project-name> --file wiki/<category>/<slug>.md --op generated
+```
+If exit 0 — proceed to Step 9.
+If exit non-zero — emit `⚠ fast path failed (exit <code>) — falling back to LLM.` then apply LLM fallback:
+
+LLM fallback: append to `.mnemo/<project-name>/log.md`:
 ```
 - wiki/<category>/<slug>.md | <UTC ISO timestamp> | generated
 ```
