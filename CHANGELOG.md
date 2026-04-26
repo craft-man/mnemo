@@ -10,9 +10,9 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ### Added
 
-- **`scripts/update_log.py`** — fast path script for deterministic log writes. Appends 3-column entries (`file | timestamp | op`) to `log.md`; special `lint` op updates the `# Last lint:` header. Validates `--file` against pipe and newline injection. Stdlib only, TDD.
-- **`scripts/update_index.py`** — fast path script for index regeneration. Rebuilds `index.md` from YAML frontmatter of every wiki page; shards into `wiki/indexes/<category>.md` when page count exceeds 150. Supports `--dry-run` and `--json`. Category whitelisted against path traversal. Stdlib only, TDD.
-- **Fast path Step 0** added to `/mnemo:init`, `/mnemo:save` (Steps 7+8), `agents/ingestor.md` (Steps 11+12), `agents/linter.md` (Step 13). Each fast path: tries the Python script → exit 0 skips LLM → exit non-zero emits non-blocking warning and falls back to LLM → script not found falls back to LLM.
+- **`scripts/update_log.py`** — fast path script for deterministic log writes. Appends 3-column entries (`file | timestamp | op`) to `log.md`; special `lint` op updates the `# Last lint:` header. Validates `--file` against pipe and newline injection.
+- **`scripts/update_index.py`** — fast path script for index regeneration. Rebuilds `index.md` from YAML frontmatter of every wiki page; shards into `wiki/indexes/<category>.md` when page count exceeds 150. Supports `--dry-run` and `--json`. Category whitelisted against path traversal.
+- **Fast path Step 0** added to `/mnemo:init`, `/mnemo:save`, `agents/ingestor.md`, `agents/linter.md`. Each fast path: tries the Python script → exit 0 skips LLM → exit non-zero emits non-blocking warning and falls back to LLM → script not found falls back to LLM.
 
 ### Changed
 
