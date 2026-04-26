@@ -10,11 +10,8 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ### Added
 
--
-
-### Changed
-
--
+- **`/mnemo:log`** — new inline skill to query `log.md` in natural language. Displays `ingest`, `skipped`, `generated`, and `lint` entries as a markdown table sorted newest first. Supports three filters: operation type (`ingest`, `skipped`, `generated`, `lint`), date range (`since YYYY-MM-DD`, `since Monday`, `yesterday`), and recency (`last N`). Read-only — never writes to `log.md`.
+- **`scripts/bump_version.py`** — atomic version bump script. Updates `.claude-plugin/plugin.json`, the README badge, all `skills/*/SKILL.md` frontmatter, and `CHANGELOG.md` in a single commit. Supports `--tag` (creates `vX.Y.Z`) and `--push` (pushes the tag to origin).
 
 ---
 
