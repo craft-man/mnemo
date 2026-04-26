@@ -157,6 +157,22 @@ class TestShardingThreshold(unittest.TestCase):
             self.assertIn("wiki/indexes/sources.md", index)
 
 
+class TestPathTraversalPrevention(unittest.TestCase):
+    def test_traversal_category_does_not_write_outside_indexes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault = _make_vault(pathlib.Path(tmp))
+            # Create 151 pages to trigger sharding, one with a traversal category
+            for i in range(150):
+                cat = ["sources", "entities", "concepts", "synthesis"][i % 4]
+                content = f"---\ntitle: Page {i}\ncategory: {cat}\n---\n# Page {i}\n"
+                (vault / "wiki" / cat / f"page-{i}.md").write_text(content)
+            evil_page = "---\ntitle: Evil\ncategory: ../evil\n---\n# Evil\n"
+            (vault / "wiki" / "sources" / "evil.md").write_text(evil_page)
+            r = _run("--vault", str(vault))
+            self.assertEqual(r.returncode, 0)
+            self.assertFalse((vault / "wiki" / "evil.md").exists())
+
+
 class TestVaultNotFound(unittest.TestCase):
     def test_exit_1_when_vault_missing(self):
         r = _run("--vault", "/nonexistent/path")

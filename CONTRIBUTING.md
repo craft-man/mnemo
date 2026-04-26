@@ -38,6 +38,7 @@ mnemo/
 │   └── check_skill_invocations.sh  ← CI guard: no slash-command syntax in SKILL.md
 ├── tests/
 │   ├── test_init_mnemo.py
+│   ├── test_update_index.py
 │   ├── test_update_log.py
 │   └── test_wiki_lint.py
 └── CLAUDE.md              ← agent constitution (loaded in every session)

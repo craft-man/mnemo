@@ -28,19 +28,18 @@ If found at `<script_path>`, run:
 ```
 python3 <script_path>
 ```
-(passing the current working directory implicitly, as `init_mnemo.py` defaults to `Path.cwd()`).
 If exit 0 — confirm to the user that the vault was initialized, then **stop**.
 If exit non-zero — emit `⚠ fast path failed (exit <code>) — falling back to LLM.` then continue with the steps below.
 If Python unavailable or script not found — continue with the steps below.
 
-**0. Determine vault root** — `<project-name>` = current directory name (`Path.cwd().name`). The local vault root is `.mnemo/<project-name>/`.
+**1. Determine vault root** — `<project-name>` = current directory name (`Path.cwd().name`). The local vault root is `.mnemo/<project-name>/`.
 
-**1. Check for existing init** — if `.mnemo/<project-name>/wiki/sources/` already exists, warn:
+**2. Check for existing init** — if `.mnemo/<project-name>/wiki/sources/` already exists, warn:
 > "Knowledge base already initialized. Run `/mnemo:lint` to check its health."
 
 Stop here.
 
-**2. Create directory structure:**
+**3. Create directory structure:**
 ```
 .mnemo/
 └── <project-name>/             ← vault root (open this folder in Obsidian)
@@ -121,7 +120,7 @@ Invoke the onboard skill by reading `skills/onboard/SKILL.md` and following its 
 - If no profile exists: run the full interview to create one.
 - If a profile already exists: skip silently (no prompt to the user).
 
-**6. Semantic search setup (optional)** — ask the user:
+**7. Semantic search setup (optional)** — ask the user:
 
 > "Would you like to enable semantic search via **qmd**? It adds hybrid BM25 + vector search locally — no API key required. Needs: Node.js ≥ 22 (or Bun ≥ 1.0) + ~2 GB disk for models (downloaded once on first use). [y]es / [n]o"
 
@@ -162,13 +161,13 @@ Write `.mnemo/<project-name>/config.json`:
 }
 ```
 
-**7. Report:**
+**8. Report:**
 > "Knowledge base initialized at `.mnemo/<project-name>/`.
 > Search backend: **<qmd | BM25>**.
 > Next: drop files into `.mnemo/<project-name>/raw/` and run `/mnemo:ingest`."
 > (If schema was not defined in step 4, add: "Run `/mnemo:schema` to define your domain taxonomy first.")
 
-**9. Graphify setup (optional)** — ask the user:
+**10. Graphify setup (optional)** — ask the user:
 
 > "Want to map your codebase with **graphify**? It builds a persistent knowledge graph so I can answer questions about your project without re-reading source files on every session. [y]es / [n]o"
 

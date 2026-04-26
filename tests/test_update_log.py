@@ -66,6 +66,22 @@ class TestTimestampFormat(unittest.TestCase):
             self.assertRegex(log, r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\+00:00")
 
 
+class TestFileValidation(unittest.TestCase):
+    def test_exit_1_on_pipe_in_file(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault = _make_vault(pathlib.Path(tmp))
+            r = _run("--vault", str(vault), "--file", "wiki/foo.md | bad", "--op", "ingest")
+            self.assertEqual(r.returncode, 1)
+            self.assertIn("error", r.stderr)
+
+    def test_exit_1_on_newline_in_file(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault = _make_vault(pathlib.Path(tmp))
+            r = _run("--vault", str(vault), "--file", "wiki/foo.md\nbad", "--op", "ingest")
+            self.assertEqual(r.returncode, 1)
+            self.assertIn("error", r.stderr)
+
+
 class TestInvalidOp(unittest.TestCase):
     def test_exit_1_on_invalid_op(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -159,7 +159,7 @@ Body text referencing [[Related Concept]] and [[Entity Name]].
 | `synthesis/` filename | `kebab-case.md` | `btree-vs-hash-comparison.md` |
 | `activity/` filename | `YYYY-MM-DD.md` | `2026-04-24.md` |
 | Page title (H1) | Title Case | `Redis — In-Memory Data Store` |
-| Index entry | `- [Title](wiki/<subdir>/file.md)` | `- [Redis](wiki/entities/tool-redis.md)` |
+| Index entry | `- [Title](wiki/<subdir>/file.md) — summary _(upd YYYY-MM-DD)_` | `- [Redis](wiki/entities/tool-redis.md) — Fast key-value store _(upd 2026-04-20)_` |
 | Log entry | `- wiki/path.md \| ISO timestamp \| op` | `- wiki/sources/foo.md \| 2026-04-22T14:00:00+00:00 \| ingest` |
 
 ---
