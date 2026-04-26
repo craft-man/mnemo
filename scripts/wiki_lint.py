@@ -119,12 +119,11 @@ def main() -> None:
     log = root / 'log.md'
     if log.exists():
         for line in log.read_text(encoding='utf-8').splitlines():
-            # Skip [generated] entries — they reference wiki pages, not raw files
-            if '[generated]' in line:
-                continue
-            # Format: "- filename.ext | ISO-timestamp"
-            if m := re.match(r'-\s+(\S+)\s+\|', line):
-                processed.add(m.group(1))
+            # Format: "- <file> | <ts> | <op>"
+            if line.startswith('- '):
+                parts = [p.strip() for p in line[2:].split('|')]
+                if len(parts) == 3 and parts[2] == 'ingest':
+                    processed.add(parts[0])
 
     # 5. Raw files
     raw_dir = root / 'raw'

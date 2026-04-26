@@ -48,7 +48,7 @@ def update_lint_header(log_path: pathlib.Path, ts: str) -> None:
 def main() -> None:
     p = argparse.ArgumentParser(description="Append a log entry to log.md.")
     p.add_argument("--vault", required=True, help="Vault root directory")
-    p.add_argument("--file", required=True, help="Wiki file path (relative to vault)")
+    p.add_argument("--file", required=False, default="", help="Wiki file path (relative to vault)")
     p.add_argument("--op", required=True, help=f"Operation type: {', '.join(sorted(VALID_OPS))}")
     p.add_argument("--timestamp", default=None, help="ISO 8601 UTC timestamp (default: now)")
     args = p.parse_args()
@@ -63,6 +63,10 @@ def main() -> None:
             f"[error] invalid op '{args.op}'. Valid: {', '.join(sorted(VALID_OPS))}",
             file=sys.stderr,
         )
+        sys.exit(1)
+
+    if args.op != "lint" and not args.file:
+        print("[error] --file is required for non-lint ops", file=sys.stderr)
         sys.exit(1)
 
     ts = args.timestamp or _now_utc()

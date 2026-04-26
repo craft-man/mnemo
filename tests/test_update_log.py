@@ -39,7 +39,8 @@ class TestAppendPreservesExisting(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             vault = _make_vault(pathlib.Path(tmp))
             (vault / "log.md").write_text("# Log\n- old | 2026-01-01T00:00:00+00:00 | ingest\n")
-            _run("--vault", str(vault), "--file", "wiki/sources/bar.md", "--op", "generated")
+            r = _run("--vault", str(vault), "--file", "wiki/sources/bar.md", "--op", "generated")
+            self.assertEqual(r.returncode, 0)
             log = (vault / "log.md").read_text()
             self.assertIn("old", log)
             self.assertIn("bar.md", log)
@@ -49,8 +50,9 @@ class TestTimestampFormat(unittest.TestCase):
     def test_custom_timestamp_used(self):
         with tempfile.TemporaryDirectory() as tmp:
             vault = _make_vault(pathlib.Path(tmp))
-            _run("--vault", str(vault), "--file", "wiki/x.md", "--op", "init",
-                 "--timestamp", "2026-04-26T10:00:00+00:00")
+            r = _run("--vault", str(vault), "--file", "wiki/x.md", "--op", "init",
+                     "--timestamp", "2026-04-26T10:00:00+00:00")
+            self.assertEqual(r.returncode, 0)
             log = (vault / "log.md").read_text()
             self.assertIn("2026-04-26T10:00:00+00:00", log)
 
@@ -58,7 +60,8 @@ class TestTimestampFormat(unittest.TestCase):
         import re
         with tempfile.TemporaryDirectory() as tmp:
             vault = _make_vault(pathlib.Path(tmp))
-            _run("--vault", str(vault), "--file", "wiki/x.md", "--op", "ingest")
+            r = _run("--vault", str(vault), "--file", "wiki/x.md", "--op", "ingest")
+            self.assertEqual(r.returncode, 0)
             log = (vault / "log.md").read_text()
             self.assertRegex(log, r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\+00:00")
 
@@ -83,8 +86,9 @@ class TestLintHeader(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             vault = _make_vault(pathlib.Path(tmp))
             (vault / "log.md").write_text("# Log\n")
-            _run("--vault", str(vault), "--file", "", "--op", "lint",
-                 "--timestamp", "2026-04-26T12:00:00+00:00")
+            r = _run("--vault", str(vault), "--op", "lint",
+                     "--timestamp", "2026-04-26T12:00:00+00:00")
+            self.assertEqual(r.returncode, 0)
             log = (vault / "log.md").read_text()
             self.assertIn("# Last lint: 2026-04-26T12:00:00+00:00", log)
 
@@ -92,8 +96,9 @@ class TestLintHeader(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             vault = _make_vault(pathlib.Path(tmp))
             (vault / "log.md").write_text("# Last lint: 2026-01-01T00:00:00+00:00\n# Log\n")
-            _run("--vault", str(vault), "--file", "", "--op", "lint",
-                 "--timestamp", "2026-04-26T12:00:00+00:00")
+            r = _run("--vault", str(vault), "--op", "lint",
+                     "--timestamp", "2026-04-26T12:00:00+00:00")
+            self.assertEqual(r.returncode, 0)
             log = (vault / "log.md").read_text()
             self.assertIn("2026-04-26T12:00:00+00:00", log)
             self.assertNotIn("2026-01-01", log)

@@ -160,7 +160,7 @@ Body text referencing [[Related Concept]] and [[Entity Name]].
 | `activity/` filename | `YYYY-MM-DD.md` | `2026-04-24.md` |
 | Page title (H1) | Title Case | `Redis — In-Memory Data Store` |
 | Index entry | `- [Title](wiki/<subdir>/file.md)` | `- [Redis](wiki/entities/tool-redis.md)` |
-| Log entry | `- filename \| ISO timestamp` | `- notes.md \| 2026-04-22T14:00:00+00:00` |
+| Log entry | `- wiki/path.md \| ISO timestamp \| op` | `- wiki/sources/foo.md \| 2026-04-22T14:00:00+00:00 \| ingest` |
 
 ---
 
