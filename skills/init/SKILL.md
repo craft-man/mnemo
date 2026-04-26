@@ -21,6 +21,18 @@ Initialize `.mnemo/` with the full taxonomy structure.
 
 ## Steps
 
+## Step 0 — Python fast path (optional)
+
+Fast path: use `Glob('**/mnemo/scripts/init_mnemo.py')` to locate the script.
+If found at `<script_path>`, run:
+```
+python3 <script_path>
+```
+(passing the current working directory implicitly, as `init_mnemo.py` defaults to `Path.cwd()`).
+If exit 0 — confirm to the user that the vault was initialized, then **stop**.
+If exit non-zero — emit `⚠ fast path failed (exit <code>) — falling back to LLM.` then continue with the steps below.
+If Python unavailable or script not found — continue with the steps below.
+
 **0. Determine vault root** — `<project-name>` = current directory name (`Path.cwd().name`). The local vault root is `.mnemo/<project-name>/`.
 
 **1. Check for existing init** — if `.mnemo/<project-name>/wiki/sources/` already exists, warn:
