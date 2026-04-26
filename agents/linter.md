@@ -242,6 +242,14 @@ After all issues:
 
 ## Step 13 — Record lint timestamp
 
-Update `{vault}/log.md`:
+Fast path: use `Glob('**/mnemo/scripts/update_log.py')` to locate the script.
+If found at `<script_path>`, run:
+```
+python3 <script_path> --vault {vault} --op lint
+```
+If exit 0 — done.
+If exit non-zero — emit `⚠ fast path failed (exit <code>) — falling back to LLM.` then apply LLM fallback:
+
+LLM fallback — update `{vault}/log.md`:
 - If `# Last lint: ...` exists: replace with `# Last lint: <UTC ISO timestamp>`
 - Otherwise: add as the first line of `{vault}/log.md`
