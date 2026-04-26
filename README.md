@@ -112,6 +112,21 @@ Both paths let you configure **qmd** for hybrid semantic search and choose betwe
 
 ---
 
+## Utility scripts
+
+Deterministic operations are handled by Python scripts (3.10+, no external dependencies). Skills invoke them automatically as a fast path before falling back to LLM.
+
+| Script | Purpose | CLI |
+|---|---|---|
+| `scripts/init_mnemo.py` | Bootstrap vault structure | `python3 scripts/init_mnemo.py` |
+| `scripts/update_log.py` | Append entry to `log.md` | `python3 scripts/update_log.py --vault <path> --file <slug> --op <op>` |
+| `scripts/update_index.py` | Regenerate `index.md` from frontmatter | `python3 scripts/update_index.py --vault <path> [--dry-run] [--json]` |
+| `scripts/wiki_search.py` | BM25 search across wiki pages | `python3 scripts/wiki_search.py <mnemo_dir> <query>` |
+| `scripts/wiki_stats.py` | Size metrics and scaling status | `python3 scripts/wiki_stats.py <mnemo_dir>` |
+| `scripts/wiki_lint.py` | Structural audit of the wiki | `python3 scripts/wiki_lint.py <mnemo_dir>` |
+
+---
+
 ## Search backends
 
 By default mnemo uses **BM25** — no extra dependencies, works out of the box.

@@ -33,11 +33,34 @@ mnemo/
 │   └── references/        ← contributor and integration docs
 ├── scripts/
 │   ├── init_mnemo.py      ← standalone bootstrap (no agent required)
+│   ├── update_log.py      ← fast path: append entries to log.md
+│   ├── update_index.py    ← fast path: regenerate index.md from frontmatter
 │   └── check_skill_invocations.sh  ← CI guard: no slash-command syntax in SKILL.md
 ├── tests/
-│   └── test_init_mnemo.py
+│   ├── test_init_mnemo.py
+│   ├── test_update_log.py
+│   └── test_wiki_lint.py
 └── CLAUDE.md              ← agent constitution (loaded in every session)
 ```
+
+## Fast path pattern
+
+Skills and agents invoke Python scripts as a "Step 0" before their LLM logic. The pattern:
+
+```
+Fast path: use `Glob('**/mnemo/scripts/<script>.py')` to locate the script.
+If found, run: `python3 <script_path> --vault <vault> [args]`
+If exit 0 → skip LLM steps.
+If exit non-zero → emit `⚠ fast path failed (exit <code>) — falling back to LLM.` and continue.
+If script not found → apply LLM fallback.
+```
+
+**Rules for adding a new fast path script:**
+- Stdlib only — no external dependencies
+- Exit 0 = success, exit 1 = error (print to stderr)
+- Must have a corresponding test file in `tests/test_<script_name>.py`
+- Follow naming convention: `verb_noun.py` (e.g. `update_log.py`, `update_index.py`)
+- Test with `python -m pytest tests/test_<script_name>.py -v` before opening a PR
 
 ## PRs welcome
 
