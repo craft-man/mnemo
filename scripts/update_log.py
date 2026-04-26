@@ -69,6 +69,10 @@ def main() -> None:
         print("[error] --file is required for non-lint ops", file=sys.stderr)
         sys.exit(1)
 
+    if args.op != "lint" and ("|" in args.file or "\n" in args.file):
+        print("[error] --file must not contain '|' or newline characters", file=sys.stderr)
+        sys.exit(1)
+
     ts = args.timestamp or _now_utc()
     log_path = vault / "log.md"
 

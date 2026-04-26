@@ -182,7 +182,7 @@ def main() -> None:
             indexes_dir = vault / "wiki" / "indexes"
             indexes_dir.mkdir(exist_ok=True)
             for cat, entries in pages.items():
-                if entries:
+                if entries and cat in set(CATEGORY_ORDER):
                     (indexes_dir / f"{cat}.md").write_text(render_shard(entries, cat), encoding="utf-8")
     except OSError as e:
         msg = str(e)
