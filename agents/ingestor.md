@@ -267,15 +267,29 @@ After each page written:
 
 ## Step 11 — Update index
 
-For each new page:
-- Total pages in `wiki/**/*.md` < 150: add to `index.md` under the correct
-  category (`## Sources`, `## Entities`, `## Concepts`, `## Synthesis`).
-- ≥ 150: add to `wiki/indexes/<category>.md`. Ensure `index.md`
-  points to the shards.
+Fast path: use `Glob('**/mnemo/scripts/update_index.py')` to locate the script.
+If found at `<script_path>`, run:
+```
+python3 <script_path> --vault {vault}
+```
+If exit 0 — proceed to Step 12.
+If exit non-zero — emit `⚠ fast path failed (exit <code>) — falling back to LLM.` then apply LLM fallback:
+
+LLM fallback — for each new page:
+- Total pages in `wiki/**/*.md` < 150: add to `index.md` under the correct category (`## Sources`, `## Entities`, `## Concepts`, `## Synthesis`).
+- ≥ 150: add to `wiki/indexes/<category>.md`. Ensure `index.md` points to the shards.
 
 ## Step 12 — Update log
 
-Add to `{vault}/log.md`:
+Fast path: use `Glob('**/mnemo/scripts/update_log.py')` to locate the script.
+If found at `<script_path>`, run:
+```
+python3 <script_path> --vault {vault} --file raw/<original_filename> --op ingest
+```
+If exit 0 — proceed to Step 12a.
+If exit non-zero — emit `⚠ fast path failed (exit <code>) — falling back to LLM.` then apply LLM fallback:
+
+LLM fallback — add to `{vault}/log.md`:
 ```
 - raw/<original_filename> | <UTC ISO timestamp> | ingest
 ```
