@@ -3,7 +3,7 @@
 </p>
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.11.0-blue)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.12.0-blue)](CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
@@ -14,7 +14,7 @@ Named after [Mnemosyne](https://en.wikipedia.org/wiki/Mnemosyne), the Greek godd
 If this saves you time, [![GitHub stars](https://img.shields.io/github/stars/craft-man/mnemo?style=social)](https://github.com/craft-man/mnemo) helps others find it.
 
 > [!WARNING]
-> This plugin is in beta. Core skills run on Claude Code, OpenCode, Gemini CLI, Cursor, Codex, and any agentskills.io-compatible agent. Heavy workflows use native sub-agents when the host supports delegation, and otherwise fall back to inline execution. Some optional features (Stop hook, CLAUDE.md wiring) are Claude Code-only and activate only when running on that platform. Thanks for your patience! Contributions welcome.
+> This plugin is in beta. Core skills run on Claude Code, OpenCode, Gemini CLI, Cursor, Codex, and any agentskills.io-compatible agent. Heavy workflows use native sub-agents when the host supports delegation, and otherwise fall back to inline execution. Session memory wiring and session-end reminders are host-dependent: mnemo uses the current tool's project memory file and hook/reminder system when available, and falls back to best-effort local instructions otherwise. Thanks for your patience! Contributions welcome.
 
 Most AI tools re-derive answers from your raw files on every query. mnemo builds a persistent wiki instead: your agent reads your sources once, synthesizes structured pages, and cross-references them permanently. The longer you use it, the richer the graph gets.
 
@@ -36,29 +36,34 @@ The difference compounds over time. At 5 sources it feels similar. At 50, the wi
 
 ## What it does
 
-mnemo gives your agent a two-tier knowledge base:
+mnemo gives your agent a two-tier memory system:
 
-- **Project** (`.mnemo/<project-name>/`) — knowledge scoped to the current project, also the Obsidian vault root
-- **Global** (`~/.mnemo/`) — knowledge shared across all projects
+- **Project knowledge base** (`.mnemo/<project-name>/`) — sources, entities, concepts, syntheses, schema, and audit log for the current project
+- **Global profile** (`~/.mnemo/`) — persistent user profile and cross-project memory
+- **Codebase graph runtime** (`graphify-out/`, optional) — graphify's native code-structure artifacts for fast codebase orientation
 
-Each tier is a taxonomy-based wiki:
+The project tier is a taxonomy-based wiki:
 
 ```
 .mnemo/
-└── <project-name>/   ← vault root (open this in Obsidian — displays the project name)
+└── <project-name>/
     ├── raw/          ← drop your source files here (immutable input)
     ├── wiki/
     │   ├── activity/ ← session activity log per day
     │   ├── sources/  ← one synthesized page per ingested source
     │   ├── entities/ ← people, tools, projects, systems
     │   ├── concepts/ ← patterns, techniques, ideas
-    │   └── synthesis/← cross-source analyses and comparisons
+    │   ├── synthesis/← cross-source analyses and comparisons
+    │   └── indexes/  ← index shards when the wiki grows large
     ├── index.md      ← categorized table of contents
-    ├── log.md        ← audit trail (prevents duplicate processing)
-    └── SCHEMA.md     ← domain conventions (edit per project)
+    ├── log.md        ← audit trail
+    ├── SCHEMA.md     ← domain conventions (edit per project)
+    └── config.json   ← search backend configuration
 ```
 
-mnemo exposes ten skills that work with any [agentskills.io](https://agentskills.io)-compatible agent — no server, no binary, no dependencies.
+`graphify-out/` is intentionally separate from `.mnemo/`: graphify owns codebase analysis, cache, and structured graph artifacts; mnemo owns the knowledge base, profile, and durable notes.
+
+mnemo exposes its skills as portable `SKILL.md` workflows for any [agentskills.io](https://agentskills.io)-compatible agent — no server required.
 
 ---
 
@@ -98,12 +103,12 @@ This matrix describes current intended behavior by host.
 
 | Host | Memory file | Invocation | Heavy workflow execution | Notes |
 |---|---|---|---|---|
-| Claude Code | `CLAUDE.md` | Slash commands + natural language | Native sub-agent when available, inline fallback otherwise | Also supports optional Stop hook wiring during `/mnemo:init` |
-| Codex | `AGENTS.md` | Natural language, or host-specific skill invocation | Inline fallback by default, native delegation if the host exposes it | Uses `skills/init/codex.md` for memory wiring |
-| Cursor | `AGENTS.md` | Natural language, or host-specific skill invocation | Inline fallback by default, native delegation if the host exposes it | Uses `skills/init/cursor.md` for memory wiring |
-| OpenCode | `AGENTS.md` | Natural language, or host-specific skill invocation | Inline fallback by default, native delegation if the host exposes it | Uses `skills/init/opencode.md` for memory wiring |
-| Gemini CLI | `GEMINI.md` | Natural language, or host-specific skill invocation | Inline fallback by default, native delegation if the host exposes it | Uses `skills/init/gemini.md` for memory wiring |
-| Other agentskills.io hosts | Host-specific | Natural language or skill invocation, depending on host | Inline fallback baseline | Add a host adapter in `skills/dispatch/` for better native integration |
+| Claude Code | Auto-loaded project memory file when supported | Slash commands + natural language | Native sub-agent when available, inline fallback otherwise | Can also wire a session-end reminder when the host supports local hooks |
+| Codex | Auto-loaded project memory file when supported | Natural language, or host-specific skill invocation | Inline fallback by default, native delegation if the host exposes it | Prefers a host-supported project memory file over a best-effort fallback |
+| Cursor | Auto-loaded project memory file when supported | Natural language, or host-specific skill invocation | Inline fallback by default, native delegation if the host exposes it | Prefers a host-supported project memory file over a best-effort fallback |
+| OpenCode | Auto-loaded project memory file when supported | Natural language, or host-specific skill invocation | Inline fallback by default, native delegation if the host exposes it | Prefers a host-supported project memory file over a best-effort fallback |
+| Gemini CLI | Auto-loaded project memory file when supported | Natural language, or host-specific skill invocation | Inline fallback by default, native delegation if the host exposes it | Prefers a host-supported project memory file over a best-effort fallback |
+| Other agentskills.io hosts | Host-specific | Natural language or skill invocation, depending on host | Inline fallback baseline | If no project memory file is known to auto-load, mnemo can write a best-effort local instructions file |
 
 ### Interpretation
 
@@ -128,7 +133,7 @@ Without an agent — standalone bootstrap (Python 3.10+):
 python3 scripts/init_mnemo.py
 ```
 
-Both paths let you configure **qmd** for hybrid semantic search and choose between project-only, global, or both tiers. Then drop files into `.mnemo/<project-name>/raw/` and:
+Both paths let you configure **qmd** for hybrid semantic search. Then drop files into `.mnemo/<project-name>/raw/` and:
 
 ```
 /mnemo:ingest      # "ingest files in raw/"
@@ -178,9 +183,10 @@ The active backend is stored in `.mnemo/<project-name>/config.json` under `searc
 Slash commands work in any agent. Natural language alternatives are shown in comments — use whichever your agent prefers.
 
 ```
-/mnemo:init                          # "initialize mnemo" — guides qmd, graphify, and schema setup
+/mnemo:init                          # "initialize mnemo" — guides qmd, graphify, schema, and agent memory setup
 # drop files into .mnemo/<project-name>/raw/
 /mnemo:ingest                        # "ingest files in raw/"
+/mnemo:graphify                      # optional: map the codebase into graphify-out/
 /mnemo:query database indexing       # "what does my wiki say about database indexing?"
 /mnemo:mine                          # "remember this" — extract knowledge from current session
 /mnemo:save B-tree vs Hash Index     # "save this as a wiki page titled B-tree vs Hash Index"
@@ -205,26 +211,37 @@ Bootstraps a new knowledge base. Run once per project — warns if already initi
 
 ```
 .mnemo/
-└── <project-name>/   ← vault root (open in Obsidian for a named vault)
+└── <project-name>/
     ├── raw/          ← drop your source files here
     ├── wiki/
     │   ├── activity/
     │   ├── sources/
     │   ├── entities/
     │   ├── concepts/
-    │   └── synthesis/
+    │   ├── synthesis/
+    │   └── indexes/
     ├── index.md
-    ├── log.md        ← ingest audit trail
-    └── SCHEMA.md     ← starter taxonomy, ready to edit
+    ├── log.md        ← ingest and graphify audit trail
+    ├── SCHEMA.md     ← starter taxonomy, ready to edit
+    └── config.json   ← search backend (`bm25` or `qmd`)
 ```
 
 `log.md` records every ingested file — filename and ISO timestamp. Before processing anything, `/mnemo:ingest` checks this log and skips files already present. To force a re-ingest, remove the entry from `log.md`.
 
-Pick which tiers to activate (project, global, or both) and whether to enable **qmd** for hybrid semantic search. After that, init offers two paths: run `/mnemo:schema` to define a taxonomy before your first ingest, or run `/mnemo:graphify` to map the codebase right now — it walks you through the graphify install if you don't have it yet.
+`/mnemo:init` also:
+
+- offers to run `/mnemo:schema` immediately
+- ensures your global profile exists via `/mnemo:onboard`
+- offers to enable **qmd** for hybrid semantic search
+- offers to write project memory instructions into a host-supported auto-loaded memory file when available
+- offers to configure a session-end `/mnemo:mine` reminder when the host supports local hooks or reminders
+- offers to run `/mnemo:graphify` right away
+
+When graphify is enabled, init instructs future sessions to read `graphify-out/GRAPH_REPORT.md` first if it exists.
 
 ### `/mnemo:onboard`
 
-Creates or updates your global user profile at `~/.mnemo/<project-name>/wiki/entities/person-user.md`. Run automatically on first `/mnemo:init` — skipped silently if a profile already exists. Run directly to update it.
+Creates or updates your global user profile at `~/.mnemo/wiki/entities/person-user.md`. Run automatically on first `/mnemo:init` — skipped silently if a profile already exists. Run directly to update it.
 
 A short interview covers your role (solo dev, team lead, researcher…), technical level, preferred language for notes and responses, main domains of interest, knowledge base goal, and response style preference. Answers are inferred from the conversation where possible (e.g. language) — you only confirm rather than type them.
 
@@ -290,12 +307,15 @@ Triggered explicitly (`/mnemo:mine`) or by intent — the user expressing a desi
 Maps the project codebase into a knowledge graph using [graphify](https://github.com/safishamsi/graphify). Requires graphify installed (`pip install graphifyy && graphify install`) and mnemo initialized.
 
 - Runs `graphify .` on the project root (respects `.graphifyignore` — `.mnemo/` is always excluded)
-- Reads `graphify-out/graph.json` and converts each node into a mnemo wiki page with frontmatter and wikilinks
-- Routes nodes to the right category: code nodes (`class`, `module`, `file`) → `entities/`, conceptual nodes (`pattern`, `technique`) → `concepts/`
-- Converts `GRAPH_REPORT.md` into a synthesis page at `wiki/synthesis/codebase-graph-report.md`
-- Persists `graph.json` to `.mnemo/<project-name>/graph.json` — re-runs are incremental, only changed nodes get updated
+- Treats `graphify-out/` as graphify's canonical runtime directory
+- Keeps `graphify-out/graph.json`, `graphify-out/GRAPH_REPORT.md`, and `graphify-out/cache/` in place
+- Writes only lightweight mnemo integration pages:
+  - `wiki/synthesis/codebase-graph-report.md`
+  - `wiki/synthesis/codebase-graph-status.md`
+- Does not convert graph nodes into mnemo entity/concept pages
+- Does not copy `graph.json` or `cache/` into `.mnemo/`
 
-The point: Claude stops re-reading your source files every session and queries the wiki instead. Persistent across sessions, queryable via `/mnemo:query`.
+The point: your agent starts with `graphify-out/GRAPH_REPORT.md` for codebase structure, uses `graphify-out/graph.json` for focused follow-up questions, and avoids rescanning the entire repo when graphify's runtime is already fresh.
 
 ### `/mnemo:stats`
 
@@ -323,7 +343,7 @@ Workflows are defined in the `agents/` directory at the root of the plugin. Each
 
 ## Using mnemo with Obsidian
 
-mnemo's wiki format works directly in Obsidian — point a vault at `.mnemo/<project-name>/wiki/` (or `~/.mnemo/wiki/` for the global tier). Wikilinks resolve in the graph view, YAML frontmatter shows up in the properties panel, and the bidirectional links from `/mnemo:ingest` appear in the backlinks panel without any setup.
+mnemo's wiki format works directly in Obsidian — open `.mnemo/<project-name>/` as the vault root (or `~/.mnemo/` for the global tier). This keeps both `raw/` and `wiki/` visible in the same vault while displaying the project name in Obsidian. Wikilinks resolve in the graph view, YAML frontmatter shows up in the properties panel, and the bidirectional links from `/mnemo:ingest` appear in the backlinks panel without any setup.
 
 ### Obsidian Web Clipper
 

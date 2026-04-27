@@ -6,18 +6,19 @@ description: >
   initializing a personal knowledge base, or when the user says "set up my wiki",
   "create a knowledge base", "initialize mnemo", or "start my second brain".
   Run once per project before the first ingest.
-  After init, optionally wires the wiki into CLAUDE.md for future session memory.
+  After init, optionally wires the wiki into a tool-agnostic agent memory file for future sessions.
 license: MIT
 compatibility: >
-  Claude Code (slash command /mnemo:init). Other agentskills.io-compatible
+  Agents that support skill-style slash commands (for example /mnemo:init).
+  Other agentskills.io-compatible
   agents invoke by natural language. No external dependencies.
 metadata:
   author: mnemo contributors
-  version: "0.11.0"
+  version: "0.12.0"
 allowed-tools: Read Write Edit Glob Bash
 ---
 
-Initialize `.mnemo/` with the full taxonomy structure.
+Initialize `.mnemo/<project-name>/` with the full taxonomy structure.
 
 ## Steps
 
@@ -42,10 +43,9 @@ Stop here.
 **3. Create directory structure:**
 ```
 .mnemo/
-└── <project-name>/             ← vault root (open this folder in Obsidian)
+└── <project-name>/
     ├── raw/                    ← source files (immutable input)
     ├── wiki/
-    │   ├── activity/           ← session activity log per day
     │   ├── sources/            ← one page per ingested source
     │   ├── entities/           ← people, tools, projects, systems
     │   ├── concepts/           ← ideas, patterns, techniques
@@ -54,7 +54,8 @@ Stop here.
     │   └── indexes/            ← index shards (created when >150 pages)
     ├── index.md
     ├── log.md
-    └── SCHEMA.md
+    ├── SCHEMA.md
+    └── config.json
 ```
 
 Write `.mnemo/<project-name>/index.md`:
@@ -75,7 +76,7 @@ Write `.mnemo/<project-name>/log.md`:
 # Log
 ```
 
-**3. Write `.mnemo/<project-name>/SCHEMA.md`** — starter schema the user should customize:
+**4. Write `.mnemo/<project-name>/SCHEMA.md`** — starter schema the user should customize:
 ```markdown
 # Knowledge Base Schema
 
@@ -106,7 +107,7 @@ Define recurring concept categories:
 Use `[[Page Title]]` syntax — always the exact H1 title of the target page. Obsidian-compatible.
 ```
 
-**4. Schema setup** — offer to define the domain taxonomy immediately:
+**5. Schema setup** — offer to define the domain taxonomy immediately:
 
 > "Would you like to define your domain taxonomy now? I can read files already in `raw/` to infer entity types and concept categories, then ask a few questions. [y]es / [n]o (you can run `/mnemo:schema` anytime)"
 
@@ -114,7 +115,7 @@ If `[y]es`: invoke the schema skill by reading `skills/schema/SKILL.md` and foll
 
 If `[n]o`: continue — the starter SCHEMA.md from step 3 will be used until the user runs `/mnemo:schema`.
 
-**5. User profile** — ensure the global user profile exists:
+**6. User profile** — ensure the global user profile exists:
 
 Invoke the onboard skill by reading `skills/onboard/SKILL.md` and following its instructions. It will detect whether a profile already exists:
 - If no profile exists: run the full interview to create one.
@@ -167,6 +168,81 @@ Write `.mnemo/<project-name>/config.json`:
 > Next: drop files into `.mnemo/<project-name>/raw/` and run `/mnemo:ingest`."
 > (If schema was not defined in step 4, add: "Run `/mnemo:schema` to define your domain taxonomy first.")
 
+**9. Agent memory wiring** — offer to persist the wiki in the project's agent instructions/memory:
+
+Ask the user:
+> "Want me to add a mnemo memory stanza to this project's agent instructions so future sessions know about the wiki? [y/n]"
+
+If `[n]`: do nothing. Do not ask again.
+
+If `[y]`:
+
+Resolve the target file using this logic:
+1. Prefer the project-level memory/instructions file that the current tool is known to auto-load at the start of new sessions.
+2. If multiple supported files exist, prefer the one already used by the current tool in this project.
+3. If support exists but no file is present yet, create the tool's preferred project-level memory/instructions file.
+4. If the current tool does not auto-load any project-level memory/instructions file, or support cannot be confirmed, do not assume persistence. Warn the user and ask whether they still want a best-effort local file created for manual or future-tool use.
+
+For best-effort local files, prefer this fallback order:
+1. `AGENTS.md`
+2. `CLAUDE.md`
+3. another conventional project-level agent memory/instructions file appropriate to the environment
+
+Check whether the target file already contains the heading `## mnemo`. If yes: skip silently — the stanza is already present.
+
+Otherwise:
+
+Build the stanza based on what was initialized in steps 3–6:
+
+```markdown
+## mnemo
+
+This project has a mnemo knowledge base in `.mnemo/<project-name>/`.
+
+At the start of every session:
+- Read the user profile if it exists at `~/.mnemo/wiki/entities/person-user.md`
+- Read `graphify-out/GRAPH_REPORT.md` if it exists
+- Read the latest canonical codebase recap produced for mnemo, if one exists in the project's knowledge base
+- Use that context before answering project-specific questions or making implementation decisions
+
+During the session:
+- Query it with `/mnemo:query <term>` before answering factual questions
+- Ingest new sources with `/mnemo:ingest`
+- When a spec or plan is finalized (e.g. from superpowers brainstorming or writing-plans), move it to `.mnemo/<project-name>/raw/` and run `/mnemo:ingest` to add it to the knowledge base
+```
+
+If graphify was set up in step 10, append this line to the stanza:
+```
+- Treat `graphify-out/GRAPH_REPORT.md` as the canonical starting point for project structure when it exists
+- Run `/mnemo:graphify` after significant code changes to keep the knowledge graph up to date
+```
+
+Then:
+- If the target file exists: append the stanza at the end of the file, preceded by a blank line.
+- If the target file does not exist: create it with the stanza as the only content.
+
+Confirm:
+> "Done — mnemo instructions added to the project's agent memory file. Future sessions can discover this wiki automatically."
+
+If the stanza was written only as a best-effort file without confirmed auto-loading support, confirm instead:
+> "mnemo instructions written to a local agent file, but automatic reuse in future sessions depends on tool support."
+
+**9b. Session-end reminder wiring** — if the current tool supports project-local stop hooks or session-end reminders, offer to wire one:
+
+Ask the user:
+> "Want me to add a session-end reminder to capture insights with `/mnemo:mine` when this tool supports local hooks/reminders? [y/n]"
+
+If `[n]`: do nothing. Do not ask again.
+
+If `[y]`:
+
+- Detect whether the current tool has a supported project-local mechanism for session-end hooks or reminders.
+- If supported: add a reminder that tells the user to run `/mnemo:mine` at session end, preserving any existing config and skipping silently if an equivalent mnemo reminder is already present.
+- If not supported: skip gracefully and tell the user manual use of `/mnemo:mine` remains available.
+
+After writing, confirm:
+> "Session-end reminder configured — you'll be prompted to run `/mnemo:mine` when the session ends."
+
 **10. Graphify setup (optional)** — ask the user:
 
 > "Want to map your codebase with **graphify**? It builds a persistent knowledge graph so I can answer questions about your project without re-reading source files on every session. [y]es / [n]o"
@@ -180,7 +256,7 @@ Check if graphify is installed: run `graphify --version`.
 
 - **If not found:** show the install command and wait for the user to run it:
   ```
-  pip install graphify && graphify install
+  pip install graphifyy && graphify install
   ```
   Once the user confirms graphify is installed (or `graphify --version` succeeds): continue.
 
@@ -189,9 +265,9 @@ Check if graphify is installed: run `graphify --version`.
 Invoke the graphify skill by reading `skills/graphify/SKILL.md` and following its instructions.
 
 After the graphify skill completes, report:
-> "Codebase mapped. Query it with `/mnemo:query <term>`. Re-run `/mnemo:graphify` after significant code changes to keep the graph up to date."
+> "Codebase mapped. Start with `graphify-out/GRAPH_REPORT.md` for structure, and use `graphify query ... --graph graphify-out/graph.json` for focused follow-up questions. Re-run `/mnemo:graphify` after significant code changes to keep the graph up to date."
 
-**10. Obsidian setup (optional)** — ask the user:
+**11. Obsidian setup (optional)** — ask the user:
 
 > "Want to open this wiki in **Obsidian**? It gives you a visual graph, full-text search, and lets the Web Clipper send pages directly into your ingest queue. [y]es / [n]o"
 
@@ -207,20 +283,7 @@ After the graphify skill completes, report:
    > "In Obsidian: **Open folder as vault** → select `.mnemo/<project-name>/` in this project (or `~/.mnemo/` for the global vault)."
 
 3. Offer to set up the **Obsidian Web Clipper** browser extension so clipped pages land directly in the ingest queue:
-   > "Install the Obsidian Web Clipper: https://https://obsidian.md//clipper#more-browsers — then set its default save location to `raw/` inside this vault. Pages you clip will be picked up automatically by `/mnemo:ingest`."
+   > "Install the Obsidian Web Clipper: https://obsidian.md/clipper#more-browsers — then set its default save location to `raw/` inside this vault. Pages you clip will be picked up automatically by `/mnemo:ingest`."
 
 4. Report:
    > "Obsidian vault ready at `.mnemo/<project-name>/`. Clipped pages saved to `raw/` will be ingested with `/mnemo:ingest`."
-
-**11. Agent wiring** — wire mnemo into your agent's memory configuration:
-
-Check if a file `skills/init/<agent-name>.md` exists for your platform and follow its instructions.
-
-Known extension files:
-- `skills/init/claude-code.md` — Claude Code (CLAUDE.md stanza + Stop hook)
-- `skills/init/opencode.md` — OpenCode (AGENTS.md stanza)
-- `skills/init/gemini.md` — Gemini CLI (GEMINI.md stanza)
-- `skills/init/cursor.md` — Cursor (AGENTS.md stanza)
-- `skills/init/codex.md` — Codex (AGENTS.md stanza)
-
-If no extension file exists for your agent, consult `skills/references/agent-memory-integration.md` for manual wiring instructions.

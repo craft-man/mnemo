@@ -6,6 +6,16 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.12.0] — 2026-04-28
+
+### Changed
+
+- **`/mnemo:init` behavior** — made agent memory wiring tool-agnostic and changed session-start guidance to read the global user profile plus `graphify-out/GRAPH_REPORT.md` when present, while keeping the local project vault at `.mnemo/<project-name>/`.
+- **`/mnemo:graphify` behavior** — redefined `graphify-out/` as the canonical runtime owned by graphify. The skill now keeps `GRAPH_REPORT.md`, `graph.json`, and `cache/` in place, writes only lightweight synthesis/status pages into `.mnemo/<project-name>/wiki/synthesis/`, and no longer converts graph nodes into mnemo entity/concept pages or copies `graph.json` into the local vault.
+- **Documentation alignment** — updated `README.md`, `CLAUDE.md`, and `CONTRIBUTING.md` to reflect the retained `.mnemo/<project-name>/` layout, tool-agnostic init wiring, and graphify's new role as the codebase runtime rather than a page-expansion pipeline.
+
+---
+
 ## [0.11.0] — 2026-04-27
 
 ### Added

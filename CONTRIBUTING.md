@@ -16,11 +16,11 @@ mnemo/
 ├── skills/
 │   ├── init/
 │   │   ├── SKILL.md       ← universal core
-│   │   ├── claude-code.md ← Claude Code extension (CLAUDE.md + Stop hook)
-│   │   ├── opencode.md    ← OpenCode extension (AGENTS.md stanza)
-│   │   ├── gemini.md      ← Gemini CLI extension (GEMINI.md stanza)
-│   │   ├── cursor.md      ← Cursor extension (AGENTS.md stanza)
-│   │   └── codex.md       ← Codex extension (AGENTS.md stanza)
+│   │   ├── claude-code.md ← host-specific memory/hook notes
+│   │   ├── opencode.md    ← host-specific memory notes
+│   │   ├── gemini.md      ← host-specific memory notes
+│   │   ├── cursor.md      ← host-specific memory notes
+│   │   └── codex.md       ← host-specific memory notes
 │   ├── onboard/SKILL.md
 │   ├── schema/SKILL.md
 │   ├── dispatch/          ← host adapters + inline fallback
@@ -70,14 +70,14 @@ Edit a `SKILL.md`, test with `claude --plugin-dir ./mnemo` (use `/reload-plugins
 
 ## Adding support for a new agent
 
-Each agent gets one extension file alongside the core skill. The core (`skills/init/SKILL.md`) auto-delegates to it in step 11.
+mnemo now prefers tool-agnostic project memory wiring:
 
-1. Create `skills/init/<agent-name>.md` (e.g. `skills/init/copilot.md`)
-2. Follow the structure of an existing extension — frontmatter, user prompt, idempotency check, append stanza, confirm
-3. Add your file to the `Known extension files` list in `skills/init/SKILL.md` step 11
-4. Add the memory stanza format to `skills/references/agent-memory-integration.md` if it uses a new config file format
+1. Detect whether the host auto-loads a project-level memory/instructions file across sessions.
+2. Teach `skills/init/SKILL.md` how to prefer that file over best-effort fallbacks.
+3. If the host also supports local stop hooks or session-end reminders, document the integration pattern clearly.
+4. Add host-specific notes in `skills/init/<agent-name>.md` and `skills/references/agent-memory-integration.md` only when the host needs special handling beyond the generic resolution logic.
 
-No changes to the core skill needed. Run `bash scripts/check_skill_invocations.sh` before opening a PR to verify no slash-command syntax leaked in.
+The core skill should not promise persistence when host auto-loading support cannot be confirmed. Run `bash scripts/check_skill_invocations.sh` before opening a PR to verify no slash-command syntax leaked in.
 
 ## Adding or modifying agents
 
