@@ -8,10 +8,10 @@ Each skill is a plain Markdown file (`SKILL.md`) with instructions the agent fol
 mnemo/
 ├── .claude-plugin/
 │   └── plugin.json        ← Claude Code marketplace manifest
-├── agents/                ← sub-agents dispatché par les skills lourds
-│   ├── ingestor.md        ← Opus — ingest complet + discuss before write
-│   ├── archivist.md       ← Sonnet — query + format adaptatif + file back
-│   └── linter.md          ← Opus — lint 3 passes + graph analytics
+├── agents/                ← portable workflow specs for heavy skills
+│   ├── ingestor.md        ← heavy ingest workflow + discuss before write
+│   ├── archivist.md       ← balanced query workflow + adaptive format + file back
+│   └── linter.md          ← heavy lint workflow + graph analytics
 ├── commands/mnemo/        ← slash-command stubs (one .md per skill)
 ├── skills/
 │   ├── init/
@@ -23,9 +23,10 @@ mnemo/
 │   │   └── codex.md       ← Codex extension (AGENTS.md stanza)
 │   ├── onboard/SKILL.md
 │   ├── schema/SKILL.md
-│   ├── ingest/SKILL.md    ← Step 0 dispatch → agents/ingestor.md
-│   ├── query/SKILL.md     ← Step 0 dispatch → agents/archivist.md
-│   ├── lint/SKILL.md      ← Step 0 dispatch → agents/linter.md
+│   ├── dispatch/          ← host adapters + inline fallback
+│   ├── ingest/SKILL.md    ← orchestrates dispatch → agents/ingestor.md
+│   ├── query/SKILL.md     ← orchestrates dispatch → agents/archivist.md
+│   ├── lint/SKILL.md      ← orchestrates dispatch → agents/linter.md
 │   ├── save/SKILL.md
 │   ├── mine/SKILL.md
 │   ├── graphify/SKILL.md
@@ -80,7 +81,9 @@ No changes to the core skill needed. Run `bash scripts/check_skill_invocations.s
 
 ## Adding or modifying agents
 
-Les agents (`agents/*.md`) sont des specs self-contained lus par l'outil Agent de Claude Code. Ils ne dépendent d'aucun autre fichier à l'exécution.
+Agents in `agents/*.md` are self-contained workflow specs. They must be
+portable: a host may execute them through native sub-agent delegation or inline
+through the main agent via the dispatch adapters.
 
 **Structure de fichier obligatoire :**
 
@@ -89,7 +92,7 @@ Les agents (`agents/*.md`) sont des specs self-contained lus par l'outil Agent d
 name: mnemo-<role>
 description: >
   Une phrase sur ce que fait l'agent et quand il est dispatché.
-model: opus   # ou sonnet selon la charge
+reasoning-profile: heavy   # ou balanced selon la charge
 allowed-tools: Read Write Edit Grep Glob Bash
 ---
 
@@ -105,14 +108,37 @@ allowed-tools: Read Write Edit Grep Glob Bash
 ```
 
 **Conventions :**
-- `model: opus` pour les workflows lourds (ingest complet, lint, graph analytics)
-- `model: sonnet` pour les workflows de lecture/synthèse (query, save)
+- `reasoning-profile: heavy` pour les workflows lourds (ingest complet, lint, graph analytics)
+- `reasoning-profile: balanced` pour les workflows de lecture/synthèse (query, save)
 - Chaque agent est self-contained — ne pas importer ni référencer le SKILL.md parent
 - Les inputs sont explicitement listés dans la section `## Inputs` du prompt de dispatch
 - Terminer par un step Report qui résume les actions effectuées
+- Le workflow doit rester valide en délégation native et en fallback inline
 
 **Mise à jour du skill parent :**
-Quand tu ajoutes ou modifies un agent, vérifier que le Step 0 dans le SKILL.md correspondant transmet bien tous les inputs nécessaires à l'agent.
+Quand tu ajoutes ou modifies un agent, vérifier que le Step 0 dans le SKILL.md
+correspondant transmet bien tous les inputs nécessaires à l'agent via le
+contrat défini dans `skills/references/subagent-dispatch.md`.
+
+## Adding or modifying dispatch adapters
+
+Dispatch adapters live in `skills/dispatch/`.
+
+Use one file per host plus the universal fallback:
+
+- `claude-code.md`
+- `codex.md`
+- `cursor.md`
+- `gemini.md`
+- `opencode.md`
+- `inline.md`
+
+Rules:
+
+- Prefer native delegation only when the host supports it clearly.
+- Otherwise use the inline fallback.
+- Treat reasoning hints as advisory only.
+- Do not redefine workflow semantics in the adapter.
 
 **Versioning :**
 Les fichiers agents ne portent pas de version individuelle. La version du plugin (`0.x.y`) couvre l'ensemble skills + agents.
@@ -140,15 +166,26 @@ mnemo follows [Semantic Versioning](https://semver.org/). The version lives in f
 - All `skills/*/SKILL.md` → `version:` frontmatter field
 - `CHANGELOG.md` → new section header
 
-Use the bump script to update all four atomically and create a git commit:
+Use the bump script to update all four atomically, then fill in the release
+notes and create your commit deliberately:
 
 ```bash
-python3 scripts/bump_version.py 0.8.0          # bump + commit
-python3 scripts/bump_version.py 0.8.0 --tag     # bump + commit + git tag v0.8.0
-python3 scripts/bump_version.py 0.8.0 --tag --push  # also push the tag
+python3 scripts/bump_version.py 0.8.0                   # bump files + changelog placeholder
+python3 scripts/bump_version.py 0.8.0 --commit          # bump + commit
+python3 scripts/bump_version.py 0.8.0 --commit --tag    # bump + commit + git tag v0.8.0
+python3 scripts/bump_version.py 0.8.0 --commit --tag --push  # also push the tag
 ```
 
-The script inserts a placeholder section in `CHANGELOG.md` — fill in the release notes before pushing. Agent extension files (`skills/init/*.md` other than `SKILL.md`) and agent files (`agents/*.md`) do not carry individual version numbers.
+The script inserts a placeholder section in `CHANGELOG.md`. Preferred flow:
+
+1. Run the script without `--commit`
+2. Fill in the release notes
+3. Review the diff
+4. Create the release commit manually
+
+Use `--commit` only if you intentionally want the script to create the commit
+for you. Agent extension files (`skills/init/*.md` other than `SKILL.md`) and
+agent files (`agents/*.md`) do not carry individual version numbers.
 
 ## License
 

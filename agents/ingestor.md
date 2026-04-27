@@ -5,7 +5,7 @@ description: >
   in an isolated context: reads the source, proposes a pre-write report (TL;DR,
   pages affected, contradictions), waits for confirmation, then writes the source page,
   entities, concepts, enriches the graph, and updates the index and log.
-model: opus
+reasoning-profile: heavy
 allowed-tools: Read Write Edit Glob Grep Bash
 ---
 

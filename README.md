@@ -3,7 +3,7 @@
 </p>
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.10.0-blue)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.11.0-blue)](CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
@@ -14,9 +14,9 @@ Named after [Mnemosyne](https://en.wikipedia.org/wiki/Mnemosyne), the Greek godd
 If this saves you time, [![GitHub stars](https://img.shields.io/github/stars/craft-man/mnemo?style=social)](https://github.com/craft-man/mnemo) helps others find it.
 
 > [!WARNING]
-> This plugin is in beta. Core skills run on Claude Code, OpenCode, Gemini CLI, Cursor, and any agentskills.io-compatible agent. Some optional features (Stop hook, CLAUDE.md wiring) are Claude Code-only and activate only when running on that platform. Thanks for your patience! Contributions welcome.
+> This plugin is in beta. Core skills run on Claude Code, OpenCode, Gemini CLI, Cursor, Codex, and any agentskills.io-compatible agent. Heavy workflows use native sub-agents when the host supports delegation, and otherwise fall back to inline execution. Some optional features (Stop hook, CLAUDE.md wiring) are Claude Code-only and activate only when running on that platform. Thanks for your patience! Contributions welcome.
 
-Most AI tools re-derive answers from your raw files on every query. mnemo builds a persistent wiki instead: Claude reads your sources once, synthesizes structured pages, and cross-references them permanently. The longer you use it, the richer the graph gets.
+Most AI tools re-derive answers from your raw files on every query. mnemo builds a persistent wiki instead: your agent reads your sources once, synthesizes structured pages, and cross-references them permanently. The longer you use it, the richer the graph gets.
 
 Inspired by Karpathy's [LLM Wiki pattern](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f).
 
@@ -64,7 +64,10 @@ mnemo exposes ten skills that work with any [agentskills.io](https://agentskills
 
 ## Installation
 
-**Requirements:** [Claude Code](https://claude.ai/code) CLI
+**Requirements:** one compatible host agent.
+
+- For Claude Code marketplace install: [Claude Code](https://claude.ai/code) CLI
+- For other hosts: an [agentskills.io](https://agentskills.io)-compatible agent
 
 ### Claude Code marketplace (recommended)
 
@@ -89,9 +92,31 @@ claude --plugin-dir ./mnemo
 
 ---
 
+## Compatibility Matrix
+
+This matrix describes current intended behavior by host.
+
+| Host | Memory file | Invocation | Heavy workflow execution | Notes |
+|---|---|---|---|---|
+| Claude Code | `CLAUDE.md` | Slash commands + natural language | Native sub-agent when available, inline fallback otherwise | Also supports optional Stop hook wiring during `/mnemo:init` |
+| Codex | `AGENTS.md` | Natural language, or host-specific skill invocation | Inline fallback by default, native delegation if the host exposes it | Uses `skills/init/codex.md` for memory wiring |
+| Cursor | `AGENTS.md` | Natural language, or host-specific skill invocation | Inline fallback by default, native delegation if the host exposes it | Uses `skills/init/cursor.md` for memory wiring |
+| OpenCode | `AGENTS.md` | Natural language, or host-specific skill invocation | Inline fallback by default, native delegation if the host exposes it | Uses `skills/init/opencode.md` for memory wiring |
+| Gemini CLI | `GEMINI.md` | Natural language, or host-specific skill invocation | Inline fallback by default, native delegation if the host exposes it | Uses `skills/init/gemini.md` for memory wiring |
+| Other agentskills.io hosts | Host-specific | Natural language or skill invocation, depending on host | Inline fallback baseline | Add a host adapter in `skills/dispatch/` for better native integration |
+
+### Interpretation
+
+- `init`, `save`, `mine`, `log`, and `stats` do not depend on sub-agent support.
+- `ingest`, `query`, and `lint` use workflow specs from `agents/`.
+- If the host supports delegation clearly, mnemo may use sub-agents.
+- If not, mnemo runs the same workflow inline in the main agent.
+
+---
+
 ## Quick start
 
-In any agent (Claude Code, Codex, Cursor, OpenCode…):
+In any agent (Claude Code, Codex, Cursor, OpenCode, Gemini CLI…):
 
 ```
 /mnemo:init
@@ -284,15 +309,15 @@ Queries `log.md` in natural language. Displays ingest, skipped, generated, and l
 
 ## Agents
 
-For heavy-duty operations, mnemo automatically dispatches dedicated sub-agents that execute the workflow in an isolated context. Your session context remains intact regardless of the job size.
+For heavy-duty operations, mnemo uses dedicated workflow specs. When the host supports delegation, mnemo dispatches them to sub-agents in an isolated context. When it does not, mnemo runs the same workflow inline in the main agent.
 
-| Agent | Model | Dispatched by | Key Behaviors |
+| Workflow | Reasoning Hint | Used by | Key Behaviors |
 |---|---|---|---|
-| `mnemo-ingestor` | Opus | `/mnemo:ingest` | Discuss before write — proposes TL;DR + planned pages before writing |
-| `mnemo-archivist` | Sonnet | `/mnemo:query` | Adaptive formatting + offers to file back after each substantial response |
-| `mnemo-linter` | Opus | `/mnemo:lint` | Mechanical audit + graph (hubs, sinks, components) + semantics |
+| `mnemo-ingestor` | `heavy` | `/mnemo:ingest` | Discuss before write — proposes TL;DR + planned pages before writing |
+| `mnemo-archivist` | `balanced` | `/mnemo:query` | Adaptive formatting + offers to file back after each substantial response |
+| `mnemo-linter` | `heavy` | `/mnemo:lint` | Mechanical audit + graph (hubs, sinks, components) + semantics |
 
-Agents are defined in the `agents/` directory at the root of the plugin. Each file is self-contained and can be read independently as a reference specification.
+Workflows are defined in the `agents/` directory at the root of the plugin. Each file is self-contained and can be read independently as a reference specification. Dispatch behavior is selected by host adapters in `skills/dispatch/`, with inline fallback when no native sub-agent mechanism exists.
 
 ---
 

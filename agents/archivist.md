@@ -5,7 +5,7 @@ description: >
   BM25 fallback, global fallback), synthesizes a response with [[wikilinks]]
   citations, adapts the format to the question, and systematically offers
   to archive substantial responses into the wiki.
-model: sonnet
+reasoning-profile: balanced
 allowed-tools: Read Write Edit Glob Grep Bash
 ---
 

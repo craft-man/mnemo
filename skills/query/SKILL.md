@@ -14,29 +14,49 @@ compatibility: >
   (scripts/wiki_search.py).
 metadata:
   author: mnemo contributors
-  version: "0.10.0"
+  version: "0.11.0"
 allowed-tools: Read Glob Grep Bash
 ---
 
-Dispatch the mnemo-archivist sub-agent to handle this query.
+Dispatch the mnemo-archivist workflow using the portable dispatch contract.
 
-## Step 0 — Dispatch agent
+## Step 0 — Resolve workflow and dispatch path
 
 1. Locate the plugin root: find the directory containing `agents/archivist.md`
    relative to this skill file (two levels up from `skills/query/`).
 
 2. Read the full contents of `agents/archivist.md`.
 
-3. Spawn a sub-agent using the Agent tool with:
-   - prompt: full contents of `agents/archivist.md` followed by:
-     ```
-     ## Inputs
-     vault: .mnemo/<project-name>/
-     query: <$ARGUMENTS — the user's search query>
-     ```
-   - model: sonnet
-   - tools: Read, Write, Edit, Grep, Glob, Bash
+3. Read `skills/references/subagent-dispatch.md`. Use it as the canonical
+   dispatch contract.
 
-4. Wait for the agent to complete.
+4. Build the runtime inputs block:
+   ```markdown
+   ## Inputs
+   vault: .mnemo/<project-name>/
+   query: <$ARGUMENTS — the user's search query>
+   ```
 
-5. Relay the agent's response to the user verbatim.
+5. Select a dispatch adapter:
+   - If the current host has a matching adapter in `skills/dispatch/<host>.md`,
+     read it and follow it.
+   - If the host is unknown, ambiguous, or lacks reliable sub-agent support,
+     use `skills/dispatch/inline.md`.
+
+   Known adapters:
+   - `skills/dispatch/claude-code.md`
+   - `skills/dispatch/codex.md`
+   - `skills/dispatch/cursor.md`
+   - `skills/dispatch/gemini.md`
+   - `skills/dispatch/opencode.md`
+   - `skills/dispatch/inline.md`
+
+6. Dispatch the workflow with these inputs:
+   - `workflow_name`: `mnemo-archivist`
+   - `workflow_spec`: full contents of `agents/archivist.md`
+   - `inputs_block`: the block from step 4
+   - `preferred_reasoning`: `balanced`
+   - `allowed_tools`: `Read, Write, Edit, Grep, Glob, Bash`
+
+7. If delegated, wait for completion and relay the final report.
+   If executed inline, follow the workflow directly and present its response.

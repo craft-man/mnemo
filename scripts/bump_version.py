@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Bump mnemo version across all tracked locations and optionally create a git tag.
+"""Bump mnemo version across all tracked locations and optionally create a git commit/tag.
 
 Usage:
     python3 scripts/bump_version.py 0.8.0
-    python3 scripts/bump_version.py 0.8.0 --tag
-    python3 scripts/bump_version.py 0.8.0 --tag --push
+    python3 scripts/bump_version.py 0.8.0 --commit
+    python3 scripts/bump_version.py 0.8.0 --commit --tag
+    python3 scripts/bump_version.py 0.8.0 --commit --tag --push
 """
 
 import argparse
@@ -95,12 +96,19 @@ def git_tag(new: str, push: bool) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Bump mnemo version everywhere.")
     parser.add_argument("version", help="New version, e.g. 0.8.0")
+    parser.add_argument("--commit", action="store_true", help="Create a git commit for the bump")
     parser.add_argument("--tag", action="store_true", help="Create a git tag vX.Y.Z")
     parser.add_argument("--push", action="store_true", help="Push tag to origin (implies --tag)")
     args = parser.parse_args()
 
     new = args.version
     old = current_version()
+
+    if args.push:
+        args.tag = True
+
+    if args.tag and not args.commit:
+        sys.exit("error: --tag/--push require --commit so the tag points at the bumped version commit")
 
     if not re.fullmatch(r"\d+\.\d+\.\d+", new):
         sys.exit(f"error: version must be X.Y.Z, got: {new!r}")
@@ -130,13 +138,17 @@ def main() -> None:
     changed.append(path)
 
     print()
-    git_commit(changed, new)
-    print(f"  commit created")
+    if args.commit:
+        git_commit(changed, new)
+        print("  commit created")
 
-    if args.tag or args.push:
-        git_tag(new, push=args.push)
+        if args.tag:
+            git_tag(new, push=args.push)
 
-    print(f"\nDone. Edit CHANGELOG.md to add release notes, then push.")
+        print("\nDone.")
+    else:
+        print("  no commit created")
+        print("\nDone. Fill in CHANGELOG.md, review the diff, then create your commit manually.")
 
 
 if __name__ == "__main__":
