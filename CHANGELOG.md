@@ -6,6 +6,23 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.11.0] — 2026-04-27
+
+### Added
+
+- **Portable dispatch contract** — Added `skills/references/subagent-dispatch.md` as the canonical cross-host contract for heavy workflows (`ingest`, `query`, `lint`). It defines explicit workflow inputs, reasoning hints, prompt assembly, and mandatory inline fallback semantics.
+- **Host dispatch adapters** — Added `skills/dispatch/claude-code.md`, `codex.md`, `cursor.md`, `gemini.md`, `opencode.md`, and `inline.md` to separate workflow transport from workflow semantics and document host-specific delegation behavior.
+- **Compatibility matrix** — README now includes a host-by-host matrix covering memory file, invocation mode, heavy workflow execution path, and current integration notes for Claude Code, Codex, Cursor, OpenCode, Gemini CLI, and generic agentskills.io hosts.
+
+### Changed
+
+- **Heavy workflow portability** — `skills/ingest/SKILL.md`, `skills/query/SKILL.md`, and `skills/lint/SKILL.md` no longer hardcode a Claude-specific Agent tool dispatch. They now route through the portable dispatch contract and explicitly fall back to inline execution when no reliable native delegation exists.
+- **Workflow metadata** — `agents/ingestor.md`, `agents/archivist.md`, and `agents/linter.md` now use `reasoning-profile: heavy|balanced` instead of vendor-specific model labels, keeping workflow intent while removing provider coupling.
+- **Contributor guidance** — `CONTRIBUTING.md` now documents portable workflow specs, dispatch adapters, and the requirement that heavy workflows remain valid both under native delegation and inline fallback.
+- **Version bump workflow** — `scripts/bump_version.py` no longer commits by default. It now prepares the version bump and changelog placeholder first, with commit/tag behavior moved behind explicit `--commit` and `--tag` flags so release notes can be filled in before the release commit.
+
+---
+
 ## [0.10.0] — 2026-04-27
 
 ### Changed

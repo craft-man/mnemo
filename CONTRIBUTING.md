@@ -166,15 +166,26 @@ mnemo follows [Semantic Versioning](https://semver.org/). The version lives in f
 - All `skills/*/SKILL.md` → `version:` frontmatter field
 - `CHANGELOG.md` → new section header
 
-Use the bump script to update all four atomically and create a git commit:
+Use the bump script to update all four atomically, then fill in the release
+notes and create your commit deliberately:
 
 ```bash
-python3 scripts/bump_version.py 0.8.0          # bump + commit
-python3 scripts/bump_version.py 0.8.0 --tag     # bump + commit + git tag v0.8.0
-python3 scripts/bump_version.py 0.8.0 --tag --push  # also push the tag
+python3 scripts/bump_version.py 0.8.0                   # bump files + changelog placeholder
+python3 scripts/bump_version.py 0.8.0 --commit          # bump + commit
+python3 scripts/bump_version.py 0.8.0 --commit --tag    # bump + commit + git tag v0.8.0
+python3 scripts/bump_version.py 0.8.0 --commit --tag --push  # also push the tag
 ```
 
-The script inserts a placeholder section in `CHANGELOG.md` — fill in the release notes before pushing. Agent extension files (`skills/init/*.md` other than `SKILL.md`) and agent files (`agents/*.md`) do not carry individual version numbers.
+The script inserts a placeholder section in `CHANGELOG.md`. Preferred flow:
+
+1. Run the script without `--commit`
+2. Fill in the release notes
+3. Review the diff
+4. Create the release commit manually
+
+Use `--commit` only if you intentionally want the script to create the commit
+for you. Agent extension files (`skills/init/*.md` other than `SKILL.md`) and
+agent files (`agents/*.md`) do not carry individual version numbers.
 
 ## License
 
