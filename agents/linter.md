@@ -6,7 +6,7 @@ description: >
   hubs, sinks, components), Pass 3 (semantic: contradictions, stale claims,
   gap pages). Produces a severity-grouped report and proposes fixes with
   interactive approval.
-model: opus
+reasoning-profile: heavy
 allowed-tools: Read Write Edit Glob Grep Bash
 ---
 
