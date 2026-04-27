@@ -23,7 +23,7 @@ Initialize `.mnemo/` with the full taxonomy structure.
 
 ## Step 0 — Python fast path (optional)
 
-Fast path: use `Glob('**/mnemo/scripts/init_mnemo.py')` to locate the script.
+Fast path: use `Glob('**/skills/init/init_mnemo.py')` to locate the script.
 If found at `<script_path>`, run:
 ```
 python3 <script_path>

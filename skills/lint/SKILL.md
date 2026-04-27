@@ -12,7 +12,7 @@ license: MIT
 compatibility: >
   Claude Code (slash command /mnemo:lint). Other agentskills.io-compatible
   agents invoke by natural language. Optional: Python 3.10+ for faster auditing
-  (scripts/wiki_lint.py).
+  (skills/lint/wiki_lint.py).
 metadata:
   author: mnemo contributors
   version: "0.9.0"

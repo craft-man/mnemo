@@ -19,7 +19,7 @@ allowed-tools: Read Glob Bash
 
 ## Step 0 — Python fast path (optional)
 
-1. Use `Glob('**/mnemo/scripts/wiki_stats.py')` to locate the stats script.
+1. Use `Glob('**/skills/stats/wiki_stats.py')` to locate the stats script.
 2. If found at `<script_path>`, run:
    ```
    python3 <script_path> .mnemo/<project-name>
