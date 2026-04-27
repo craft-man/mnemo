@@ -2,24 +2,25 @@
 name: graphify
 description: >
   Map the current project codebase into a queryable mnemo knowledge graph using graphify.
-  Converts graphify's structured output (graph.json) directly into mnemo wiki pages —
-  entities, concepts, and a synthesis report — so agents can answer questions about the
-  project without re-reading source files on every session.
+  Treats graphify-out/ as the canonical runtime output and writes only lightweight
+  mnemo integration pages, so agents can answer questions about the project without
+  re-reading source files on every session.
   Use when the user says "map my codebase", "build a knowledge graph", "index my project",
   "graphify this", or invokes /mnemo:graphify explicitly.
 license: MIT
 compatibility: >
-  Claude Code (slash command /mnemo:graphify). Other agentskills.io-compatible
+  Agents that support skill-style slash commands (for example /mnemo:graphify).
+  Other agentskills.io-compatible
   agents invoke by natural language. Requires: graphify (pip install graphifyy && graphify install).
 metadata:
   author: mnemo contributors
-  version: "0.11.0"
+  version: "0.12.0"
 allowed-tools: Read Write Edit Glob Bash
 ---
 
 Map the current project codebase into a queryable mnemo knowledge graph.
 
-> **Scope:** This skill operates on the local `.mnemo/` knowledge base only. The `--global` flag is not supported.
+> **Scope:** This skill operates on the local `.mnemo/<project-name>/` knowledge base only. The `--global` flag is not supported.
 
 ## Prerequisites
 
@@ -59,7 +60,7 @@ Report: "Created `.graphifyignore` with default exclusions."
 Report only what was added: "Updated `.graphifyignore` — added: `.mnemo/`, `graphify-out/`."
 If nothing was missing: no report.
 
-Note: if `.mnemo/<project-name>/graph.json` already exists, this is an incremental re-run. Graphify will use its SHA256 cache automatically — only changed files are reprocessed.
+Note: if `graphify-out/cache/` already exists, this is an incremental re-run. Graphify will use its SHA256 cache automatically — only changed files are reprocessed.
 
 ## Step 2 — Run graphify
 
@@ -76,105 +77,22 @@ On success, graphify produces:
 - `graphify-out/GRAPH_REPORT.md` — narrative report (god nodes, surprising connections, suggested questions)
 - `graphify-out/cache/` — SHA256 cache for incremental re-runs
 
-## Step 3 — Convert nodes to wiki pages
+## Step 3 — Validate native graphify outputs
 
-If `graphify-out/graph.json` does not exist: report "graphify produced no output file. Nothing was written to the wiki." and stop.
+`graphify-out/` is the canonical runtime directory. Do not move it, rename it, or copy its cache into `.mnemo/`.
 
-After reading the file, if `nodes` is empty or absent: report "graphify produced no nodes. The project may have no recognized code structure. Nothing was written to the wiki." and stop.
+Validate the outputs produced by graphify:
+- `graphify-out/GRAPH_REPORT.md`
+- `graphify-out/graph.json`
+- optionally `graphify-out/cache/`
 
-Read `graphify-out/graph.json`.
+If `graphify-out/GRAPH_REPORT.md` does not exist: report "graphify produced no GRAPH_REPORT.md. Nothing was written to the wiki." and stop.
 
-### Node type mapping
+If `graphify-out/graph.json` does not exist: report "graphify produced no graph.json. Nothing was written to the wiki." and stop.
 
-| graphify node type | mnemo category | Target directory |
-|---|---|---|
-| `class`, `function`, `module`, `file`, `system`, `project`, `person`, `tool` | `entities` | `.mnemo/<project-name>/wiki/entities/` |
-| `concept`, `pattern`, `technique`, `idea`, `problem` | `concepts` | `.mnemo/<project-name>/wiki/concepts/` |
-| Any unrecognized type | `entities` | `.mnemo/<project-name>/wiki/entities/` |
+Read `graphify-out/graph.json`. If `nodes` is empty or absent: report "graphify produced no nodes. The project may have no recognized code structure. Nothing was written to the wiki." and stop.
 
-### Filename
-
-`<type>-<slug>.md` where slug = node label lowercased, spaces → `-`, non-alphanumeric characters (except `-`) removed.
-
-Collision rule: if two nodes produce the same slug, append the community ID: `<type>-<slug>-c<community_id>.md`.
-
-> Note: graphify node types (`class`, `function`, `module`, etc.) are used directly as filename type-prefixes. They are not required to match the SCHEMA.md entity vocabulary.
-
-### Field mapping
-
-| Template variable | graph.json field | Fallback |
-|---|---|---|
-| `<node label>` | `node.label` | — (required, skip node if absent) |
-| `<node description>` | `node.description` | `"No description available."` |
-| `<community_id>` | `node.community` | omit tag, write `Community: unknown` in byline |
-| Relation tag (`EXTRACTED`/`INFERRED`/`AMBIGUOUS`) | `edge.type` | `EXTRACTED` |
-| Confidence score | `edge.confidence` | omit the `*(confidence: X)*` fragment |
-
-### Page format
-
-```markdown
----
-title: <node label>
-category: <entities | concepts>
-tags: [graphify, <node type>, c<community_id>]
-created: <YYYY-MM-DD>
-updated: <YYYY-MM-DD>
----
-
-# <node label>
-
-> *Type: <node type> — Community: <community_id>*
-
----
-
-## Description
-
-<node description from graph.json>
-
-## Sources
-
-- [[Codebase Graph Report]]
-
-## Relations
-
-- **<relationship type>** → [[<target node label>]] `EXTRACTED`
-- **<relationship type>** → [[<target node label>]] `INFERRED` *(confidence: 0.87)*
-- **<relationship type>** → [[<target node label>]] `AMBIGUOUS`
-
-## Links
-
-- [[<connected node label>]]
-```
-
-Only include relations where the target node exists in `graph.json`. Skip dangling edges.
-If a node has no relations, omit the `## Relations` section entirely.
-
-### Incremental update (re-run)
-
-If `.mnemo/<project-name>/graph.json` exists (prior run detected in Step 1):
-
-1. Load old graph from `.mnemo/<project-name>/graph.json` and new graph from `graphify-out/graph.json`.
-2. Compute delta:
-   - **Added nodes** — write new wiki pages.
-   - **Modified nodes** (description or edges changed) — update the existing page:
-     1. Replace the `## Description` section body.
-     2. Replace the `## Relations` section body (or add/remove the section if it appears/disappears).
-     3. Update `updated:` frontmatter field to today.
-     If `## Description` or `## Relations` cannot be located in the existing page, append the updated content at the end of the file and update `updated:` in the frontmatter. Warn: "`Section not found in <filename> — content appended.`"
-   - **Removed nodes** — do not delete the page. Append this block before `## Links`:
-     Before appending, check whether a line matching `> **Note (` already appears above `## Links` in the page. If it does, skip the append.
-     ```
-     > **Note (<YYYY-MM-DD>):** This node was removed from the graphify graph on re-run. Content may be stale.
-     ```
-   - **Unchanged nodes** — do not touch the page.
-
-### First run
-
-Write all nodes as new pages. Track count for the Step 5 report.
-
-## Step 4 — Convert GRAPH_REPORT.md to synthesis page
-
-If `graphify-out/GRAPH_REPORT.md` does not exist, skip this step and note it in the final report.
+## Step 4 — Write lightweight mnemo integration pages
 
 Read `graphify-out/GRAPH_REPORT.md`. Write `.mnemo/<project-name>/wiki/synthesis/codebase-graph-report.md`:
 
@@ -183,39 +101,74 @@ Read `graphify-out/GRAPH_REPORT.md`. Write `.mnemo/<project-name>/wiki/synthesis
 title: Codebase Graph Report
 category: synthesis
 tags: [graphify, codebase, graph-report]
-source: graphify
+source: graphify-out/GRAPH_REPORT.md
 created: <YYYY-MM-DD>
 updated: <YYYY-MM-DD>
 ---
 
 # Codebase Graph Report
 
-> *Generated by graphify on <YYYY-MM-DD>. Re-run `/mnemo:graphify` to refresh.*
+> *Generated by graphify on <YYYY-MM-DD>. Canonical runtime artifacts live in `graphify-out/`. Re-run `/mnemo:graphify` to refresh.*
 
----
+## Canonical Runtime
+
+- Human-readable report: `graphify-out/GRAPH_REPORT.md`
+- Structured graph: `graphify-out/graph.json`
+- Incremental cache: `graphify-out/cache/`
+
+## Usage
+
+- Read `graphify-out/GRAPH_REPORT.md` first when you need a fast understanding of project structure.
+- Use `graphify query ... --graph graphify-out/graph.json` for focused follow-up questions instead of scanning the entire codebase.
+- Treat `graphify-out/` as the source of truth for graphify outputs.
+
+## Report
 
 <full body of graphify-out/GRAPH_REPORT.md, preserved verbatim>
-
-## Links
-
-<wikilinks to every god node named in the report, e.g. [[AuthService]], [[DatabaseLayer]]>
 ```
 
-**On re-run:** overwrite this page entirely — it is always regenerated from the latest report.
-Update `created:` only if the file is new; always update `updated:`.
+On re-run: overwrite this page entirely. Update `created:` only if the file is new; always update `updated:`.
+
+Write `.mnemo/<project-name>/wiki/synthesis/codebase-graph-status.md`:
+
+```markdown
+---
+title: Codebase Graph Status
+category: synthesis
+tags: [graphify, codebase, status]
+created: <YYYY-MM-DD>
+updated: <YYYY-MM-DD>
+---
+
+# Codebase Graph Status
+
+- Canonical runtime directory: `graphify-out/`
+- Report present: <yes|no>
+- Graph present: <yes|no>
+- Cache present: <yes|no>
+- Last graphify run: <YYYY-MM-DD or UTC ISO timestamp if available>
+
+## Guidance
+
+- Start with `graphify-out/GRAPH_REPORT.md`.
+- Use `graphify-out/graph.json` for structured queries.
+- Leave `graphify-out/cache/` in place so graphify can re-use its SHA256 cache on the next run.
+```
 
 ## Step 5 — Integrate
 
-**Persist graph** — copy `graphify-out/graph.json` → `.mnemo/<project-name>/graph.json`. This is the baseline for the next incremental run.
+Do not copy `graphify-out/graph.json` into `.mnemo/<project-name>/`.
+Do not convert graph nodes into mnemo entity/concept pages.
+Do not copy `graphify-out/cache/` into `.mnemo/<project-name>/`.
 
-**Update index** — for each new page written, append to `.mnemo/<project-name>/index.md` under the matching heading (`## Entities`, `## Concepts`, `## Synthesis`):
+Update `.mnemo/<project-name>/index.md` under `## Synthesis` with links to:
 ```
-- [<Page Title>](wiki/<category>/<filename>.md)
+- [Codebase Graph Report](wiki/synthesis/codebase-graph-report.md)
+- [Codebase Graph Status](wiki/synthesis/codebase-graph-status.md)
 ```
-If a heading (`## Entities`, `## Concepts`, or `## Synthesis`) does not exist in `index.md`, append it before adding the entry.
-If total wiki pages ≥ 150: write to `wiki/indexes/<category>.md` shard (create if absent). Ensure `.mnemo/<project-name>/index.md` has a link to each shard: `- [Entities Index](wiki/indexes/entities.md)`.
+Add the heading if missing. Avoid duplicate entries on re-run.
 
-**Update log** — append to `.mnemo/<project-name>/log.md`:
+Append to `.mnemo/<project-name>/log.md`:
 ```
 - graphify-out/graph.json | <UTC ISO timestamp> | graphify
 ```
@@ -223,12 +176,13 @@ If total wiki pages ≥ 150: write to `wiki/indexes/<category>.md` shard (create
 **Report:**
 ```
 graphify run complete.
-  Pages created:        N
-  Pages updated:        M
-  Pages unchanged:      K
-  Removed nodes flagged: R
-  Synthesis page: wiki/synthesis/codebase-graph-report.md
+  Canonical runtime:    graphify-out/
+  Report page:          wiki/synthesis/codebase-graph-report.md
+  Status page:          wiki/synthesis/codebase-graph-status.md
+  Structured graph:     graphify-out/graph.json
+  Cache retained:       graphify-out/cache/
 
-Query the codebase with `/mnemo:query <term>`.
-Run `/mnemo:lint` to verify knowledge base health.
+Read graphify-out/GRAPH_REPORT.md before scanning raw files.
+Use graphify query with graphify-out/graph.json for focused graph questions.
+Run /mnemo:lint to verify knowledge base health.
 ```

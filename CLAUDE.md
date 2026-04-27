@@ -41,6 +41,8 @@ Always read the relevant wiki files first, then synthesize.
 
 Context loads on demand. Do **not** auto-run lint or ingest at session start.
 Invoke skills only when the user explicitly asks, or when a skill's own instructions require it.
+If `~/.mnemo/wiki/entities/person-user.md` exists and user context matters, read it before making personalized recommendations.
+If `graphify-out/GRAPH_REPORT.md` exists and codebase structure matters, read it before broad raw-file search.
 
 ---
 
@@ -70,7 +72,7 @@ At the end of any session that produced decisions, new knowledge, or significant
 ### `/mnemo:ingest`
 
 - When the user invokes it explicitly
-- After the user drops new files into `<project-name>/raw/`
+- After the user drops new files into `.mnemo/<project-name>/raw/`
 
 ### `/mnemo:query`
 
@@ -176,7 +178,7 @@ Body text referencing [[Related Concept]] and [[Entity Name]].
 
 ```
 .mnemo/                        (local — per project)
-└── <project-name>/            ← vault root (open this in Obsidian)
+└── <project-name>/
     ├── raw/                   ← source files (immutable input)
     ├── wiki/
     │   ├── sources/           ← one page per ingested raw source
@@ -187,7 +189,8 @@ Body text referencing [[Related Concept]] and [[Entity Name]].
     │   └── indexes/           ← index shards (created when >150 pages)
     ├── index.md               ← categorized table of contents
     ├── log.md                 ← audit trail (prevents re-processing)
-    └── SCHEMA.md              ← domain conventions (edit per project)
+    ├── SCHEMA.md              ← domain conventions (edit per project)
+    └── config.json            ← search backend configuration
 
 ~/.mnemo/                      (global — cross-project, flat structure)
 ├── raw/
