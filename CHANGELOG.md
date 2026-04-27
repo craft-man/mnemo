@@ -8,13 +8,10 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [0.10.0] — 2026-04-27
 
-### Added
-
--
-
 ### Changed
 
--
+- **Refactor: Encapsulation of proprietary scripts** — Moved module-specific Python scripts (`init_mnemo.py`, `wiki_lint.py`, `wiki_stats.py`) from the global `scripts/` directory to their respective skill directories (`skills/init/`, `skills/lint/`, `skills/stats/`). This enhances portability and modularity, ensuring that skills are self-contained and easier to use with external agents like Cursor or Codex.
+- **Standardized references** — Updated all `SKILL.md` files to use root-relative paths (e.g., `skills/init/init_mnemo.py`) for maximum compatibility across all AI agent environments.
 
 ---
 
