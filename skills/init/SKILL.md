@@ -14,7 +14,7 @@ compatibility: >
   agents invoke by natural language. No external dependencies.
 metadata:
   author: mnemo contributors
-  version: "0.12.0"
+  version: "0.13.0"
 allowed-tools: Read Write Edit Glob Bash
 ---
 

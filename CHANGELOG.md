@@ -6,6 +6,22 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.13.0] — 2026-04-28
+
+### Added
+
+- **`/mnemo:init` fast path schema setup** — the standalone Python init now offers to define the project domain taxonomy during initialization and writes a customized `.mnemo/<project-name>/SCHEMA.md` instead of only creating the starter template.
+- **`/mnemo:init` fast path onboard setup** — the Python init now ensures the global user profile tier exists and creates or reviews `~/.mnemo/wiki/entities/person-user.md`, matching the core init skill's onboard step.
+
+### Changed
+
+- **`/mnemo:init` fast path defaults** — qmd semantic search and graphify codebase mapping now default to yes (`[Y/n]`) in the Python init script.
+- **`/mnemo:init` graphify integration** — the Python init no longer stops at `graphify .`; it prepares `.graphifyignore`, validates `graphify-out/`, writes the codebase graph report/status synthesis pages, updates the index, and appends the graphify log entry.
+- **Init structure parity** — the Python init now creates `wiki/activity/` and preserves existing global tier files when onboarding runs against an existing `~/.mnemo/`.
+- **Test portability** — init tests now import the self-contained script from `skills/init/`, and lint tests import `wiki_lint.py` from `skills/lint/`, matching the refactored skill layout.
+
+---
+
 ## [0.12.0] — 2026-04-28
 
 ### Changed

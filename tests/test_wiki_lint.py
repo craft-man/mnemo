@@ -7,7 +7,7 @@ import unittest
 from contextlib import redirect_stdout
 from unittest.mock import patch
 
-sys.path.insert(0, str(pathlib.Path(__file__).parent.parent / "scripts"))
+sys.path.insert(0, str(pathlib.Path(__file__).parent.parent / "skills" / "lint"))
 from wiki_lint import parse_frontmatter, main
 
 
