@@ -46,6 +46,12 @@ supersedes: "Predecessor Page Title"     # this entity/concept replaced another
 
 Body text referencing [[Related Concept]] and [[Entity Name]].
 
+## Claims
+
+- **Claim:** <verifiable assertion>
+  **Evidence:** [[<Source Page Title>]] — "<short source excerpt>"
+  **Status:** active
+
 ## Links
 
 - [[Related Page Title]]
@@ -54,6 +60,13 @@ Body text referencing [[Related Concept]] and [[Entity Name]].
 
 **Rules:**
 - H1 = page title only. Never use H1 for sections.
+- New pages in `entities/`, `concepts/`, and `synthesis/` must include
+  `## Claims` with at least one sourced claim. `sources/`, `activity/`, and
+  graphify-generated pages are exempt.
+- Each claim must include `Claim`, `Evidence`, and `Status`.
+- `Evidence` must cite a source page with a wikilink plus a short excerpt.
+  Keep excerpts brief; they anchor the claim and must not replace the source.
+- `Status` must be one of `active`, `disputed`, or `superseded`.
 - Always end with a `## Links` section.
 - Wikilinks: `[[Exact H1 Title]]` — always the exact H1 title of the target page, not a filename.
 - Wikilinks are Obsidian-compatible.

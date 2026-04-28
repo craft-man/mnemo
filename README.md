@@ -32,6 +32,8 @@ mnemo accumulates. Each ingest run extracts entities and concepts, links them bi
 
 The difference compounds over time. At 5 sources it feels similar. At 50, the wiki answers questions your sources never explicitly addressed.
 
+Entity, concept, and synthesis pages also carry structured claims: each important assertion can point back to a source page and a short excerpt, with a status of `active`, `disputed`, or `superseded`.
+
 ---
 
 ## What it does
@@ -304,8 +306,9 @@ Processes all pending files from `raw/` via LLM synthesis.
 - Writes bidirectional wikilinks between source, entity, and concept pages
 - Enriches up to 15 related existing pages per ingest run
 - Enforces `source:` citation in frontmatter, so provenance is never silently lost
+- Writes structured `## Claims` for new entity/concept pages, with `Claim`, `Evidence`, and `Status`
 - Checks page size; warns at 400 lines, splits at 800
-- Detects contradictions with existing content and offers `[u]pdate / [k]eep both / [h]istory / [s]kip`. The `[h]istory` option marks an entity as superseded: it adds `superseded_by:` to the old page's frontmatter, appends a `## History` entry, and adds `supersedes:` to the new page
+- Detects contradictions with existing claims and offers `update / keep both / disputed / history / skip`. The `history` option marks an entity as superseded: it adds `superseded_by:` to the old page's frontmatter, appends a `## History` entry, and adds `supersedes:` to the new page
 
 ### `/mnemo:query <term>`
 
@@ -329,12 +332,16 @@ Audits the knowledge base and proposes fixes for:
 | `stale_claim` | Temporal language that may be outdated |
 | `gap_page` | Term in 3+ sources but no dedicated page |
 | `superseded_without_history` | Entity/concept with `superseded_by:` or `supersedes:` but no `## History` section |
+| `missing_claims_section` | Entity, concept, or synthesis page without `## Claims` |
+| `claim_without_evidence` | Claim bullet missing an `Evidence` field |
+| `claim_without_status` | Claim bullet missing a `Status` field |
+| `invalid_claim_status` | Claim status is not `active`, `disputed`, or `superseded` |
 
 Every proposed fix requires explicit approval before being applied.
 
 ### `/mnemo:save <title>`
 
-Saves Claude-generated content (summaries, comparisons, analyses) as a permanent wiki page with YAML frontmatter, routed to the correct category and indexed automatically.
+Saves generated content (summaries, comparisons, analyses) as a permanent wiki page with YAML frontmatter, routed to the correct category and indexed automatically. Saved entity, concept, and synthesis pages include structured claims when they contain verifiable assertions.
 
 ### `/mnemo:mine`
 

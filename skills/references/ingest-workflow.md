@@ -40,8 +40,10 @@ Sections: Summary (2–4 sentences), Key Points (bullets), Entities Mentioned (w
 ### 5. Write or update entity pages
 
 For each significant entity found in the source:
-- **New entity**: create `wiki/entities/<type>-<slug>.md`. Verify the source page already lists this entity in `## Entities Mentioned` before creating.
-- **Existing entity**: surgical edit — append `- [[Source Title]]` to `## Sources`, update `updated:` field in frontmatter.
+- **New entity**: create `wiki/entities/<type>-<slug>.md`. Verify the source page already lists this entity in `## Entities Mentioned` before creating. Include `## Claims` with at least one sourced claim using the standard `Claim` / `Evidence` / `Status` fields.
+- **Existing entity**: surgical edit — add or revise a sourced claim in `## Claims`, append `- [[Source Title]]` to `## Sources`, and update `updated:` in frontmatter. Prefer a claim update over only adding a source reference.
+- Before editing, compare incoming claims semantically with existing `## Claims` entries on the page and with claims on closely linked pages.
+- If a contradiction is detected, present the existing claim, existing evidence, incoming claim, and incoming evidence. Ask for one resolution: `update`, `keep both`, `disputed`, `history`, or `skip`.
 
 ### 6. Write or update concept pages
 
@@ -59,7 +61,7 @@ After creating source/entity/concept pages:
    - Source **refines or contradicts** a claim on this page.
    - Source introduces a **closely related technique** not yet mentioned.
    - Source is by an **author or project already referenced** on this page.
-5. If any criterion is met: one surgical append (wikilink bullet to `## Sources`, `## Related Sources`, `## See Also`, or `## Links`). Never rewrite page body.
+5. If any criterion is met: one surgical append (prefer a sourced `## Claims` bullet for entity/concept/synthesis pages; otherwise use `## Sources`, `## Related Sources`, `## See Also`, or `## Links`). Never rewrite page body.
 6. If fewer than 3 candidates found, skip enrichment entirely.
 
 ### 8. Update index
