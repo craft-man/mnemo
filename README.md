@@ -109,6 +109,7 @@ This matrix describes current intended behavior by host.
 | Cursor | Auto-loaded project memory file when supported | Natural language, or host-specific skill invocation | Inline fallback by default, native delegation if the host exposes it | Prefers a host-supported project memory file over a best-effort fallback |
 | OpenCode | Auto-loaded project memory file when supported | Natural language, or host-specific skill invocation | Inline fallback by default, native delegation if the host exposes it | Prefers a host-supported project memory file over a best-effort fallback |
 | Gemini CLI | Auto-loaded project memory file when supported | Natural language, or host-specific skill invocation | Inline fallback by default, native delegation if the host exposes it | Prefers a host-supported project memory file over a best-effort fallback |
+| Copilot | Best-effort project instructions unless auto-load is confirmed | Natural language/manual workflow | Inline/manual fallback | mnemo can write local instructions, but does not promise automatic loading across Copilot surfaces |
 | Other agentskills.io hosts | Host-specific | Natural language or skill invocation, depending on host | Inline fallback baseline | If no project memory file is known to auto-load, mnemo can write a best-effort local instructions file |
 
 ### Interpretation
@@ -152,18 +153,19 @@ Deterministic operations are handled by Python scripts (3.10+, no external depen
 | `scripts/init_mnemo.py` | Bootstrap vault structure | `python3 scripts/init_mnemo.py` |
 | `scripts/update_log.py` | Append entry to `log.md` | `python3 scripts/update_log.py --vault <path> --file <slug> --op <op>` |
 | `scripts/update_index.py` | Regenerate `index.md` from frontmatter | `python3 scripts/update_index.py --vault <path> [--dry-run] [--json]` |
+| `scripts/update_session_brief.py` | Regenerate compact startup context | `python3 scripts/update_session_brief.py --vault <path> [--summary <text>]` |
 | `scripts/show_session_brief.py` | Print compact startup context without modifying files | `python3 scripts/show_session_brief.py --vault <path> [--code]` |
 | `scripts/wiki_search.py` | BM25 search across wiki pages | `python3 scripts/wiki_search.py <mnemo_dir> <query>` |
 | `scripts/wiki_stats.py` | Size metrics and scaling status | `python3 scripts/wiki_stats.py <mnemo_dir>` |
-| `scripts/wiki_lint.py` | Structural audit of the wiki | `python3 scripts/wiki_lint.py <mnemo_dir>` |
+| `skills/lint/wiki_lint.py` | Structural audit of the wiki | `python3 skills/lint/wiki_lint.py <mnemo_dir>` |
 
 ---
 
 ## Search backends
 
-By default mnemo uses **BM25** — no extra dependencies, works out of the box.
+By default mnemo uses a simple stdlib **BM25** fallback — no extra dependencies, works out of the box for small wikis.
 
-For better results, both `/mnemo:init` and `python3 scripts/init_mnemo.py` offer to configure **[qmd](https://github.com/tobi/qmd)**, a local hybrid search engine (BM25 + vector embeddings). Once set up, `/mnemo:query` routes through qmd automatically.
+For medium and large wikis, **[qmd](https://github.com/tobi/qmd)** is recommended. It provides local hybrid search (BM25 + vector embeddings), and both `/mnemo:init` and `python3 scripts/init_mnemo.py` offer to configure it. Once set up, `/mnemo:query` routes through qmd automatically.
 
 **qmd requirements:** Node.js ≥ 22 or Bun ≥ 1.0, ~2 GB disk (models downloaded once on first use).
 
@@ -174,7 +176,7 @@ npm install -g @tobilu/qmd
 bun install -g @tobilu/qmd
 ```
 
-qmd is optional — BM25 remains available as fallback if qmd is unavailable or returns an error.
+qmd is optional — BM25 remains available as fallback if qmd is unavailable or returns an error. `/mnemo:stats` reports the active backend and recommends qmd when a BM25 wiki grows large.
 
 The active backend is stored in `.mnemo/<project-name>/config.json` under `search_backend` (`"bm25"` or `"qmd"`). Custom backends can be registered by adding a dispatch case to the query skill — see `skills/references/backends.md` for the interface spec.
 
@@ -358,6 +360,7 @@ The point: your agent starts with `graphify-out/GRAPH_REPORT.md` for codebase st
 ### `/mnemo:stats`
 
 Displays page counts per category, total lines, top 5 largest pages, and index scaling status.
+Also reports the active search backend and recommends qmd for large BM25 wikis.
 
 ### `/mnemo:log`
 

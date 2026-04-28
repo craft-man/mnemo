@@ -13,7 +13,7 @@ import datetime
 import pathlib
 import sys
 
-VALID_OPS = {"ingest", "generated", "skipped", "lint", "init"}
+VALID_OPS = {"ingest", "generated", "skipped", "lint", "init", "graphify"}
 
 
 def _now_utc() -> str:

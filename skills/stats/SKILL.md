@@ -19,7 +19,7 @@ allowed-tools: Read Glob Bash
 
 ## Step 0 — Python fast path (optional)
 
-1. Use `Glob('**/skills/stats/wiki_stats.py')` to locate the stats script.
+1. Use `Glob('**/scripts/wiki_stats.py')` first, then `Glob('**/skills/stats/wiki_stats.py')` if the public wrapper is not found.
 2. If found at `<script_path>`, run:
    ```
    python3 <script_path> .mnemo/<project-name>
@@ -27,7 +27,7 @@ allowed-tools: Read Glob Bash
 3. If exit code is 0: present the script output and **stop** — do not run steps 1–5.
 4. If Python is unavailable or script not found, continue to Step 1 below.
 
-Display metrics for `.mnemo/<project-name>/`.
+Display metrics for `.mnemo/<project-name>/`, including the active search backend from `config.json`.
 
 ## Steps
 
@@ -45,6 +45,8 @@ Display metrics for `.mnemo/<project-name>/`.
 **4. Check thresholds:**
 - `total_pages` >= 150 → "Index sharding active (or recommended)"
 - `total_pages` >= 100 → "Approaching index sharding threshold (150 pages)"
+- If `config.json` says `search_backend: bm25` and `total_pages` >= 300 → recommend qmd for better query quality and latency while noting BM25 remains available as fallback
+- If `search_backend: qmd` → report the configured qmd collection and do not warn about BM25
 - Any page > 400 lines → include in oversized list (warning)
 - Any page > 800 lines → include in critical list (should have been split during ingest)
 
@@ -68,7 +70,9 @@ Display metrics for `.mnemo/<project-name>/`.
 2. ...
 
 ### Scaling status
+- Search backend: <bm25 | qmd | unknown>
 - Index: <sharded | flat | approaching threshold (X/150)>
 - Oversized pages (>400 lines): <list paths or "none">
 - Critical pages (>800 lines): <list paths or "none">
+- Search: <BM25 OK at this size | qmd recommended | qmd configured>
 ```

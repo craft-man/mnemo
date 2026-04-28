@@ -24,12 +24,12 @@ Initialize `.mnemo/<project-name>/` with the full taxonomy structure.
 
 ## Step 0 — Python fast path (optional)
 
-Fast path: use `Glob('**/skills/init/init_mnemo.py')` to locate the script.
+Fast path: use `Glob('**/scripts/init_mnemo.py')` first, then `Glob('**/skills/init/init_mnemo.py')` if the public wrapper is not found.
 If found at `<script_path>`, run:
 ```
 python3 <script_path>
 ```
-If exit 0 — confirm to the user that the vault was initialized, then **stop**.
+If exit 0 — confirm to the user that the vault filesystem was initialized, then continue with the host-aware steps below that are not handled safely by the generic script: agent memory wiring, session-end reminder wiring, graphify guidance, and Obsidian guidance. The Python fast path is a filesystem bootstrap, not the whole `/mnemo:init` workflow.
 If exit non-zero — emit `⚠ fast path failed (exit <code>) — falling back to LLM.` then continue with the steps below.
 If Python unavailable or script not found — continue with the steps below.
 
@@ -54,6 +54,7 @@ Stop here.
     │   └── indexes/            ← index shards (created when >150 pages)
     ├── index.md
     ├── log.md
+    ├── SESSION_BRIEF.md        ← compact startup context for agents
     ├── SCHEMA.md
     └── config.json
 ```
@@ -168,6 +169,14 @@ Write `.mnemo/<project-name>/config.json`:
 > Next: drop files into `.mnemo/<project-name>/raw/` and run `/mnemo:ingest`."
 > (If schema was not defined in step 4, add: "Run `/mnemo:schema` to define your domain taxonomy first.")
 
+**8b. Generate session brief** — after `index.md`, `log.md`, and `config.json` exist, create the compact startup context file.
+
+Fast path: use `Glob('**/mnemo/scripts/update_session_brief.py')` or `Glob('**/scripts/update_session_brief.py')` to locate the script. If found at `<script_path>`, run:
+```
+python3 <script_path> --vault .mnemo/<project-name>
+```
+If the script is unavailable or fails, write `.mnemo/<project-name>/SESSION_BRIEF.md` manually with short sections for startup reads, project summary, canonical pages, recent changes, active threads, and guardrails. Do not copy raw source content or the full index.
+
 **9. Agent memory wiring** — offer to persist the wiki in the project's agent instructions/memory:
 
 Ask the user:
@@ -201,8 +210,8 @@ This project has a mnemo knowledge base in `.mnemo/<project-name>/`.
 
 At the start of every session:
 - Read the user profile if it exists at `~/.mnemo/wiki/entities/person-user.md`
-- Read `graphify-out/GRAPH_REPORT.md` if it exists
-- Read the latest canonical codebase recap produced for mnemo, if one exists in the project's knowledge base
+- Read `.mnemo/<project-name>/SESSION_BRIEF.md` if it exists
+- Read `graphify-out/GRAPH_REPORT.md` only if the task concerns codebase structure
 - Use that context before answering project-specific questions or making implementation decisions
 
 During the session:

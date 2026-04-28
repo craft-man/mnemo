@@ -152,3 +152,9 @@ updated: YYYY-MM-DD
 *(Write these as a single file — the frontmatter and body blocks above are shown separately for clarity only.)*
 
 5. Report: "Activity log written to `wiki/activity/YYYY-MM-DD.md`."
+
+6. Refresh the session brief after the activity log is written. Use `Glob('**/mnemo/scripts/update_session_brief.py')` or `Glob('**/scripts/update_session_brief.py')`; if found, run:
+   ```
+   python3 <script_path> --vault .mnemo/<project-name>
+   ```
+   If the script is unavailable, update `SESSION_BRIEF.md` manually with a short recent activity note. Do not load or copy the full wiki.

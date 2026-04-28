@@ -18,7 +18,7 @@ allowed-tools: Read Write Edit Glob Grep Bash
 
 ## Step 0 — Python fast path (optional)
 
-Use `Glob('**/mnemo/scripts/wiki_lint.py')` to locate the script.
+Use `Glob('**/skills/lint/wiki_lint.py')` to locate the script.
 If found:
 - Read `{vault}/log.md`, look for `# Last lint: <timestamp>`. If found, use
   `--since <timestamp>`.
@@ -254,3 +254,9 @@ If script not found → apply LLM fallback below.
 LLM fallback — update `{vault}/log.md`:
 - If `# Last lint: ...` exists: replace with `# Last lint: <UTC ISO timestamp>`
 - Otherwise: add as the first line of `{vault}/log.md`
+
+If lint applied structural changes that affect startup context (index regeneration, graph status pages, frontmatter category/title changes, or deleted/renamed pages), refresh `{vault}/SESSION_BRIEF.md` after recording the lint timestamp:
+```
+python3 <update_session_brief.py> --vault {vault}
+```
+Skip the brief update for read-only lint runs or purely local prose fixes.
