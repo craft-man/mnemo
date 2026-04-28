@@ -6,6 +6,22 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.14.0] — 2026-04-28
+
+### Added
+
+- **Manual startup context** — added `/mnemo:context` and `scripts/show_session_brief.py` to load the compact mnemo context manually when an agent does not auto-load project instructions before the first prompt.
+- **Session brief generation** — added `scripts/update_session_brief.py` plus init integration so each vault can maintain a compact `SESSION_BRIEF.md` startup summary.
+- **Public CLI wrappers** — added root-level wrappers for init and stats so deterministic workflows can be used outside a skill runtime.
+- **Copilot fallback wiring** — added best-effort Copilot/local instructions that point agents at the session brief without promising automatic loading.
+
+### Changed
+
+- **Startup context model** — updated agent memory guidance to read `SESSION_BRIEF.md` first, load `graphify-out/GRAPH_REPORT.md` only for code-structure tasks, and avoid loading the whole wiki at startup.
+- **Scaling guidance** — expanded stats and scaling checks for qmd recommendations, oversized pages, and index growth.
+
+---
+
 ## [0.13.0] — 2026-04-28
 
 ### Added

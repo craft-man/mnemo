@@ -3,7 +3,7 @@
 </p>
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.13.0-blue)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.14.0-blue)](CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
