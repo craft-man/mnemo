@@ -15,6 +15,7 @@ This document is your operating contract — follow it strictly.
 | `/mnemo:schema` | Interactively create or revise the domain taxonomy (SCHEMA.md) |
 | `/mnemo:ingest` | Synthesize `raw/` files → categorized `wiki/` |
 | `/mnemo:query` | Search the knowledge base |
+| `/mnemo:context` | Load minimal mnemo startup context manually |
 | `/mnemo:lint` | Audit for structure issues, broken links, oversized pages |
 | `/mnemo:save` | Persist generated content as a wiki page |
 | `/mnemo:stats` | Display size metrics and scaling thresholds |
@@ -41,8 +42,11 @@ Always read the relevant wiki files first, then synthesize.
 
 Context loads on demand. Do **not** auto-run lint or ingest at session start.
 Invoke skills only when the user explicitly asks, or when a skill's own instructions require it.
+If `.mnemo/<project-name>/SESSION_BRIEF.md` exists, read it first for compact startup context.
 If `~/.mnemo/wiki/entities/person-user.md` exists and user context matters, read it before making personalized recommendations.
 If `graphify-out/GRAPH_REPORT.md` exists and codebase structure matters, read it before broad raw-file search.
+Do not load the whole wiki at startup; use `/mnemo:query <term>` for focused retrieval.
+If startup auto-load did not happen, run `/mnemo:context` as a read-only fallback.
 
 ---
 
@@ -79,6 +83,12 @@ At the end of any session that produced decisions, new knowledge, or significant
 - Before answering any factual question that might be in the knowledge base
 - Search **local first** (`.mnemo/<project-name>/`), then global (`~/.mnemo/`) if no results
 - If query returns 0 results, say so explicitly — never hallucinate wiki content
+
+### `/mnemo:context`
+
+- When startup auto-load did not happen before the first prompt
+- Read only the session brief, optional global profile, and `graphify-out/GRAPH_REPORT.md` with `--code`
+- Never regenerate the brief automatically; report the update command if it is missing or stale
 
 ### `/mnemo:lint`
 
@@ -189,6 +199,7 @@ Body text referencing [[Related Concept]] and [[Entity Name]].
     │   └── indexes/           ← index shards (created when >150 pages)
     ├── index.md               ← categorized table of contents
     ├── log.md                 ← audit trail (prevents re-processing)
+    ├── SESSION_BRIEF.md       ← compact startup context for agents
     ├── SCHEMA.md              ← domain conventions (edit per project)
     └── config.json            ← search backend configuration
 

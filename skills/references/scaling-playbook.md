@@ -8,7 +8,7 @@
 | 50–99 | Growing | Start using `tags:` frontmatter for filtering. Review SCHEMA.md. |
 | 100–149 | Approaching shard | Run lint monthly. Check for orphans and bloated pages. |
 | ≥ 150 | Shard required | Split index into per-category shards in `wiki/indexes/`. |
-| ≥ 300 | BM25 critical | Python `wiki_search.py` becomes essential for query performance. |
+| ≥ 300 | Search backend review | qmd recommended. BM25 remains a simple fallback, but query quality and latency degrade as the wiki grows. |
 | ≥ 500 | Lint weekly | Run structural lint after every 5 ingests. Semantic lint weekly. |
 | ≥ 1000 | Consider database | Markdown portability starts to trade off against query latency. |
 
@@ -27,6 +27,20 @@ When total wiki pages exceed 150:
    ```
 2. Each new page is appended to its category shard, not to `index.md`.
 3. Queries read the relevant shard (or all shards if no `category:` filter).
+
+---
+
+## Search Backend Scaling
+
+BM25 is the zero-dependency fallback. It is useful for small wikis and offline portability, but the stdlib implementation is intentionally simple and should not be treated as a full search engine.
+
+Use qmd when the wiki becomes medium-sized or search quality matters:
+
+- < 100 pages: BM25 is usually fine.
+- 100-299 pages: qmd recommended if queries are frequent or nuanced.
+- ≥ 300 pages: qmd strongly recommended; BM25 remains available as fallback.
+
+`/mnemo:stats` reports the active backend from `config.json` and warns when a large wiki is still on BM25.
 
 ---
 

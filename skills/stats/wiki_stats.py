@@ -4,6 +4,7 @@
 Usage: wiki_stats.py <mnemo_dir>
 """
 import sys
+import json
 from pathlib import Path
 
 CATEGORIES = ['sources', 'entities', 'concepts', 'synthesis']
@@ -17,6 +18,13 @@ def main() -> None:
     wiki = root / 'wiki'
     if not wiki.exists():
         sys.exit('ERROR: wiki/ not found. Run /mnemo:init first.')
+
+    config_path = root / 'config.json'
+    try:
+        config = json.loads(config_path.read_text(encoding='utf-8')) if config_path.exists() else {}
+    except (OSError, json.JSONDecodeError):
+        config = {}
+    backend = config.get('search_backend', 'bm25')
 
     counts: dict[str, int] = {}
     all_pages: list[Path] = []
@@ -68,9 +76,17 @@ def main() -> None:
     else:
         print('No pages found.')
     print('\n### Scaling status\n')
+    print(f'- Search backend: {backend}')
     print(f'- Index: {index_status}')
     print(f'- Oversized pages (>400 lines): {len(oversized) if oversized else "none"}')
     print(f'- Critical pages (>800 lines): {len(critical) if critical else "none"}')
+    if backend == 'bm25' and total_pages >= 300:
+        print('- Search: qmd recommended for this wiki size; BM25 remains available as fallback.')
+    elif backend == 'bm25':
+        print('- Search: BM25 fallback is fine at this size; consider qmd as the wiki grows.')
+    elif backend == 'qmd':
+        collection = config.get('qmd_collection', 'mnemo-wiki')
+        print(f'- Search: qmd configured (`{collection}`).')
     for n, p in critical:
         print(f'  - `{p.relative_to(root).as_posix()}` ({n} lines) — split required')
 

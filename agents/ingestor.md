@@ -296,7 +296,17 @@ LLM fallback — add to `{vault}/log.md`:
 - raw/<original_filename> | <UTC ISO timestamp> | ingest
 ```
 
-## Step 12a — Sync qmd index (if configured)
+## Step 12a — Update session brief
+
+After the index and log are updated, refresh `{vault}/SESSION_BRIEF.md`.
+
+Fast path: use `Glob('**/mnemo/scripts/update_session_brief.py')` or `Glob('**/scripts/update_session_brief.py')` to locate the script. If found at `<script_path>`, run:
+```
+python3 <script_path> --vault {vault}
+```
+If the script is unavailable or fails, update the brief manually with a compact recent-changes entry for `raw/<original_filename>`. Keep it short; do not copy source content or the full index.
+
+## Step 12b — Sync qmd index (if configured)
 
 Read `{vault}/config.json`. If `search_backend` = `"qmd"`:
 read `qmd_collection` (default: `"mnemo-wiki"`), then:
@@ -305,7 +315,7 @@ qmd update "$QMD_COLLECTION"
 ```
 If exit code is non-zero: warn in the report but do not abort.
 
-## Step 12b — Suggest synthesis pages
+## Step 12c — Suggest synthesis pages
 
 For each entity/concept page created or updated, count the bullets in
 `## Sources`. If ≥ 3 and no `synthesis/` page exists for that subject:

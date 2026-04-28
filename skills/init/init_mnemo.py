@@ -82,6 +82,15 @@ def create_structure(root: pathlib.Path, overwrite: bool = True) -> None:
             path.write_text(template, encoding="utf-8")
 
 
+def update_session_brief(mnemo_root: pathlib.Path) -> None:
+    script = pathlib.Path(__file__).resolve().parents[2] / "scripts" / "update_session_brief.py"
+    if not script.exists():
+        return
+    result = subprocess.run([sys.executable, str(script), "--vault", str(mnemo_root)])
+    if result.returncode != 0:
+        print("  SESSION_BRIEF.md was not updated. Run scripts/update_session_brief.py manually to retry.")
+
+
 def ensure_global_tier() -> pathlib.Path:
     global_root = pathlib.Path.home() / ".mnemo"
     create_structure(global_root, overwrite=False)
@@ -546,6 +555,7 @@ def main() -> None:
 
     if choice in ("1", "2"):
         prompt_obsidian(local_root)
+        update_session_brief(local_root)
 
     print("\nNext steps:")
     if graphify_done:

@@ -21,8 +21,10 @@ Otherwise, append to `GEMINI.md` (create it if it doesn't exist):
 
 This project maintains a synthesized wiki at `.mnemo/<project-name>/wiki/`.
 
-- Consult `.mnemo/<project-name>/index.md` before answering domain questions.
-- Read relevant wiki pages (sources, entities, concepts, synthesis) for grounded answers.
+- At session startup, read `.mnemo/<project-name>/SESSION_BRIEF.md` if present.
+- Read `graphify-out/GRAPH_REPORT.md` only when the task concerns codebase structure.
+- Do not load the whole wiki at startup; use `/mnemo:query <term>` for factual lookup.
+- If the brief was not auto-read at startup, the user can run `/mnemo:context`.
 - Skill instructions are in `skills/<skill-name>/SKILL.md` — follow them to ingest, query, save, and lint.
 ```
 

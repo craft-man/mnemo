@@ -128,4 +128,14 @@ LLM fallback: append to `.mnemo/<project-name>/log.md`:
 - wiki/<category>/<slug>.md | <UTC ISO timestamp> | generated
 ```
 
-**9. Confirm:** file path created, category, new vs. overwrite, index entry added.
+**8b. Update session brief**
+
+After Step 8 updates `log.md`, refresh `.mnemo/<project-name>/SESSION_BRIEF.md`.
+
+Fast path: use `Glob('**/mnemo/scripts/update_session_brief.py')` or `Glob('**/scripts/update_session_brief.py')` to locate the script. If found at `<script_path>`, run:
+```
+python3 <script_path> --vault .mnemo/<project-name>
+```
+If the script is unavailable or fails, update the brief manually with a compact recent-changes entry for `wiki/<category>/<slug>.md`. Do not copy page bodies or the full index.
+
+**9. Confirm:** file path created, category, new vs. overwrite, index entry added, session brief refreshed.

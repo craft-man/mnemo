@@ -168,10 +168,25 @@ Update `.mnemo/<project-name>/index.md` under `## Synthesis` with links to:
 ```
 Add the heading if missing. Avoid duplicate entries on re-run.
 
-Append to `.mnemo/<project-name>/log.md`:
+Update `.mnemo/<project-name>/log.md` after the index links are present.
+
+Fast path: use `Glob('**/mnemo/scripts/update_log.py')` or `Glob('**/scripts/update_log.py')` to locate the script. If found at `<script_path>`, run:
+```
+python3 <script_path> --vault .mnemo/<project-name> --file graphify-out/graph.json --op graphify
+```
+
+LLM fallback — append to `.mnemo/<project-name>/log.md`:
 ```
 - graphify-out/graph.json | <UTC ISO timestamp> | graphify
 ```
+
+Then refresh `.mnemo/<project-name>/SESSION_BRIEF.md`.
+
+Fast path: use `Glob('**/mnemo/scripts/update_session_brief.py')` or `Glob('**/scripts/update_session_brief.py')` to locate the script. If found at `<script_path>`, run:
+```
+python3 <script_path> --vault .mnemo/<project-name>
+```
+If the script is unavailable, update the brief manually and include `graphify-out/GRAPH_REPORT.md` as a startup read only for codebase-structure tasks.
 
 **Report:**
 ```
