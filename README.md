@@ -57,6 +57,7 @@ The project tier is a taxonomy-based wiki:
     │   └── indexes/  ← index shards when the wiki grows large
     ├── index.md      ← categorized table of contents
     ├── log.md        ← audit trail
+    ├── SESSION_BRIEF.md ← compact startup context for agents
     ├── SCHEMA.md     ← domain conventions (edit per project)
     └── config.json   ← search backend configuration
 ```
@@ -151,6 +152,7 @@ Deterministic operations are handled by Python scripts (3.10+, no external depen
 | `scripts/init_mnemo.py` | Bootstrap vault structure | `python3 scripts/init_mnemo.py` |
 | `scripts/update_log.py` | Append entry to `log.md` | `python3 scripts/update_log.py --vault <path> --file <slug> --op <op>` |
 | `scripts/update_index.py` | Regenerate `index.md` from frontmatter | `python3 scripts/update_index.py --vault <path> [--dry-run] [--json]` |
+| `scripts/show_session_brief.py` | Print compact startup context without modifying files | `python3 scripts/show_session_brief.py --vault <path> [--code]` |
 | `scripts/wiki_search.py` | BM25 search across wiki pages | `python3 scripts/wiki_search.py <mnemo_dir> <query>` |
 | `scripts/wiki_stats.py` | Size metrics and scaling status | `python3 scripts/wiki_stats.py <mnemo_dir>` |
 | `scripts/wiki_lint.py` | Structural audit of the wiki | `python3 scripts/wiki_lint.py <mnemo_dir>` |
@@ -184,6 +186,7 @@ Slash commands work in any agent. Natural language alternatives are shown in com
 
 ```
 /mnemo:init                          # "initialize mnemo" — guides qmd, graphify, schema, and agent memory setup
+/mnemo:context                       # "Charge le contexte mnemo minimal pour ce projet."
 # drop files into .mnemo/<project-name>/raw/
 /mnemo:ingest                        # "ingest files in raw/"
 /mnemo:graphify                      # optional: map the codebase into graphify-out/
@@ -222,6 +225,7 @@ Bootstraps a new knowledge base. Run once per project — warns if already initi
     │   └── indexes/
     ├── index.md
     ├── log.md        ← ingest and graphify audit trail
+    ├── SESSION_BRIEF.md ← compact startup context
     ├── SCHEMA.md     ← starter taxonomy, ready to edit
     └── config.json   ← search backend (`bm25` or `qmd`)
 ```
@@ -233,11 +237,45 @@ Bootstraps a new knowledge base. Run once per project — warns if already initi
 - offers to run `/mnemo:schema` immediately
 - ensures your global profile exists via `/mnemo:onboard`
 - offers to enable **qmd** for hybrid semantic search
+- generates `SESSION_BRIEF.md` for compact startup context
 - offers to write project memory instructions into a host-supported auto-loaded memory file when available
 - offers to configure a session-end `/mnemo:mine` reminder when the host supports local hooks or reminders
 - offers to run `/mnemo:graphify` right away
 
-When graphify is enabled, init instructs future sessions to read `graphify-out/GRAPH_REPORT.md` first if it exists.
+Future sessions should read `SESSION_BRIEF.md` first. When graphify is enabled, they read `graphify-out/GRAPH_REPORT.md` only for codebase-structure tasks.
+
+### `/mnemo:context`
+
+Loads the minimal mnemo startup context manually when an agent did not auto-load project instructions before the first prompt.
+
+It is read-only and loads only:
+
+- `.mnemo/<project-name>/SESSION_BRIEF.md`
+- `~/.mnemo/wiki/entities/person-user.md` if present
+- `graphify-out/GRAPH_REPORT.md` only with `/mnemo:context --code`
+
+It never reads the whole wiki and never regenerates `SESSION_BRIEF.md`. If the brief is missing or stale, it reports the regeneration command:
+
+```bash
+python3 scripts/update_session_brief.py --vault .mnemo/<project-name>
+```
+
+Without an agent, use:
+
+```bash
+python3 scripts/show_session_brief.py --vault .mnemo/<project-name> [--code]
+```
+
+### Startup context model
+
+mnemo keeps startup context compact:
+
+1. Read `.mnemo/<project-name>/SESSION_BRIEF.md` if present.
+2. Read `graphify-out/GRAPH_REPORT.md` only when the task concerns code structure.
+3. Use `/mnemo:query <term>` for focused retrieval.
+
+Do not load the whole wiki at session startup. `index.md` remains the catalog; `SESSION_BRIEF.md` is the operational summary.
+If startup auto-load did not happen, run `/mnemo:context` or say "Charge le contexte mnemo minimal pour ce projet."
 
 ### `/mnemo:onboard`
 

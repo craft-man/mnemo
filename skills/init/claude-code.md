@@ -20,7 +20,15 @@ Otherwise, build the stanza based on what was initialized:
 ## mnemo
 
 This project has a mnemo knowledge base in `.mnemo/<project-name>/`.
-- Query it with `/mnemo:query <term>` before answering factual questions
+
+At session startup:
+- Read `.mnemo/<project-name>/SESSION_BRIEF.md` if it exists.
+- Read `graphify-out/GRAPH_REPORT.md` only when the task concerns codebase structure.
+- Do not load the whole wiki at startup.
+- If the brief was not auto-read at startup, the user can run `/mnemo:context`.
+
+During the session:
+- Query it with `/mnemo:query <term>` before answering factual questions.
 - Ingest new sources with `/mnemo:ingest`
 - When a spec or plan is finalized (e.g. from superpowers brainstorming or writing-plans), move it to `.mnemo/<project-name>/raw/` and run `/mnemo:ingest` to add it to the knowledge base
 ```

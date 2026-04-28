@@ -15,6 +15,10 @@ This project uses mnemo for knowledge management.
 
 - Wiki: `.mnemo/<project-name>/wiki/` — synthesized, categorized, interlinked pages
 - Index: `.mnemo/<project-name>/index.md` — categorized table of contents
+- Session brief: `.mnemo/<project-name>/SESSION_BRIEF.md` — compact startup context
+
+At session startup, read `SESSION_BRIEF.md` if present. Read `graphify-out/GRAPH_REPORT.md` only when the task concerns codebase structure. Do not load the whole wiki at startup.
+If startup auto-load did not happen, run `/mnemo:context` or ask: "Charge le contexte mnemo minimal pour ce projet."
 
 **Before answering any factual question** that might be in the knowledge base, run `/mnemo:query <topic>`. If results are returned, synthesize from them. If 0 results, say so explicitly — never invent wiki content.
 
@@ -36,8 +40,11 @@ Add this stanza to `AGENTS.md` at the project root:
 
 Wiki location: `.mnemo/<project-name>/wiki/`
 Index: `.mnemo/<project-name>/index.md`
+Session brief: `.mnemo/<project-name>/SESSION_BRIEF.md`
 
 Workflow:
+- At session startup, read `SESSION_BRIEF.md` if present. Read `graphify-out/GRAPH_REPORT.md` only for codebase-structure tasks. Do not load the whole wiki.
+- If startup auto-load did not happen, run `/mnemo:context` or ask: "Charge le contexte mnemo minimal pour ce projet."
 - Query before answering: invoke the `query` skill with the topic.
 - Ingest new sources: invoke the `ingest` skill after adding files to `.mnemo/<project-name>/raw/`.
 - Save insights: invoke the `save` skill with a descriptive title.
@@ -57,10 +64,39 @@ Add this stanza to `GEMINI.md` at the project root:
 
 This project maintains a synthesized wiki at `.mnemo/<project-name>/wiki/`.
 
-- Consult `.mnemo/<project-name>/index.md` before answering domain questions.
-- Read relevant wiki pages (sources, entities, concepts, synthesis) for grounded answers.
+- Read `.mnemo/<project-name>/SESSION_BRIEF.md` at session startup if present.
+- Read `graphify-out/GRAPH_REPORT.md` only when the task concerns codebase structure.
+- If startup auto-load did not happen, run `/mnemo:context` or ask: "Charge le contexte mnemo minimal pour ce projet."
+- Use `/mnemo:query <term>` for factual lookup instead of loading the whole wiki.
 - Skill instructions are in `skills/<skill-name>/SKILL.md` — follow them to ingest, query, save, and lint.
 ```
+
+---
+
+## Copilot — best-effort support
+
+Copilot auto-load behavior depends on the specific surface and repository configuration. Use this support as best effort unless the current environment confirms a project instruction file is loaded automatically.
+
+If a confirmed Copilot instruction file exists, add a short mnemo stanza there. Otherwise place the same stanza in `AGENTS.md` for manual use:
+
+```markdown
+## Knowledge Base (mnemo)
+
+Read `.mnemo/<project-name>/SESSION_BRIEF.md` first if present. If startup auto-load did not happen, run `/mnemo:context` or ask: "Charge le contexte mnemo minimal pour ce projet." Read `graphify-out/GRAPH_REPORT.md` only for codebase-structure tasks. Use `/mnemo:query <term>` or `skills/query/SKILL.md` before answering factual questions. Do not load the whole wiki at startup.
+```
+
+---
+
+## Startup Context Model
+
+Agents should start from the smallest useful context:
+
+1. `SESSION_BRIEF.md` for project summary, startup reads, canonical pages, and recent changes.
+2. `graphify-out/GRAPH_REPORT.md` only when codebase structure matters.
+3. `/mnemo:query <term>` for focused retrieval.
+
+`index.md` is a catalog, not startup context. Load it only when the brief or query workflow points there.
+Manual fallback for all agents, including Copilot: run `/mnemo:context` or say "Charge le contexte mnemo minimal pour ce projet." Use `/mnemo:context --code` only when codebase structure matters.
 
 ---
 
@@ -92,6 +128,7 @@ mnemo uses an extension file pattern for agent-specific wiring. To add support f
    - Frontmatter with `name` and `description`
    - Ask the user if they want to wire mnemo into their agent's memory config file
    - If yes: check for an existing stanza, then append it
+   - Point startup reads at `SESSION_BRIEF.md`; do not tell the agent to load the whole wiki
    - Confirm when done
 3. The core `skills/init/SKILL.md` will automatically delegate to your file in step 11.
 
