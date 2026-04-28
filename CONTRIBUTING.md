@@ -53,12 +53,12 @@ Skills and agents invoke Python scripts as a "Step 0" before their LLM logic. Th
 Fast path: use `Glob('**/mnemo/scripts/<script>.py')` to locate the script.
 If found, run: `python3 <script_path> --vault <vault> [args]`
 If exit 0 → skip LLM steps.
-If exit non-zero → emit `⚠ fast path failed (exit <code>) — falling back to LLM.` and continue.
+If exit non-zero → emit `⚠ fast path failed (exit <code>); falling back to LLM.` and continue.
 If script not found → apply LLM fallback.
 ```
 
 **Rules for adding a new fast path script:**
-- Stdlib only — no external dependencies
+- Stdlib only; no external dependencies
 - Exit 0 = success, exit 1 = error (print to stderr)
 - Must have a corresponding test file in `tests/test_<script_name>.py`
 - Follow naming convention: `verb_noun.py` (e.g. `update_log.py`, `update_index.py`)
@@ -103,14 +103,14 @@ allowed-tools: Read Write Edit Grep Glob Bash
 
 ---
 
-## Step 1 — ...
-## Step N — Report
+## Step 1: ...
+## Step N: Report
 ```
 
 **Conventions :**
 - `reasoning-profile: heavy` pour les workflows lourds (ingest complet, lint, graph analytics)
 - `reasoning-profile: balanced` pour les workflows de lecture/synthèse (query, save)
-- Chaque agent est self-contained — ne pas importer ni référencer le SKILL.md parent
+- Chaque agent est self-contained; ne pas importer ni référencer le SKILL.md parent
 - Les inputs sont explicitement listés dans la section `## Inputs` du prompt de dispatch
 - Terminer par un step Report qui résume les actions effectuées
 - Le workflow doit rester valide en délégation native et en fallback inline
@@ -145,7 +145,7 @@ Les fichiers agents ne portent pas de version individuelle. La version du plugin
 
 ## Skill authoring tips
 
-- Write explicit stop conditions. Agents follow instructions literally — vague wording leads to over-eager behaviour, like ingesting files twice.
+- Write explicit stop conditions. Agents follow instructions literally, and vague wording leads to over-eager behaviour, like ingesting files twice.
 - Put guard clauses first. Steps execute top to bottom.
 - One action per step. It keeps retry logic predictable.
 - Write edge cases in prose: what should the agent do when a file is missing, already processed, or oversized?
@@ -189,4 +189,4 @@ agent files (`agents/*.md`) do not carry individual version numbers.
 
 ## License
 
-MIT — contributions are accepted under the same license.
+MIT. Contributions are accepted under the same license.

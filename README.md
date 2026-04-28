@@ -26,7 +26,7 @@ Inspired by Karpathy's [LLM Wiki pattern](https://gist.github.com/karpathy/442a6
 
 ## Why not just RAG?
 
-RAG retrieves — it doesn't remember. Every query starts from scratch: embed, search, read, answer, forget.
+RAG retrieves, but it doesn't remember. Every query starts from scratch: embed, search, read, answer, forget.
 
 mnemo accumulates. Each ingest run extracts entities and concepts, links them bidirectionally, and updates existing pages with new citations. A concept page that starts with one source reference grows into a dense hub as more sources arrive. Queries hit a pre-synthesized graph, not raw documents.
 
@@ -38,9 +38,9 @@ The difference compounds over time. At 5 sources it feels similar. At 50, the wi
 
 mnemo gives your agent a two-tier memory system:
 
-- **Project knowledge base** (`.mnemo/<project-name>/`) — sources, entities, concepts, syntheses, schema, and audit log for the current project
-- **Global profile** (`~/.mnemo/`) — persistent user profile and cross-project memory
-- **Codebase graph runtime** (`graphify-out/`, optional) — graphify's native code-structure artifacts for fast codebase orientation
+- **Project knowledge base** (`.mnemo/<project-name>/`): sources, entities, concepts, syntheses, schema, and audit log for the current project
+- **Global profile** (`~/.mnemo/`): persistent user profile and cross-project memory
+- **Codebase graph runtime** (`graphify-out/`, optional): graphify's native code-structure artifacts for fast codebase orientation
 
 The project tier is a taxonomy-based wiki:
 
@@ -64,7 +64,7 @@ The project tier is a taxonomy-based wiki:
 
 `graphify-out/` is intentionally separate from `.mnemo/`: graphify owns codebase analysis, cache, and structured graph artifacts; mnemo owns the knowledge base, profile, and durable notes.
 
-mnemo exposes its skills as portable `SKILL.md` workflows for any [agentskills.io](https://agentskills.io)-compatible agent — no server required.
+mnemo exposes its skills as portable `SKILL.md` workflows for any [agentskills.io](https://agentskills.io)-compatible agent. No server required.
 
 ---
 
@@ -81,7 +81,7 @@ mnemo exposes its skills as portable `SKILL.md` workflows for any [agentskills.i
 /plugin marketplace add craft-man/mnemo
 ```
 
-Once installed, mnemo is available in any project — no `--plugin-dir` needed.
+Once installed, mnemo is available in any project. No `--plugin-dir` needed.
 
 ### Other agents (Codex, Cursor, OpenCode…)
 
@@ -129,7 +129,7 @@ In any agent (Claude Code, Codex, Cursor, OpenCode, Gemini CLI…):
 /mnemo:init
 ```
 
-Without an agent — standalone bootstrap (Python 3.10+):
+Without an agent, use the standalone bootstrap (Python 3.10+):
 
 ```bash
 python3 scripts/init_mnemo.py
@@ -163,7 +163,7 @@ Deterministic operations are handled by Python scripts (3.10+, no external depen
 
 ## Search backends
 
-By default mnemo uses a simple stdlib **BM25** fallback — no extra dependencies, works out of the box for small wikis.
+By default mnemo uses a simple stdlib **BM25** fallback. It has no extra dependencies and works out of the box for small wikis.
 
 For medium and large wikis, **[qmd](https://github.com/tobi/qmd)** is recommended. It provides local hybrid search (BM25 + vector embeddings), and both `/mnemo:init` and `python3 scripts/init_mnemo.py` offer to configure it. Once set up, `/mnemo:query` routes through qmd automatically.
 
@@ -176,28 +176,28 @@ npm install -g @tobilu/qmd
 bun install -g @tobilu/qmd
 ```
 
-qmd is optional — BM25 remains available as fallback if qmd is unavailable or returns an error. `/mnemo:stats` reports the active backend and recommends qmd when a BM25 wiki grows large.
+qmd is optional. BM25 remains available as fallback if qmd is unavailable or returns an error. `/mnemo:stats` reports the active backend and recommends qmd when a BM25 wiki grows large.
 
-The active backend is stored in `.mnemo/<project-name>/config.json` under `search_backend` (`"bm25"` or `"qmd"`). Custom backends can be registered by adding a dispatch case to the query skill — see `skills/references/backends.md` for the interface spec.
+The active backend is stored in `.mnemo/<project-name>/config.json` under `search_backend` (`"bm25"` or `"qmd"`). Custom backends can be registered by adding a dispatch case to the query skill; see `skills/references/backends.md` for the interface spec.
 
 ---
 
 ## Typical workflow
 
-Slash commands work in any agent. Natural language alternatives are shown in comments — use whichever your agent prefers.
+Slash commands work in any agent. Natural language alternatives are shown in comments, so use whichever your agent prefers.
 
 ```
-/mnemo:init                          # "initialize mnemo" — guides qmd, graphify, schema, and agent memory setup
+/mnemo:init                          # "initialize mnemo"; guides qmd, graphify, schema, and agent memory setup
 /mnemo:context                       # "Charge le contexte mnemo minimal pour ce projet."
 # drop files into .mnemo/<project-name>/raw/
 /mnemo:ingest                        # "ingest files in raw/"
 /mnemo:graphify                      # optional: map the codebase into graphify-out/
 /mnemo:query database indexing       # "what does my wiki say about database indexing?"
-/mnemo:mine                          # "remember this" — extract knowledge from current session
+/mnemo:mine                          # "remember this"; extract knowledge from current session
 /mnemo:save B-tree vs Hash Index     # "save this as a wiki page titled B-tree vs Hash Index"
 /mnemo:lint                          # "audit my wiki"
 /mnemo:stats                         # "show wiki stats"
-/mnemo:log                           # "show the audit log" — filter by op, date, or last N entries
+/mnemo:log                           # "show the audit log"; filter by op, date, or last N entries
 ```
 
 No agent? Bootstrap with the standalone script:
@@ -212,7 +212,7 @@ python3 scripts/init_mnemo.py        # requires Python 3.10+
 
 ### `/mnemo:init`
 
-Bootstraps a new knowledge base. Run once per project — warns if already initialized.
+Bootstraps a new knowledge base. Run once per project; it warns if already initialized.
 
 ```
 .mnemo/
@@ -232,7 +232,7 @@ Bootstraps a new knowledge base. Run once per project — warns if already initi
     └── config.json   ← search backend (`bm25` or `qmd`)
 ```
 
-`log.md` records every ingested file — filename and ISO timestamp. Before processing anything, `/mnemo:ingest` checks this log and skips files already present. To force a re-ingest, remove the entry from `log.md`.
+`log.md` records every ingested file, including filename and ISO timestamp. Before processing anything, `/mnemo:ingest` checks this log and skips files already present. To force a re-ingest, remove the entry from `log.md`.
 
 `/mnemo:init` also:
 
@@ -281,31 +281,31 @@ If startup auto-load did not happen, run `/mnemo:context` or say "Charge le cont
 
 ### `/mnemo:onboard`
 
-Creates or updates your global user profile at `~/.mnemo/wiki/entities/person-user.md`. Run automatically on first `/mnemo:init` — skipped silently if a profile already exists. Run directly to update it.
+Creates or updates your global user profile at `~/.mnemo/wiki/entities/person-user.md`. It runs automatically on first `/mnemo:init` and is skipped silently if a profile already exists. Run directly to update it.
 
-A short interview covers your role (solo dev, team lead, researcher…), technical level, preferred language for notes and responses, main domains of interest, knowledge base goal, and response style preference. Answers are inferred from the conversation where possible (e.g. language) — you only confirm rather than type them.
+A short interview covers your role (solo dev, team lead, researcher…), technical level, preferred language for notes and responses, main domains of interest, knowledge base goal, and response style preference. Answers are inferred from the conversation where possible (e.g. language), so you only confirm rather than type them.
 
 The profile persists across all projects and lets mnemo tailor its responses to your context without re-asking every session.
 
 ### `/mnemo:schema`
 
-Builds or revises `.mnemo/<project-name>/SCHEMA.md` — the taxonomy that tells `/mnemo:ingest` how to classify what it finds. No form to fill out: the skill asks questions, proposes a draft, and you refine it. If files are already in `raw/`, it reads them first and brings concrete suggestions rather than a blank slate.
+Builds or revises `.mnemo/<project-name>/SCHEMA.md`, the taxonomy that tells `/mnemo:ingest` how to classify what it finds. No form to fill out: the skill asks questions, proposes a draft, and you refine it. If files are already in `raw/`, it reads them first and brings concrete suggestions rather than a blank slate.
 
 Covers entity types (people, tools, projects, systems), concept categories (techniques, patterns, principles), tagging conventions, and relationship hints. Nothing is written without your explicit confirmation.
 
-Run it any time, not just at init — useful when the domain evolves or the initial taxonomy turns out too coarse.
+Run it any time, not just at init. This is useful when the domain evolves or the initial taxonomy turns out too coarse.
 
 ### `/mnemo:ingest`
 
 Processes all pending files from `raw/` via LLM synthesis.
 
-- Synthesizes a summary, key points, and excerpts — never copy-pastes raw text
+- Synthesizes a summary, key points, and excerpts without copy-pasting raw text
 - Extracts entities and concepts, creating dedicated pages for each
 - Writes bidirectional wikilinks between source, entity, and concept pages
 - Enriches up to 15 related existing pages per ingest run
-- Enforces `source:` citation in frontmatter — no silent provenance loss
+- Enforces `source:` citation in frontmatter, so provenance is never silently lost
 - Checks page size; warns at 400 lines, splits at 800
-- Detects contradictions with existing content — offers `[u]pdate / [k]eep both / [h]istory / [s]kip`. The `[h]istory` option marks an entity as superseded: it adds `superseded_by:` to the old page's frontmatter, appends a `## History` entry, and adds `supersedes:` to the new page
+- Detects contradictions with existing content and offers `[u]pdate / [k]eep both / [h]istory / [s]kip`. The `[h]istory` option marks an entity as superseded: it adds `superseded_by:` to the old page's frontmatter, appends a `## History` entry, and adds `supersedes:` to the new page
 
 ### `/mnemo:query <term>`
 
@@ -338,15 +338,15 @@ Saves Claude-generated content (summaries, comparisons, analyses) as a permanent
 
 ### `/mnemo:mine`
 
-Scans the current session for knowledge worth persisting — decisions, new entities, concepts, and conclusions. Presents a numbered candidate list; approved items are routed to `/mnemo:save`.
+Scans the current session for knowledge worth persisting: decisions, new entities, concepts, and conclusions. Presents a numbered candidate list; approved items are routed to `/mnemo:save`.
 
-Triggered explicitly (`/mnemo:mine`) or by intent — the user expressing a desire to save something ("remember this", "note that", "important") or the agent detecting high-value signals ("we decided", "in conclusion", "key insight") — in any language.
+Triggered explicitly (`/mnemo:mine`) or by intent, either when the user expresses a desire to save something ("remember this", "note that", "important") or when the agent detects high-value signals ("we decided", "in conclusion", "key insight"), in any language.
 
 ### `/mnemo:graphify`
 
 Maps the project codebase into a knowledge graph using [graphify](https://github.com/safishamsi/graphify). Requires graphify installed (`pip install graphifyy && graphify install`) and mnemo initialized.
 
-- Runs `graphify .` on the project root (respects `.graphifyignore` — `.mnemo/` is always excluded)
+- Runs `graphify .` on the project root (respects `.graphifyignore`; `.mnemo/` is always excluded)
 - Treats `graphify-out/` as graphify's canonical runtime directory
 - Keeps `graphify-out/graph.json`, `graphify-out/GRAPH_REPORT.md`, and `graphify-out/cache/` in place
 - Writes only lightweight mnemo integration pages:
@@ -364,7 +364,7 @@ Also reports the active search backend and recommends qmd for large BM25 wikis.
 
 ### `/mnemo:log`
 
-Queries `log.md` in natural language. Displays ingest, skipped, generated, and lint entries as a sorted markdown table. Supports filtering by operation type, recency (`last N`), and date range (`since YYYY-MM-DD` or `since Monday`). Read-only — never writes to `log.md`.
+Queries `log.md` in natural language. Displays ingest, skipped, generated, and lint entries as a sorted markdown table. Supports filtering by operation type, recency (`last N`), and date range (`since YYYY-MM-DD` or `since Monday`). Read-only and never writes to `log.md`.
 
 ---
 
@@ -374,7 +374,7 @@ For heavy-duty operations, mnemo uses dedicated workflow specs. When the host su
 
 | Workflow | Reasoning Hint | Used by | Key Behaviors |
 |---|---|---|---|
-| `mnemo-ingestor` | `heavy` | `/mnemo:ingest` | Discuss before write — proposes TL;DR + planned pages before writing |
+| `mnemo-ingestor` | `heavy` | `/mnemo:ingest` | Discuss before write; proposes TL;DR + planned pages before writing |
 | `mnemo-archivist` | `balanced` | `/mnemo:query` | Adaptive formatting + offers to file back after each substantial response |
 | `mnemo-linter` | `heavy` | `/mnemo:lint` | Mechanical audit + graph (hubs, sinks, components) + semantics |
 
@@ -384,17 +384,17 @@ Workflows are defined in the `agents/` directory at the root of the plugin. Each
 
 ## Using mnemo with Obsidian
 
-mnemo's wiki format works directly in Obsidian — open `.mnemo/<project-name>/` as the vault root (or `~/.mnemo/` for the global tier). This keeps both `raw/` and `wiki/` visible in the same vault while displaying the project name in Obsidian. Wikilinks resolve in the graph view, YAML frontmatter shows up in the properties panel, and the bidirectional links from `/mnemo:ingest` appear in the backlinks panel without any setup.
+mnemo's wiki format works directly in Obsidian. Open `.mnemo/<project-name>/` as the vault root (or `~/.mnemo/` for the global tier). This keeps both `raw/` and `wiki/` visible in the same vault while displaying the project name in Obsidian. Wikilinks resolve in the graph view, YAML frontmatter shows up in the properties panel, and the bidirectional links from `/mnemo:ingest` appear in the backlinks panel without any setup.
 
 ### Obsidian Web Clipper
 
-[Obsidian Web Clipper](https://obsidian.md/clipper) lets you clip web pages and articles directly from your browser. Configure it to save clips into `.mnemo/<project-name>/raw/`, then run `/mnemo:ingest` — mnemo synthesizes each clip into a structured wiki page, extracts entities and concepts, and links it into the graph.
+[Obsidian Web Clipper](https://obsidian.md/clipper) lets you clip web pages and articles directly from your browser. Configure it to save clips into `.mnemo/<project-name>/raw/`, then run `/mnemo:ingest`. mnemo synthesizes each clip into a structured wiki page, extracts entities and concepts, and links it into the graph.
 
 ---
 
 ## Contributing
 
-Each skill is a `SKILL.md` file — edit it, reload, test. See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide.
+Each skill is a `SKILL.md` file. Edit it, reload, test. See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide.
 
 ---
 
