@@ -86,6 +86,10 @@ Glob `{vault}/raw/*` → `raw_files`.
 | `no_inbound_links` | Entity or concept page with no incoming `[[wikilink]]` from another page |
 | `stale_claim` | Page containing potentially outdated temporal language |
 | `superseded_without_history` | Page with `superseded_by:` or `supersedes:` but no `## History` |
+| `missing_claims_section` | Entity, concept, or synthesis page without `## Claims` |
+| `claim_without_evidence` | Claim bullet missing an `Evidence` field |
+| `claim_without_status` | Claim bullet missing a `Status` field |
+| `invalid_claim_status` | Claim status is not `active`, `disputed`, or `superseded` |
 | `gap_page` | Term appearing in 3+ sources without a dedicated page |
 
 ### Step 7 — Check oversized pages
@@ -118,6 +122,17 @@ Flag with sentence and line number. Exclude `## Quotes & Excerpts`.
 
 Pages with `superseded_by:` or `supersedes:` but no `## History`. Propose
 inserting an empty `## History` section before `## Links`.
+
+### Step 11c2 — Structured claims
+
+For pages in `wiki/entities/`, `wiki/concepts/`, and `wiki/synthesis/`:
+- If `## Claims` is missing, flag `missing_claims_section` as low/maintenance.
+- For each `- **Claim:**` bullet, require `**Evidence:**` and `**Status:**`.
+- Flag `claim_without_evidence`, `claim_without_status`, or
+  `invalid_claim_status` when applicable.
+- Valid statuses are `active`, `disputed`, and `superseded`.
+- Do not apply these checks to `sources/`, `activity/`, `indexes/`, or
+  graphify-generated pages.
 
 ### Step 11b — Detect gap pages
 
@@ -212,6 +227,7 @@ Total pages: N  |  Components: N  |  Last log: <date>
 - N oversized pages
 - N missing frontmatter
 - N missing source citations
+- N structured-claims maintenance findings
 
 ## Graph stats
 Pages: N  |  Links: N  |  Density: X.XX

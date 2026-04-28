@@ -161,6 +161,8 @@ chronological list of session events.
 
 **Common rules:**
 - Every claim cites a page via `[[wikilink]]`. No uncited assertions.
+- Keep query answers compact. If a substantial answer is archived, convert its
+  important assertions into structured `## Claims` entries.
 - If no results: explicitly say "No results in the wiki for…"
   Never invent content.
 - Always offer: "Type a number to expand, or ask a follow-up question."
@@ -203,10 +205,20 @@ updated: <YYYY-MM-DD>
 
 <response body with [[wikilinks]]>
 
+## Claims
+
+- **Claim:** <verifiable assertion from the response>
+  **Evidence:** [[<Source Page Title>]] — "<short source excerpt>"
+  **Status:** active
+
 ## Links
 
 - [[<cited pages>]]
 ```
+
+Archived synthesis pages must include `## Claims` when the response contains
+multi-source assertions. Evidence must cite a wiki source page and a short
+excerpt; do not copy long passages from the source.
 
 ## Step 10 — Layer 2: expand on demand
 

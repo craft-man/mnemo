@@ -23,6 +23,50 @@ YEAR_RE = re.compile(r'\bin (20\d{2})\b', re.IGNORECASE)
 CURRENT_YEAR = datetime.date.today().year
 CAP_PHRASE_RE = re.compile(r'\b([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+)+)\b')
 WIKILINK_RE = re.compile(r'\[\[[^\]]+\]\]')
+CLAIM_REQUIRED_PATHS = ('wiki/entities/', 'wiki/concepts/', 'wiki/synthesis/')
+VALID_CLAIM_STATUSES = {'active', 'disputed', 'superseded'}
+
+
+def has_section(text: str, heading: str) -> bool:
+    return any(line.strip() == heading for line in text.splitlines())
+
+
+def extract_claim_blocks(text: str) -> list[tuple[int, list[str]]]:
+    """Return Claim bullets as (starting line number, block lines)."""
+    lines = text.splitlines()
+    blocks: list[tuple[int, list[str]]] = []
+    in_claims = False
+    current_start: int | None = None
+    current: list[str] = []
+
+    for lineno, line in enumerate(lines, 1):
+        stripped = line.strip()
+        if stripped == '## Claims':
+            in_claims = True
+            continue
+        if in_claims and stripped.startswith('## '):
+            break
+        if not in_claims:
+            continue
+        if stripped.startswith('- **Claim:**'):
+            if current_start is not None:
+                blocks.append((current_start, current))
+            current_start = lineno
+            current = [line]
+        elif current_start is not None:
+            current.append(line)
+
+    if current_start is not None:
+        blocks.append((current_start, current))
+    return blocks
+
+
+def claim_status(block: list[str]) -> str | None:
+    for line in block:
+        stripped = line.strip()
+        if stripped.startswith('**Status:**'):
+            return stripped.partition('**Status:**')[2].strip()
+    return None
 
 
 def parse_frontmatter(text: str) -> dict:
@@ -180,6 +224,39 @@ def main() -> None:
                     'superseded_without_history', wf,
                     f'{which} but no ## History section',
                 ))
+
+        # Structured claims are required for new entities, concepts, and
+        # synthesis pages. Missing sections are maintenance findings so older
+        # pages can migrate gradually.
+        if any(prefix in wf for prefix in CLAIM_REQUIRED_PATHS):
+            if not has_section(text, '## Claims'):
+                issues.append((
+                    'missing_claims_section',
+                    wf,
+                    'Maintenance: missing ## Claims section',
+                ))
+            else:
+                for claim_lineno, block in extract_claim_blocks(text):
+                    block_text = '\n'.join(block)
+                    if '**Evidence:**' not in block_text:
+                        issues.append((
+                            'claim_without_evidence',
+                            wf,
+                            f'Line {claim_lineno}: Claim has no Evidence field',
+                        ))
+                    status = claim_status(block)
+                    if status is None:
+                        issues.append((
+                            'claim_without_status',
+                            wf,
+                            f'Line {claim_lineno}: Claim has no Status field',
+                        ))
+                    elif status not in VALID_CLAIM_STATUSES:
+                        issues.append((
+                            'invalid_claim_status',
+                            wf,
+                            f'Line {claim_lineno}: {status!r} is not active, disputed, or superseded',
+                        ))
 
     # 10. No inbound links (entities and concepts only)
     for wf, (text, p) in all_texts.items():

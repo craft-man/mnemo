@@ -143,6 +143,12 @@ Then the page body:
 
 Body text referencing [[Related Concept]] and [[Entity Name]].
 
+## Claims
+
+- **Claim:** <verifiable assertion>
+  **Evidence:** [[<Source Page Title>]] — "<short source excerpt>"
+  **Status:** active
+
 ## Links
 
 - [[Related Concept]]
@@ -154,6 +160,14 @@ Body text referencing [[Related Concept]] and [[Entity Name]].
 - H1 = page title only. Never use H1 for sections.
 - YAML frontmatter is mandatory on every page — no exceptions.
 - `source:` field is required for all `sources/` category pages.
+- New `entities`, `concepts`, and `synthesis` pages must include `## Claims`
+  with at least one sourced claim.
+- Each claim must include `Claim`, `Evidence`, and `Status`.
+- `Evidence` must link to a source page and include a short excerpt; excerpts
+  are anchors, not replacements for the source.
+- Claim status must be `active`, `disputed`, or `superseded`.
+- `sources`, `activity`, and graphify-generated pages are exempt from the
+  `## Claims` requirement.
 - Always end with a `## Links` section listing related pages.
 - **Wikilinks use `[[Page Title]]` syntax** — always the exact H1 title of the target page, not a filename. This makes pages Obsidian-compatible and human-readable.
 - Page size: soft cap 400 lines, hard cap 800 lines. Split into sub-pages if exceeded.

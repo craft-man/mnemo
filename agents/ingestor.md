@@ -55,6 +55,8 @@ From the full (or consolidated) content, extract:
 - Key points (3-7 bullets)
 - Significant entities (people, tools, projects, systems)
 - Significant concepts (patterns, techniques, ideas)
+- Incoming claims worth preserving, each with a precise source excerpt that can
+  be used as evidence on entity/concept pages
 - Potential contradictions: compare the source's claims against relevant
   existing pages (read the relevant pages if necessary)
 
@@ -84,7 +86,10 @@ From the full (or consolidated) content, extract:
 - [[concepts/<existing>]] — revised claim
 
 ⚠️ Contradictions detected:
-- Existing claim in [[entities/foo]]: "<text>" vs incoming claim: "<text>"
+- Existing claim in [[entities/foo]]: "<text>"
+  Existing evidence: [[Old Source]] — "<short excerpt>"
+  Incoming claim: "<text>"
+  Incoming evidence: [[New Source]] — "<short excerpt>"
   (or "None" if nothing detected)
 ```
 
@@ -152,25 +157,25 @@ For each significant entity extracted:
 
 **If the page already exists:**
 - Re-read the original source file to anchor the update.
-- **Contradiction check**: scan the page body (excluding `## Sources` and
-  `## Links`) for sentences containing the entity name with an affirmative assertion.
-  A contradiction is present if the new source contains a negation word (`not`,
-  `no longer`, `unlike`, `contrary`, `incorrect`, `actually`, `however`) adjacent
-  to the same subject.
-  - If contradiction: display the existing claim (file + line number)
-    and the incoming claim. Check whether the contradiction contains replacement
-    language (`replaced by`, `superseded by`, `deprecated in favor of`,
-    `no longer used`, `remplacé par`, `obsolète`):
-    - If yes: ask `"Contradiction — [u]pdate / [k]eep both / [h]istory / [s]kip"`
-    - Otherwise: ask `"Contradiction — [u]pdate / [k]eep both / [s]kip"`
-  - `[u]pdate`: replace the contradicting claim, then surgical edit
-  - `[k]eep both`: add `> **Note:** [[<New Source>]] presents a different perspective.`
-  - `[h]istory`: add `superseded_by:` to frontmatter + `## History`, add
-    `supersedes:` to the new page
-  - `[s]kip`: log without modifying, note in the final report
+- Extract existing `## Claims` entries and read closely linked entity/concept
+  pages when needed.
+- **Contradiction check**: compare incoming claims semantically with existing
+  claims. A contradiction is present when the sources make incompatible
+  assertions about the same subject, capability, status, date, replacement, or
+  relationship.
+  - If contradiction: display the existing claim, existing evidence, incoming
+    claim, and incoming evidence. Ask:
+    `"Contradiction — update / keep both / disputed / history / skip"`
+  - `update`: replace or revise the existing claim and preserve the new evidence.
+  - `keep both`: add a separate active claim only if both can be true in context.
+  - `disputed`: keep both claims and mark the conflicting one(s) `Status: disputed`.
+  - `history`: add `superseded_by:` to frontmatter + `## History`, add
+    `supersedes:` to the replacement page, and mark old claim(s) `Status: superseded`.
+  - `skip`: log without modifying, note in the final report.
 - **Surgical edit only** (if no contradiction or contradiction resolved):
-  1. Add `- [[<New Source Title>]]` in `## Sources`
-  2. Update `updated:` in the frontmatter
+  1. Add or revise one bullet in `## Claims` with `Claim`, `Evidence`, and `Status`
+  2. Add `- [[<New Source Title>]]` in `## Sources`
+  3. Update `updated:` in the frontmatter
   If the source is already in `## Sources`, skip.
 
 **If the page does not exist:**
@@ -195,6 +200,12 @@ updated: <YYYY-MM-DD>
 ## Description
 
 <Synthesized description.>
+
+## Claims
+
+- **Claim:** <verifiable assertion about the entity>
+  **Evidence:** [[<Source Title>]] — "<short source excerpt>"
+  **Status:** active
 
 ## Sources
 
@@ -232,6 +243,12 @@ updated: <YYYY-MM-DD>
 
 <Synthesized definition.>
 
+## Claims
+
+- **Claim:** <verifiable assertion about the concept>
+  **Evidence:** [[<Source Title>]] — "<short source excerpt>"
+  **Status:** active
+
 ## Sources
 
 - [[<Source Title>]]
@@ -261,9 +278,11 @@ After each page written:
 4. For each candidate, read the page. Enrich it only if the source contributes
    at least one of: a concrete example, a refinement or contradiction, a related
    technique, an already-referenced author. Otherwise, skip.
-5. If enriching: one surgical edit only — add `- [[<New Source>]]`
-   in `## Sources` / `## Related Sources` / `## See Also` / `## Links`.
-   Never rewrite the body. Maximum one addition per page.
+5. If enriching: one surgical edit only. For entity/concept/synthesis pages,
+   prefer adding or revising a `## Claims` bullet with source evidence. For
+   other pages, add `- [[<New Source>]]` in `## Sources` / `## Related Sources`
+   / `## See Also` / `## Links`. Never rewrite the body. Maximum one addition
+   per page.
 
 ## Step 11 — Update index
 

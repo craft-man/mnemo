@@ -101,6 +101,65 @@ This tool is active.
 - [[Some Source]]
 """
 
+VALID_CLAIMS_ENTITY_PAGE = """\
+---
+title: Claimed Tool
+category: entities
+tags: [tool]
+created: 2025-01-01
+updated: 2026-01-01
+---
+
+# Claimed Tool
+
+> *Type: Tool*
+
+---
+
+## Description
+
+This tool is documented with structured claims.
+
+## Claims
+
+- **Claim:** Claimed Tool supports structured evidence.
+  **Evidence:** [[Some Source]] — "supports structured evidence"
+  **Status:** active
+
+## Sources
+
+- [[Some Source]]
+
+## Links
+
+- [[Some Source]]
+"""
+
+SOURCE_WITHOUT_CLAIMS_PAGE = """\
+---
+title: Some Source
+category: sources
+tags: [source]
+source: raw/some-source.md
+created: 2025-01-01
+updated: 2026-01-01
+---
+
+# Some Source
+
+> *Source: `raw/some-source.md`*
+
+---
+
+## Summary
+
+Source summary.
+
+## Links
+
+- [[Claimed Tool]]
+"""
+
 
 def _make_wiki(root: pathlib.Path, pages: dict) -> pathlib.Path:
     mnemo = root / ".mnemo"
@@ -211,6 +270,119 @@ class TestParseFrontmatterTemporalFields(unittest.TestCase):
     def test_healthy_page_has_no_superseded_by(self):
         fm = parse_frontmatter(HEALTHY_PAGE)
         self.assertNotIn("superseded_by", fm)
+
+
+class TestStructuredClaimsLint(unittest.TestCase):
+    def test_entity_with_valid_claims_has_no_claim_findings(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            mnemo = _make_wiki(
+                pathlib.Path(tmp),
+                {
+                    "wiki/entities/tool-claimed.md": VALID_CLAIMS_ENTITY_PAGE,
+                    "wiki/sources/some-source.md": SOURCE_WITHOUT_CLAIMS_PAGE,
+                },
+            )
+            output = _run_lint(mnemo)
+        self.assertNotIn("missing_claims_section", output)
+        self.assertNotIn("claim_without_evidence", output)
+        self.assertNotIn("claim_without_status", output)
+        self.assertNotIn("invalid_claim_status", output)
+
+    def test_concept_without_claims_is_flagged(self):
+        page = VALID_CLAIMS_ENTITY_PAGE.replace(
+            "title: Claimed Tool", "title: Claimed Concept"
+        ).replace(
+            "category: entities", "category: concepts"
+        ).replace(
+            "## Claims\n\n- **Claim:** Claimed Tool supports structured evidence.\n"
+            "  **Evidence:** [[Some Source]] — \"supports structured evidence\"\n"
+            "  **Status:** active\n\n",
+            "",
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            mnemo = _make_wiki(
+                pathlib.Path(tmp),
+                {"wiki/concepts/pattern-claimed.md": page},
+            )
+            output = _run_lint(mnemo)
+        self.assertIn("missing_claims_section", output)
+
+    def test_synthesis_without_claims_is_flagged(self):
+        page = """\
+---
+title: Claimed Synthesis
+category: synthesis
+tags: [summary]
+created: 2025-01-01
+updated: 2026-01-01
+---
+
+# Claimed Synthesis
+
+> *Generated — 2026-01-01 00:00 UTC*
+
+---
+
+## Summary
+
+This synthesis compares sourced ideas.
+
+## Links
+
+- [[Some Source]]
+"""
+        with tempfile.TemporaryDirectory() as tmp:
+            mnemo = _make_wiki(
+                pathlib.Path(tmp),
+                {"wiki/synthesis/claimed-synthesis.md": page},
+            )
+            output = _run_lint(mnemo)
+        self.assertIn("missing_claims_section", output)
+
+    def test_claim_without_evidence_is_flagged(self):
+        page = VALID_CLAIMS_ENTITY_PAGE.replace(
+            '  **Evidence:** [[Some Source]] — "supports structured evidence"\n',
+            "",
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            mnemo = _make_wiki(
+                pathlib.Path(tmp),
+                {"wiki/entities/tool-claimed.md": page},
+            )
+            output = _run_lint(mnemo)
+        self.assertIn("claim_without_evidence", output)
+
+    def test_claim_without_status_is_flagged(self):
+        page = VALID_CLAIMS_ENTITY_PAGE.replace("  **Status:** active\n", "")
+        with tempfile.TemporaryDirectory() as tmp:
+            mnemo = _make_wiki(
+                pathlib.Path(tmp),
+                {"wiki/entities/tool-claimed.md": page},
+            )
+            output = _run_lint(mnemo)
+        self.assertIn("claim_without_status", output)
+
+    def test_invalid_claim_status_is_flagged(self):
+        page = VALID_CLAIMS_ENTITY_PAGE.replace(
+            "  **Status:** active\n",
+            "  **Status:** pending\n",
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            mnemo = _make_wiki(
+                pathlib.Path(tmp),
+                {"wiki/entities/tool-claimed.md": page},
+            )
+            output = _run_lint(mnemo)
+        self.assertIn("invalid_claim_status", output)
+
+    def test_source_without_claims_is_not_flagged(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            mnemo = _make_wiki(
+                pathlib.Path(tmp),
+                {"wiki/sources/some-source.md": SOURCE_WITHOUT_CLAIMS_PAGE},
+            )
+            output = _run_lint(mnemo)
+        self.assertNotIn("missing_claims_section", output)
 
 
 if __name__ == "__main__":

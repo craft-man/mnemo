@@ -57,10 +57,21 @@ updated: <YYYY-MM-DD>
 
 <content>
 
+## Claims
+
+- **Claim:** <verifiable assertion from the saved content>
+  **Evidence:** [[<Source Page Title>]] — "<short source excerpt>"
+  **Status:** active
+
 ## Links
 
 - [[<Related Page Title>]]
 ```
+
+For `entities`, `concepts`, and `synthesis`, include `## Claims` with at least
+one sourced claim. For multi-source synthesis, capture the key cross-source
+assertions as claims. Each `Evidence` entry must cite a source page with a short
+excerpt; do not paste long source passages.
 
 **6. Check page size** — count lines. If > 800: warn the user and offer to split. If 400–800: note the page is large.
 
