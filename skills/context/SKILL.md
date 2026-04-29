@@ -2,8 +2,7 @@
 name: context
 description: >
   Load minimal mnemo startup context manually for the current project. Use when
-  the user runs /mnemo:context, says "Charge le contexte mnemo minimal pour ce
-  projet.", or needs a fallback because startup auto-load did not happen.
+  the user runs /mnemo:context, says "Load the minimum mnemonic context for this project", or needs a fallback because startup auto-load did not happen.
 license: MIT
 compatibility: >
   Claude Code (slash command /mnemo:context). Other agentskills.io-compatible
@@ -41,8 +40,8 @@ This skill is strictly read-only:
    - Read `~/.mnemo/wiki/entities/person-user.md` if it exists.
    - Reply briefly:
      ```
-     Contexte mnemo chargé.
-     Fichiers lus:
+     Mnemo context loaded.
+     Files read:
      - .mnemo/<project-name>/SESSION_BRIEF.md
      - ~/.mnemo/wiki/entities/person-user.md (if present)
      - graphify-out/GRAPH_REPORT.md (only with --code and if present)
@@ -51,7 +50,7 @@ This skill is strictly read-only:
    - Stop.
 5. If exit code is non-zero because `SESSION_BRIEF.md` is missing, stop and tell the user:
    ```
-   SESSION_BRIEF.md est absent. Régénérez-le avec:
+   SESSION_BRIEF.md not found. Regenerate with:
    python scripts/update_session_brief.py --vault .mnemo/<project-name>
    ```
    Do not regenerate it automatically.
@@ -64,7 +63,7 @@ This skill is strictly read-only:
 **2. Check the brief** - If `.mnemo/<project-name>/SESSION_BRIEF.md` does not exist, stop:
 
 ```
-SESSION_BRIEF.md est absent. Régénérez-le avec:
+SESSION_BRIEF.md not found. Regenerate with:
 python scripts/update_session_brief.py --vault .mnemo/<project-name>
 ```
 
@@ -74,7 +73,7 @@ Do not create or regenerate the file.
 If any of those files is newer than `SESSION_BRIEF.md`, still read the brief, but warn:
 
 ```
-Attention: SESSION_BRIEF.md peut être obsolète. Régénérez-le avec:
+Warning: SESSION_BRIEF.md may be outdated. Regenerate it with:
 python scripts/update_session_brief.py --vault .mnemo/<project-name>
 ```
 
@@ -92,8 +91,8 @@ If the global profile is absent, report `profil absent` as a warning. If `--code
 Reply briefly:
 
 ```
-Contexte mnemo chargé.
-Fichiers lus:
+Mnemo context loaded.
+Files read:
 - .mnemo/<project-name>/SESSION_BRIEF.md
 - ~/.mnemo/wiki/entities/person-user.md (if present)
 - graphify-out/GRAPH_REPORT.md (only with --code and if present)
