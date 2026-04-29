@@ -6,6 +6,20 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.16.1] — 2026-04-29
+
+### Added
+
+- **Regression coverage for releases** — added tests for `scripts/bump_version.py` to verify both plugin manifests are updated together and to fail fast when their versions drift.
+
+### Changed
+
+- **Version bump consistency** — `scripts/bump_version.py` now updates both `.claude-plugin/plugin.json` and `.codex-plugin/plugin.json` during a release bump.
+- **Manifest sync guard** — the release script now aborts if the Claude and Codex plugin manifests start from different versions, preventing silent drift.
+- **Codex plugin manifest** — aligned `.codex-plugin/plugin.json` with the current project versioning flow.
+
+---
+
 ## [0.16.0] — 2026-04-29
 
 ### Added
