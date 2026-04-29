@@ -1,6 +1,6 @@
 ---
 name: mnemo-init-cursor
-description: Cursor-specific wiring for mnemo init. Run after skills/init/SKILL.md completes.
+description: Cursor-specific wiring for mnemo-init. Run after skills/init/SKILL.md completes.
 ---
 
 ## Agent wiring — AGENTS.md

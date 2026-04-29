@@ -27,7 +27,7 @@ No sub-agent is dispatched — the log is small and deterministic.
 3. If the file does not exist, check for any subdirectory under `.mnemo/` and
    use its `log.md` if exactly one vault is present.
 4. If still not found, output:
-   > log.md not found. Run /mnemo:init to initialize the vault.
+   > log.md not found. Run mnemo-init to initialize the vault.
 
    Then stop.
 

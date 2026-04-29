@@ -28,6 +28,9 @@ dist/
 .venv/
 .worktrees/
 
+# Agent Skills eval workspaces
+skills/*-workspace/
+
 # Superpowers internal — specs and plans, never commit
 docs/superpowers/
 .superpowers

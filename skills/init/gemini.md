@@ -1,6 +1,6 @@
 ---
 name: mnemo-init-gemini
-description: Gemini CLI-specific wiring for mnemo init. Run after skills/init/SKILL.md completes.
+description: Gemini CLI-specific wiring for mnemo-init. Run after skills/init/SKILL.md completes.
 ---
 
 ## Agent wiring — GEMINI.md

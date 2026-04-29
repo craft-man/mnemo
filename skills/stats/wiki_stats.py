@@ -17,7 +17,7 @@ def main() -> None:
     root = Path(sys.argv[1]).resolve()
     wiki = root / 'wiki'
     if not wiki.exists():
-        sys.exit('ERROR: wiki/ not found. Run /mnemo:init first.')
+        sys.exit('ERROR: wiki/ not found. Run mnemo-init first.')
 
     config_path = root / 'config.json'
     try:

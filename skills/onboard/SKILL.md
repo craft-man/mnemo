@@ -2,7 +2,7 @@
 name: onboard
 description: >
   Initialize or update the global user profile in ~/.mnemo/. Use when the user
-  runs /mnemo:init for the first time, when no person-user.md exists in the global
+  runs mnemo-init for the first time, when no person-user.md exists in the global
   memory tier, or when the user says "update my profile", "change my preferences",
   "who am I in mnemo", or "my role has changed".
 license: MIT
@@ -12,7 +12,7 @@ compatibility: >
 metadata:
   author: mnemo contributors
   version: "0.16.6"
-allowed-tools: Read Write Glob
+allowed-tools: Read Write Glob Bash
 ---
 
 Create or update the user profile at `~/.mnemo/wiki/entities/person-user.md`.
@@ -144,6 +144,21 @@ updated: <YYYY-MM-DD>
 ```
 
 On update, preserve the original `created` date and set `updated` to today.
+
+Fast path for first-time profile creation after approval:
+```bash
+python skills/onboard/scripts/write_profile.py \
+  --role "<role>" \
+  --technical-level "<technical level>" \
+  --language "<language>" \
+  --domains "<domains>" \
+  --proactivity "<High|Moderate|Low>" \
+  --register "<Direct|Collaborative>"
+```
+
+The script is non-interactive, supports `--help`, writes JSON to stdout, writes
+errors to stderr, and leaves an existing profile unchanged. Do not use it for the
+interview; use it only to materialize already validated answers.
 
 **6. Report:**
 > "Profile saved to `~/.mnemo/wiki/entities/person-user.md`.

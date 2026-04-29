@@ -1,291 +1,199 @@
 ---
 name: mnemo-init
 description: >
-  Bootstrap a new mnemo knowledge base with taxonomy directory structure and a
-  required schema and global user profile. Use when starting a new wiki, setting up a second brain,
-  initializing a personal knowledge base, or when the user says "set up my wiki",
-  "create a knowledge base", "initialize mnemo", or "start my second brain".
-  Run once per project before the first ingest.
-  After init, wires the wiki into a tool-agnostic agent memory file for future sessions when possible.
+  Bootstrap a new mnemo project knowledge base with vault structure, schema,
+  global user profile when absent, search config, optional graphify, Obsidian
+  guidance, session brief, agent memory, and supported session-end hooks. Use
+  when starting a new wiki, setting up a second brain, initializing mnemo, or
+  when the user invokes mnemo-init. Run once per project before the first ingest.
 license: MIT
 compatibility: >
-  Agents that support skill-style slash commands (for example /mnemo:init).
-  Other agentskills.io-compatible
-  agents invoke by natural language. No external dependencies.
+  Agents that support skill-style commands should expose this as mnemo-init
+  rather than native init command names to avoid collisions. Other
+  agentskills.io-compatible agents invoke by natural language. Python scripts
+  use stdlib only.
 metadata:
   author: mnemo contributors
-  version: "0.16.6"
+  version: "0.17.0"
 allowed-tools: Read Write Edit Glob Bash
 ---
 
-Initialize `.mnemo/<project-name>/` with the full taxonomy structure.
+Initialize `.mnemo/<project-name>/` completely in one run. Do not report success
+until vault creation, schema, onboarding/profile check, search config, graphify
+decision, Obsidian decision, session brief, agent memory, and supported
+session-end hook wiring have all been handled.
 
-## Steps
+All helper scripts used by this skill are non-interactive, live under skill-owned
+`scripts/` directories, support `--help`, write machine-readable JSON to stdout,
+and write errors to stderr. The LLM collects and validates user answers one at a
+time before invoking scripts.
 
-## Step 0 — Python fast path
+## Stop Condition
 
-Use the Python fast path first whenever it is available: use `Glob('**/scripts/init_mnemo.py')` first, then `Glob('**/skills/init/init_mnemo.py')` if the public wrapper is not found.
+Resolve `<project-name>` from the current directory name unless the user clearly
+names another project root. Before asking schema, onboarding, search, graphify,
+or Obsidian questions, check whether `.mnemo/<project-name>/` already exists.
 
-For Codex or any agent running the script as a subprocess, collect the mandatory values in the chat before launching the script:
-- Schema: domain, entity types, concept categories.
-- Onboarding: role, technical level, language, domains, proactivity, register.
-- Search and integrations: default to BM25, graphify off, and Obsidian off unless the user explicitly chooses otherwise.
+If it exists, say:
+> "mnemo is already initialized at `.mnemo/<project-name>/`."
 
-If found at `<script_path>`, run:
+Stop. Do not rerun schema, onboard, graphify, search, memory wiring, or any other
+init step.
+
+## Step 1 - Create Vault
+
+Run:
+```bash
+python skills/init/scripts/create_vault.py --project-root .
 ```
-python3 <script_path> --non-interactive \
-  --schema-domain "<domain>" \
-  --schema-entity-types "<Person, Tool, Project>" \
-  --schema-concept-categories "<Pattern, Technique, Problem>" \
+
+If stdout reports `already_exists`, use the stop condition above. Otherwise keep
+the returned `vault` and `project_name`.
+
+## Step 2 - Schema
+
+Delegate to the schema skill immediately by reading `skills/schema/SKILL.md` and
+following its interview flow. Ask one question at a time, with a recommendation
+when useful. This is mandatory schema setup, not a follow-up.
+
+When the schema values are validated, materialize them with:
+```bash
+python skills/schema/scripts/write_schema.py \
+  --vault .mnemo/<project-name> \
+  --domain "<validated domain>" \
+  --entity-types "<comma-separated validated entity types>" \
+  --concept-categories "<comma-separated validated concept categories>"
+```
+
+## Step 3 - Global Profile
+
+Check whether `~/.mnemo/wiki/entities/person-user.md` exists.
+
+If absent, delegate to the onboard skill by reading `skills/onboard/SKILL.md` and
+running its interview. Ask one question at a time, with the recommended/default
+choice first. This is mandatory onboarding, not a follow-up.
+
+After validation, create the profile with:
+```bash
+python skills/onboard/scripts/write_profile.py \
   --role "<role>" \
   --technical-level "<technical level>" \
   --language "<language>" \
   --domains "<domains>" \
   --proactivity "<High|Moderate|Low>" \
-  --register "<Direct|Collaborative>" \
-  --search-backend bm25
-```
-If exit 0 — stop the manual init workflow. The Python script is the canonical complete bootstrap path and already handles local/global structure, mandatory schema setup, mandatory onboarding, qmd, graphify, Obsidian, session brief generation, and best-effort agent memory wiring before returning. In the final response, describe only what was completed and the normal next use: drop source files into `raw/`, then ingest them. Do not list `/mnemo:onboard`, `/mnemo:schema`, `/mnemo:graphify`, profile creation, schema customization, manual installation, or agent-memory setup as optional follow-ups.
-If exit non-zero — emit `⚠ fast path failed (exit <code>) — falling back to LLM.` then continue with the steps below.
-If Python unavailable or script not found — continue with the steps below.
-
-The fallback LLM path below must preserve the same contract as the Python path: `SCHEMA.md` setup, the global user profile, qmd/graphify decisions, `SESSION_BRIEF.md`, Obsidian guidance when requested, and agent memory wiring are part of init. They are not optional follow-ups. Do not report init as complete until these have been handled in the same run.
-
-**1. Determine vault root** — `<project-name>` = current directory name (`Path.cwd().name`). The local vault root is `.mnemo/<project-name>/`.
-
-**2. Check for existing init** — if `.mnemo/<project-name>/wiki/sources/` already exists, warn:
-> "Knowledge base already initialized. Run `/mnemo:lint` to check its health."
-
-Stop here.
-
-**3. Create directory structure:**
-```
-.mnemo/
-└── <project-name>/
-    ├── raw/                    ← source files (immutable input)
-    ├── wiki/
-    │   ├── sources/            ← one page per ingested source
-    │   ├── entities/           ← people, tools, projects, systems
-    │   ├── concepts/           ← ideas, patterns, techniques
-    │   ├── synthesis/          ← cross-source analyses, comparisons
-    │   ├── activity/           ← session logs (not searched by default)
-    │   └── indexes/            ← index shards (created when >150 pages)
-    ├── index.md
-    ├── log.md
-    ├── SESSION_BRIEF.md        ← compact startup context for agents
-    ├── SCHEMA.md
-    └── config.json
+  --register "<Direct|Collaborative>"
 ```
 
-Write `.mnemo/<project-name>/index.md`:
-```markdown
-# Index
+If the profile is already present, keep it unchanged and continue without asking
+profile questions.
 
-## Sources
+## Step 4 - Search
 
-## Entities
+Ask:
+> "Enable semantic search with qmd? Recommended: yes. It adds local hybrid BM25 + vector search and falls back to BM25 if installation or registration fails. [Y/n]"
 
-## Concepts
-
-## Synthesis
+If yes or blank:
+```bash
+python skills/init/scripts/configure_search.py --vault .mnemo/<project-name> --backend qmd --install
 ```
 
-Write `.mnemo/<project-name>/log.md`:
-```markdown
-# Log
+If no:
+```bash
+python skills/init/scripts/configure_search.py --vault .mnemo/<project-name> --backend bm25
 ```
 
-**4. Write `.mnemo/<project-name>/SCHEMA.md`** — temporary starter content before the mandatory schema pass:
-```markdown
-# Knowledge Base Schema
+Use the JSON result to report the active backend. If qmd fails, BM25 is the
+expected fallback; do not ask the user to install qmd manually.
 
-> Edit this file to define domain-specific conventions for this project.
+## Step 5 - Gitignore
 
-## Domain
-<!-- Describe the subject matter of this knowledge base (e.g. "distributed systems", "my PhD research") -->
+If the project has `.git/`, ask:
+> "Add `.mnemo/` to `.gitignore`? Recommended: yes, to keep the local wiki out of version control. [Y/n]"
 
-## Entity Types
-Define the kinds of entities that matter in this domain:
-- **Person** — researchers, authors, contributors
-- **Tool** — software, libraries, frameworks
-- **Project** — codebases, products, initiatives
-
-## Concept Taxonomy
-Define recurring concept categories:
-- **Pattern** — reusable design or architectural pattern
-- **Technique** — method or approach
-- **Problem** — known failure mode or challenge
-
-## Naming Conventions
-- Entity pages: `wiki/entities/<type>-<name>.md` (e.g. `tool-redis.md`)
-- Concept pages: `wiki/concepts/<category>-<name>.md` (e.g. `pattern-saga.md`)
-- Source pages: `wiki/sources/<slug>.md`
-- Synthesis pages: `wiki/synthesis/<slug>.md`
-
-## Wikilink Style
-Use `[[Page Title]]` syntax — always the exact H1 title of the target page. Obsidian-compatible.
+If yes or blank:
+```bash
+python skills/init/scripts/update_gitignore.py --project-root . --accept
 ```
 
-**5. Schema setup** — define the domain taxonomy immediately:
+If no, skip. Do not modify `.gitignore` without consent.
 
-Invoke the schema skill by reading `skills/schema/SKILL.md` and following its instructions.
-This is part of init, not an optional follow-up. Do not report init as complete until this pass has happened. If the user gives minimal answers, keep starter defaults where needed, but still write a schema whose `## Domain`, `## Entity Types`, and `## Concept Taxonomy` sections are no longer just untouched placeholders.
+## Step 6 - Graphify
 
-**6. User profile** — ensure the global user profile exists:
+Ask:
+> "Map this codebase with graphify? Recommended: yes. It creates `graphify-out/` so future sessions can inspect project structure without re-reading every source file. [Y/n]"
 
-Invoke the onboard skill by reading `skills/onboard/SKILL.md` and following its instructions. This is part of init, not an optional follow-up. It will detect whether a profile already exists:
-- If no profile exists: run the full interview now and create `~/.mnemo/wiki/entities/person-user.md`. Do not skip this because the file contains preferences; ask the user and store their answers.
-- If a profile already exists: skip silently (no prompt to the user).
+If no, record that graphify was not enabled and continue.
 
-**7. Semantic search setup** — ask the user with yes as the default:
-
-> "Would you like to enable semantic search via **qmd**? It adds hybrid BM25 + vector search locally — no API key required. Needs: Node.js ≥ 22 (or Bun ≥ 1.0) + ~2 GB disk for models (downloaded once on first use). [Y/n]"
-
-**If yes:**
-
-1. Check if qmd is already installed: run `qmd --version`.
-   - If not found: attempt automatic installation in this same run with `npm install -g @tobilu/qmd` when npm exists, or `bun install -g @tobilu/qmd` when bun exists.
-   - If installation is refused by the user through the initial `[n]` answer, unavailable, or fails technically, write BM25 config and state that BM25 is active. Do not ask the user to install qmd manually.
-
-2. Register the wiki as a qmd collection:
-   ```
-   qmd collection add mnemo-wiki .mnemo/<project-name>/wiki "**/*.md"
-   ```
-   If this command fails, write BM25 config and state that BM25 is active.
-
-3. Write `.mnemo/<project-name>/config.json`:
-   ```json
-   {
-     "search_backend": "qmd",
-     "qmd_collection": "mnemo-wiki"
-   }
-   ```
-
-4. Inform the user: "qmd is configured. Embeddings will be built automatically on first `/mnemo:ingest`."
-
-**If no:**
-
-Write `.mnemo/<project-name>/config.json`:
-```json
-{
-  "search_backend": "bm25"
-}
+If yes or blank, attempt installation if `graphify --version` fails:
+```bash
+python -m pip install graphifyy
+graphify install
 ```
 
-**8. Report state, not handoff work:**
-> "Knowledge base initialized at `.mnemo/<project-name>/`.
-> Search backend: **<qmd | BM25>**.
-> Next: drop files into `.mnemo/<project-name>/raw/` and run `/mnemo:ingest`."
+If installation or graphify itself fails, continue cleanly and record that
+graphify was not enabled. Do not present manual install work as a required init
+step. It is acceptable to say that after the graphify environment is fixed, the
+user can rerun `/mnemo:graphify` to create `graphify-out/`.
 
-Do not add `/mnemo:schema`, `/mnemo:onboard`, `/mnemo:graphify`, manual install commands, or memory setup as next steps here. If schema, onboarding, config, session brief, graphify decision, or memory wiring did not run, init is incomplete and you must complete it before reporting success.
-
-**8b. Generate session brief** — after `index.md`, `log.md`, and `config.json` exist, create the compact startup context file.
-
-Fast path: use `Glob('**/mnemo/scripts/update_session_brief.py')` or `Glob('**/scripts/update_session_brief.py')` to locate the script. If found at `<script_path>`, run:
-```
-python3 <script_path> --vault .mnemo/<project-name>
-```
-If the script is unavailable or fails, write `.mnemo/<project-name>/SESSION_BRIEF.md` manually with short sections for startup reads, project summary, canonical pages, recent changes, active threads, and guardrails. Do not copy raw source content or the full index.
-
-**9. Agent memory wiring** — persist the wiki in the project's agent instructions/memory automatically:
-
-Resolve the target file using this logic:
-1. Prefer the project-level memory/instructions file that the current tool is known to auto-load at the start of new sessions.
-2. If multiple supported files exist, prefer the one already used by the current tool in this project.
-3. If support exists but no file is present yet, create the tool's preferred project-level memory/instructions file.
-4. If the current tool does not auto-load any project-level memory/instructions file, or support cannot be confirmed, create the best-effort local file without prompting.
-
-For best-effort local files, prefer this fallback order:
-1. `AGENTS.md`
-2. `CLAUDE.md`
-3. another conventional project-level agent memory/instructions file appropriate to the environment
-
-Check whether the target file already contains the heading `## mnemo`. If yes: skip silently — the stanza is already present.
-
-Otherwise:
-
-Build the stanza based on what was initialized in steps 3–6:
-
-```markdown
-## mnemo
-
-This project has a mnemo knowledge base in `.mnemo/<project-name>/`.
-
-At the start of every session:
-- Read the user profile if it exists at `~/.mnemo/wiki/entities/person-user.md`
-- Read `.mnemo/<project-name>/SESSION_BRIEF.md` if it exists
-- Read `graphify-out/GRAPH_REPORT.md` only if the task concerns codebase structure
-- Use that context before answering project-specific questions or making implementation decisions
-
-During the session:
-- Query it with `/mnemo:query <term>` before answering factual questions
-- Ingest new sources with `/mnemo:ingest`
-- When a spec or plan is finalized (e.g. from superpowers brainstorming or writing-plans), move it to `.mnemo/<project-name>/raw/` and run `/mnemo:ingest` to add it to the knowledge base
+When graphify is available, delegate to the graphify skill by reading
+`skills/graphify/SKILL.md`. Use its deterministic script:
+```bash
+python skills/graphify/scripts/run_graphify.py --project-root . --vault .mnemo/<project-name>
 ```
 
-If graphify was set up in step 10, append this line to the stanza:
+The graphify skill owns `.graphifyignore`, `graphify-out/`, graph validation,
+wiki graph pages, index/log updates, and graphify status reporting.
+
+## Step 7 - Obsidian
+
+Ask:
+> "Open this wiki in Obsidian? Recommended: yes. It gives you a local graph view, full-text search, and Web Clipper intake into `raw/`. [Y/n]"
+
+If yes or blank, give instructions only. Do not install Obsidian automatically:
+- Download Obsidian from `https://obsidian.md/` if needed.
+- In Obsidian, choose **Open folder as vault** and select `.mnemo/<project-name>/`.
+- Install the Web Clipper from `https://obsidian.md/clipper#more-browsers` and set the default save location to `raw/`.
+
+If no, state that `.mnemo/<project-name>/` is Obsidian-compatible.
+
+## Step 8 - Session Brief
+
+Run:
+```bash
+python skills/init/scripts/update_session_brief.py --vault .mnemo/<project-name>
 ```
-- Treat `graphify-out/GRAPH_REPORT.md` as the canonical starting point for project structure when it exists
-- Refresh graphify after significant code changes to keep the knowledge graph up to date
+
+If graphify was enabled, run this after graphify so the brief can mention
+`graphify-out/GRAPH_REPORT.md`.
+
+## Step 9 - Agent Memory And Hook
+
+Run:
+```bash
+python skills/init/scripts/wire_agent_memory.py --project-root . --project-name <project-name>
 ```
 
-Then:
-- If the target file exists: append the stanza at the end of the file, preceded by a blank line.
-- If the target file does not exist: create it with the stanza as the only content.
+Add `--graphify` when graphify succeeded.
 
-Confirm:
-> "Done — mnemo instructions added to the project's agent memory file. Future sessions can discover this wiki automatically."
+This script writes the mnemo stanza idempotently to a supported local agent
+memory file and configures supported session-end hooks automatically when the
+current project has a supported mechanism.
 
-If the stanza was written only as a best-effort file without confirmed auto-loading support, confirm instead:
-> "mnemo instructions written to a local agent file; automatic reuse in future sessions depends on tool support."
+## Final Response
 
-**9b. Session-end reminder wiring** — if the current tool supports project-local stop hooks or session-end reminders, configure one automatically when applicable:
+Report state, not handoff work:
+- vault path
+- active search backend
+- graphify enabled or not enabled
+- session brief path
+- agent memory file updated or unchanged
+- normal next use: drop files into `.mnemo/<project-name>/raw/` and run `/mnemo:ingest`
+- if graphify was requested but failed: also mention that `/mnemo:graphify` can
+  be rerun later after fixing graphify, independently from ingesting `raw/`
 
-- Detect whether the current tool has a supported project-local mechanism for session-end hooks or reminders.
-- If supported: add a reminder that tells the user to run `/mnemo:mine` at session end, preserving any existing config and skipping silently if an equivalent mnemo reminder is already present.
-- If not supported: skip gracefully.
-
-After writing, confirm:
-> "Session-end reminder configured — you'll be prompted to run `/mnemo:mine` when the session ends."
-
-**10. Graphify setup** — ask the user with yes as the default:
-
-> "Want to map your codebase with **graphify**? It builds a persistent knowledge graph so I can answer questions about your project without re-reading source files on every session. [Y/n]"
-
-**If `[n]o`:** do nothing. Report:
-> "Codebase graph mapping was not enabled during init."
-
-**If `[y]es`:**
-
-Check if graphify is installed: run `graphify --version`.
-
-- **If not found:** attempt automatic installation in this same run with `pip install graphifyy`, then `graphify install` or `python -m graphify install`.
-  If installation is refused through the initial `[n]` answer, unavailable, or fails technically, continue cleanly without asking the user to install graphify manually.
-
-- **If found:** continue immediately.
-
-Invoke the graphify skill by reading `skills/graphify/SKILL.md` and following its instructions.
-
-After the graphify skill completes, report:
-> "Codebase mapped. Start with `graphify-out/GRAPH_REPORT.md` for structure, and use `graphify-out/graph.json` for focused follow-up questions."
-
-**11. Obsidian setup** — ask the user with yes as the default:
-
-> "Want to open this wiki in **Obsidian**? It gives you a visual graph, full-text search, and lets the Web Clipper send pages directly into your ingest queue. [Y/n]"
-
-**If `[n]o`:** do nothing. Report:
-> "You can open `.mnemo/<project-name>/` as an Obsidian vault anytime — it's compatible out of the box."
-
-**If `[y]es`:**
-
-1. Since Obsidian cannot be detected from a shell, show the install instructions immediately:
-   > "If Obsidian is not yet installed, download it from **https://obsidian.md/** (free, available on macOS, Windows, Linux, iOS, Android). No sign-up required for local vaults."
-
-2. Instruct the user to open Obsidian and set the vault root to `.mnemo/<project-name>/` — this gives the vault a meaningful name and keeps both `raw/` and `wiki/` visible inside the app:
-   > "In Obsidian: **Open folder as vault** → select `.mnemo/<project-name>/` in this project (or `~/.mnemo/` for the global vault)."
-
-3. Offer to set up the **Obsidian Web Clipper** browser extension so clipped pages land directly in the ingest queue:
-   > "Install the Obsidian Web Clipper: https://obsidian.md/clipper#more-browsers — then set its default save location to `raw/` inside this vault. Pages you clip will be picked up automatically by `/mnemo:ingest`."
-
-4. Report:
-   > "Obsidian vault ready at `.mnemo/<project-name>/`. Clipped pages saved to `raw/` will be ingested with `/mnemo:ingest`."
+Do not add `/mnemo:schema`, `/mnemo:onboard`, manual install commands, schema
+customization, profile creation, Obsidian installation, or memory setup as
+optional follow-ups. Do not present `/mnemo:graphify` as an unfinished init step;
+only mention it as a later retry when graphify was requested and failed. If any
+required step above did not run, init is incomplete; finish it before reporting
+success.

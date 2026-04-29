@@ -1,6 +1,6 @@
 ---
 name: mnemo-init-copilot
-description: Best-effort Copilot-specific wiring for mnemo init. Run after skills/init/SKILL.md completes when the user wants a manual/local fallback.
+description: Best-effort Copilot-specific wiring for mnemo-init. Run after skills/init/SKILL.md completes when the user wants a manual/local fallback.
 ---
 
 ## Agent wiring — best effort
