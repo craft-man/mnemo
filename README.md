@@ -3,7 +3,7 @@
 </p>
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.16.6-blue)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.17.0-blue)](CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
@@ -130,16 +130,10 @@ This matrix describes current intended behavior by host.
 In any agent (Claude Code, Codex, Cursor, OpenCode, Gemini CLI…):
 
 ```
-/mnemo:init
+mnemo-init
 ```
 
-Without an agent, use the standalone bootstrap (Python 3.10+):
-
-```bash
-python3 scripts/init_mnemo.py
-```
-
-Both paths run the full init flow: local/global bootstrap, schema, onboarding, search config, optional graphify, optional Obsidian guidance, session brief, and agent memory setup. qmd and graphify are proposed with yes as the default and executed during init when enabled. Then drop files into `.mnemo/<project-name>/raw/` and:
+The init flow creates the project vault, runs schema setup, ensures the global profile when absent, configures search, asks about graphify and Obsidian, generates the session brief, and wires agent memory. qmd and graphify are proposed with yes as the default and fall back cleanly when unavailable. Then drop files into `.mnemo/<project-name>/raw/` and:
 
 ```
 /mnemo:ingest      # "ingest files in raw/"
@@ -154,7 +148,11 @@ Deterministic operations are handled by Python scripts (3.10+, no external depen
 
 | Script | Purpose | CLI |
 |---|---|---|
-| `scripts/init_mnemo.py` | Bootstrap vault structure | `python3 scripts/init_mnemo.py` |
+| `skills/init/scripts/create_vault.py` | Create `.mnemo/<project-name>/` structure | `python3 skills/init/scripts/create_vault.py --project-root .` |
+| `skills/schema/scripts/write_schema.py` | Write validated schema answers | `python3 skills/schema/scripts/write_schema.py --vault <path> --domain <text> --entity-types <csv> --concept-categories <csv>` |
+| `skills/onboard/scripts/write_profile.py` | Create global profile if absent | `python3 skills/onboard/scripts/write_profile.py --role <role> --technical-level <level> --language <lang> --domains <csv> --proactivity <level> --register <style>` |
+| `skills/init/scripts/configure_search.py` | Configure qmd or BM25 fallback | `python3 skills/init/scripts/configure_search.py --vault <path> --backend qmd --install` |
+| `skills/graphify/scripts/run_graphify.py` | Run graphify and write integration pages | `python3 skills/graphify/scripts/run_graphify.py --project-root . --vault <path>` |
 | `scripts/update_log.py` | Append entry to `log.md` | `python3 scripts/update_log.py --vault <path> --file <slug> --op <op>` |
 | `scripts/update_index.py` | Regenerate `index.md` from frontmatter | `python3 scripts/update_index.py --vault <path> [--dry-run] [--json]` |
 | `scripts/update_session_brief.py` | Regenerate compact startup context | `python3 scripts/update_session_brief.py --vault <path> [--summary <text>]` |
@@ -169,7 +167,7 @@ Deterministic operations are handled by Python scripts (3.10+, no external depen
 
 By default mnemo uses a simple stdlib **BM25** fallback. It has no extra dependencies and works out of the box for small wikis.
 
-For medium and large wikis, **[qmd](https://github.com/tobi/qmd)** is recommended. It provides local hybrid search (BM25 + vector embeddings), and both `/mnemo:init` and `python3 scripts/init_mnemo.py` propose it with yes as the default, then configure it during the same init run when enabled. Once set up, `/mnemo:query` routes through qmd automatically.
+For medium and large wikis, **[qmd](https://github.com/tobi/qmd)** is recommended. It provides local hybrid search (BM25 + vector embeddings), and `mnemo-init` proposes it with yes as the default, then configures it during the same init run when enabled. Once set up, `/mnemo:query` routes through qmd automatically.
 
 **qmd requirements:** Node.js ≥ 22 or Bun ≥ 1.0, ~2 GB disk (models downloaded once on first use).
 
@@ -191,7 +189,7 @@ The active backend is stored in `.mnemo/<project-name>/config.json` under `searc
 Slash commands work in any agent. Natural language alternatives are shown in comments, so use whichever your agent prefers.
 
 ```
-/mnemo:init                          # "initialize mnemo"; runs schema/onboard, qmd, graphify, and agent memory setup in one flow
+mnemo-init                           # "initialize mnemo"; runs schema/onboard, qmd, graphify, and agent memory setup in one flow
 /mnemo:context                       # "Load the minimum mnemonic context for this project"
 # drop files into .mnemo/<project-name>/raw/
 /mnemo:ingest                        # "ingest files in raw/"
@@ -204,17 +202,11 @@ Slash commands work in any agent. Natural language alternatives are shown in com
 /mnemo:log                           # "show the audit log"; filter by op, date, or last N entries
 ```
 
-No agent? Bootstrap with the standalone script:
-
-```bash
-python3 scripts/init_mnemo.py        # requires Python 3.10+
-```
-
 ---
 
 ## Skills
 
-### `/mnemo:init`
+### `mnemo-init`
 
 Bootstraps a new knowledge base. Run once per project; it warns if already initialized.
 
@@ -238,7 +230,7 @@ Bootstraps a new knowledge base. Run once per project; it warns if already initi
 
 `log.md` records every ingested file, including filename and ISO timestamp. Before processing anything, `/mnemo:ingest` checks this log and skips files already present. To force a re-ingest, remove the entry from `log.md`.
 
-`/mnemo:init` also:
+`mnemo-init` also:
 
 - runs the project schema setup immediately
 - ensures your global profile exists
@@ -285,7 +277,7 @@ If startup auto-load did not happen, run `/mnemo:context` or say "Load the minim
 
 ### `/mnemo:onboard`
 
-Creates or updates your global user profile at `~/.mnemo/wiki/entities/person-user.md`. It runs automatically on first `/mnemo:init` and is skipped silently if a profile already exists. Run directly to update it.
+Creates or updates your global user profile at `~/.mnemo/wiki/entities/person-user.md`. It runs automatically on first `mnemo-init` and is skipped silently if a profile already exists. Run directly to update it.
 
 A short interview covers your role (solo dev, team lead, researcher…), technical level, preferred language for notes and responses, main domains of interest, knowledge base goal, and response style preference. Answers are inferred from the conversation where possible (e.g. language), so you only confirm rather than type them.
 
@@ -404,6 +396,8 @@ mnemo's wiki format works directly in Obsidian. Open `.mnemo/<project-name>/` as
 ## Contributing
 
 Each skill is a `SKILL.md` file. Edit it, reload, test. See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide.
+
+For Agent Skills evals, `skills/init/evals/evals.json` follows the official `skill_name` + `evals` shape. Always use the official `skill-creator` skill to run skill evals end-to-end. If it is not available in the current agent environment, install it first through the agent's skill installer. `skill-creator` handles run orchestration, grading, benchmark aggregation, and review presentation.
 
 ---
 

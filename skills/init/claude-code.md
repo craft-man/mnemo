@@ -1,6 +1,6 @@
 ---
 name: mnemo-init-claude-code
-description: Claude Code-specific wiring for mnemo init. Run after skills/init/SKILL.md completes.
+description: Claude Code-specific wiring for mnemo-init. Run after skills/init/SKILL.md completes.
 ---
 
 ## Step 8 — CLAUDE.md wiring

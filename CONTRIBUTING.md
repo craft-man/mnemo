@@ -16,6 +16,7 @@ mnemo/
 ├── skills/
 │   ├── init/
 │   │   ├── SKILL.md       ← universal core
+│   │   ├── scripts/       ← non-interactive init helpers
 │   │   ├── claude-code.md ← host-specific memory/hook notes
 │   │   ├── opencode.md    ← host-specific memory notes
 │   │   ├── gemini.md      ← host-specific memory notes
@@ -33,12 +34,11 @@ mnemo/
 │   ├── stats/SKILL.md
 │   └── references/        ← contributor and integration docs
 ├── scripts/
-│   ├── init_mnemo.py      ← standalone bootstrap (no agent required)
 │   ├── update_log.py      ← fast path: append entries to log.md
 │   ├── update_index.py    ← fast path: regenerate index.md from frontmatter
 │   └── check_skill_invocations.sh  ← CI guard: no slash-command syntax in SKILL.md
 ├── tests/
-│   ├── test_init_mnemo.py
+│   ├── test_init_scripts.py
 │   ├── test_update_index.py
 │   ├── test_update_log.py
 │   └── test_wiki_lint.py
@@ -47,10 +47,10 @@ mnemo/
 
 ## Fast path pattern
 
-Skills and agents invoke Python scripts as a "Step 0" before their LLM logic. The pattern:
+Skills and agents invoke Python scripts for deterministic filesystem work. The pattern:
 
 ```
-Fast path: use `Glob('**/mnemo/scripts/<script>.py')` to locate the script.
+Fast path: use the skill-owned `scripts/<script>.py` first, then shared `scripts/<script>.py` only for repository-wide helpers.
 If found, run: `python3 <script_path> --vault <vault> [args]`
 If exit 0 → skip LLM steps.
 If exit non-zero → emit `⚠ fast path failed (exit <code>); falling back to LLM.` and continue.
@@ -59,6 +59,9 @@ If script not found → apply LLM fallback.
 
 **Rules for adding a new fast path script:**
 - Stdlib only; no external dependencies
+- Non-interactive: all choices are collected by the skill before the script runs
+- Support `--help`
+- Write JSON to stdout and diagnostics/errors to stderr
 - Exit 0 = success, exit 1 = error (print to stderr)
 - Must have a corresponding test file in `tests/test_<script_name>.py`
 - Follow naming convention: `verb_noun.py` (e.g. `update_log.py`, `update_index.py`)
@@ -151,13 +154,43 @@ covers the full skills + agents set.
 - One action per step. It keeps retry logic predictable.
 - Write edge cases in prose: what should the agent do when a file is missing, already processed, or oversized?
 
-## Testing the Python bootstrap
+## Testing init scripts
 
 ```bash
-python -m pytest tests/ -v
+python -m pytest tests/test_init_scripts.py -v
 ```
 
-Tests cover `create_structure`, `guard`, `prompt_qmd`, `update_gitignore`, and the full `main()` flow for all three init choices.
+Tests cover the small non-interactive scripts used by `mnemo-init`.
+
+## Running Agent Skills evals
+
+Skill eval cases live in `skills/<skill>/evals/evals.json` using the official Agent Skills shape:
+
+```json
+{
+  "skill_name": "mnemo-init",
+  "evals": [
+    {
+      "id": "fresh-project-complete-init",
+      "prompt": "Initialize mnemo in this project...",
+      "expected_output": "A complete mnemo project init is performed...",
+      "assertions": ["The output reports a vault at `.mnemo/<project-name>/`."]
+    }
+  ]
+}
+```
+
+Required path: always use the official `skill-creator` skill to run skill evals end-to-end. If `skill-creator` is not available in the current agent environment, install it first through the agent's skill installer, then restart the eval flow with `skill-creator` loaded. `skill-creator` owns the full loop: spawning with-skill and baseline runs, grading assertions, aggregating benchmarks, and presenting results for human review.
+
+When asking an agent to run evals end-to-end, the expected orchestration is:
+
+1. Load `skill-creator`; if unavailable, install it first through the agent's skill installer.
+2. Let `skill-creator` orchestrate the eval run.
+3. Execute each `with_skill` and baseline run in isolated agent contexts, using sub-agents or separate sessions when available.
+4. Grade each run into its local `grading.json`.
+5. Record `timing.json` when available.
+6. Aggregate the benchmark.
+7. Report the benchmark and the concrete failures that should drive the next skill edit.
 
 ## Versioning
 

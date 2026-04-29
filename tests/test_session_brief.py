@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import os
 import pathlib
 import subprocess
 import sys
@@ -78,45 +77,6 @@ class TestPublicWrappers(unittest.TestCase):
             )
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertIn("Knowledge Base Stats", result.stdout)
-
-    def test_init_public_wrapper_runs_project_only(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            target = pathlib.Path(tmp) / "project"
-            target.mkdir()
-            fake_home = pathlib.Path(tmp) / "home"
-            fake_home.mkdir()
-            env = os.environ.copy()
-            env["HOME"] = str(fake_home)
-            env["USERPROFILE"] = str(fake_home)
-            inputs = "\n".join([
-                "2",
-                "Project notes",
-                "Person, Tool, Project",
-                "Pattern, Technique, Problem",
-                "",
-                "1",
-                "2",
-                "English",
-                "testing",
-                "2",
-                "1",
-                "",
-                "n",
-                "n",
-                "n",
-            ]) + "\n"
-            result = subprocess.run(
-                [sys.executable, str(ROOT / "scripts" / "init_mnemo.py"), str(target)],
-                input=inputs,
-                text=True,
-                capture_output=True,
-                env=env,
-            )
-            self.assertEqual(result.returncode, 0, result.stderr)
-            vault = target / ".mnemo" / target.name
-            self.assertTrue((vault / "wiki" / "sources").is_dir())
-            self.assertTrue((vault / "SESSION_BRIEF.md").exists())
-
 
 if __name__ == "__main__":
     unittest.main()

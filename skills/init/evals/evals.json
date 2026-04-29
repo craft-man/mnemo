@@ -1,0 +1,53 @@
+{
+  "skill_name": "mnemo-init",
+  "evals": [
+    {
+      "id": "fresh-project-complete-init",
+      "prompt": "Initialize mnemo in this project. Use the recommended defaults for search, graphify, Obsidian, and gitignore. The project has no existing .mnemo directory and no global profile.",
+      "expected_output": "A complete mnemo project init is performed: the project vault exists, schema and profile are handled during init, search is configured with qmd or BM25 fallback, graphify is attempted without manual handoff, Obsidian guidance is provided, SESSION_BRIEF.md exists, and agent memory is wired.",
+      "assertions": [
+        "The output reports a vault at `.mnemo/<project-name>/`.",
+        "The output states the active search backend as qmd or BM25.",
+        "The output states whether graphify was enabled or not enabled.",
+        "The output mentions `.mnemo/<project-name>/SESSION_BRIEF.md`.",
+        "The output does not present schema, onboarding, graphify, or memory wiring as optional follow-up work.",
+        "The project contains `.mnemo/<project-name>/SCHEMA.md`, `config.json`, `SESSION_BRIEF.md`, `index.md`, and `log.md`."
+      ]
+    },
+    {
+      "id": "already-initialized-stops",
+      "prompt": "Initialize mnemo in this project. `.mnemo/<project-name>/` already exists.",
+      "expected_output": "The skill reports that mnemo is already initialized and stops without rerunning schema, onboarding, search, graphify, Obsidian, session brief, or memory wiring.",
+      "assertions": [
+        "The output says mnemo is already initialized at `.mnemo/<project-name>/`.",
+        "The output does not ask schema questions.",
+        "The output does not ask onboarding/profile questions.",
+        "The output does not run or offer graphify.",
+        "The output does not modify existing init artifacts."
+      ]
+    },
+    {
+      "id": "qmd-failure-falls-back",
+      "prompt": "Initialize mnemo in this project and choose qmd when asked, but qmd installation or collection registration fails.",
+      "expected_output": "Init continues successfully with BM25 configured as the active search backend, without asking the user to install qmd manually.",
+      "assertions": [
+        "`config.json` contains `\"search_backend\": \"bm25\"`.",
+        "The output states that BM25 is active.",
+        "The output does not ask the user to install qmd manually.",
+        "The skill still completes session brief generation and agent memory wiring."
+      ]
+    },
+    {
+      "id": "graphify-failure-continues",
+      "prompt": "Initialize mnemo in this project and choose graphify when asked, but graphify installation or execution fails.",
+      "expected_output": "Init continues successfully, reports graphify as not enabled, still completes Obsidian guidance, session brief generation, and agent memory wiring, and presents both valid next paths: ingesting files from raw and rerunning graphify later after the graphify environment is fixed.",
+      "assertions": [
+        "The output reports that graphify was not enabled or did not complete.",
+        "The output does not ask the user to install graphify manually.",
+        "The project still contains `.mnemo/<project-name>/SESSION_BRIEF.md`.",
+        "The project still has a mnemo stanza in the selected agent memory file.",
+        "The final next use includes ingesting files from `.mnemo/<project-name>/raw/` and also says `/mnemo:graphify` can be rerun later after graphify is fixed."
+      ]
+    }
+  ]
+}

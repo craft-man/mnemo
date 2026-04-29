@@ -14,7 +14,7 @@ compatibility: >
   agents invoke by natural language. Requires: graphify (pip install graphifyy && graphify install).
 metadata:
   author: mnemo contributors
-  version: "0.16.6"
+  version: "0.17.0"
 allowed-tools: Read Write Edit Glob Bash
 ---
 
@@ -25,7 +25,7 @@ Map the current project codebase into a queryable mnemo knowledge graph.
 ## Prerequisites
 
 **1. mnemo initialized** — check if `.mnemo/<project-name>/wiki/sources/` exists. If not:
-> "Knowledge base not initialized. Run `/mnemo:init` first."
+> "Knowledge base not initialized. Run `mnemo-init` first."
 Stop.
 
 **2. graphify installed** — run `graphify --version`. If the command fails or is not found:
@@ -34,6 +34,18 @@ Stop.
 Stop.
 
 ## Step 1 — Prepare `.graphifyignore`
+
+Fast path: the deterministic graphify script below owns `.graphifyignore`,
+graphify execution, graph output validation, lightweight mnemo page writes,
+index/log updates, and JSON status output:
+```bash
+python skills/graphify/scripts/run_graphify.py --project-root . --vault .mnemo/<project-name>
+```
+
+Use `--skip-run` only in tests or when `graphify-out/` already exists and the
+user explicitly asks to integrate existing graphify artifacts. The script is
+non-interactive, supports `--help`, writes JSON to stdout, and writes errors to
+stderr.
 
 Check if `.graphifyignore` exists at project root.
 

@@ -5,15 +5,15 @@ description: >
   guides ingest categorization. If raw/ files are present, infers entity types
   and concept categories from their content before asking questions. Use when the
   user says "define my schema", "set up my taxonomy", "what entity types should I
-  use", "update my schema", "my domain has changed", or right after /mnemo:init.
+  use", "update my schema", "my domain has changed", or during mnemo-init.
 license: MIT
 compatibility: >
   Claude Code (slash command /mnemo:schema). Other agentskills.io-compatible
   agents invoke by natural language. No external dependencies.
 metadata:
   author: mnemo contributors
-  version: "0.16.6"
-allowed-tools: Read Write Glob Grep
+  version: "0.17.0"
+allowed-tools: Read Write Glob Grep Bash
 ---
 
 Arguments: $ARGUMENTS
@@ -23,7 +23,7 @@ Create or revise `.mnemo/<project-name>/SCHEMA.md` for this project's domain.
 ## Steps
 
 **1. Check init** — if `.mnemo/` does not exist, stop:
-> "Knowledge base not initialized. Run `/mnemo:init` first."
+> "Knowledge base not initialized. Run `mnemo-init` first."
 
 **2. Check for existing SCHEMA.md** — read `.mnemo/<project-name>/SCHEMA.md` if it exists. If it contains domain content beyond the starter template (i.e. the `## Domain` section is filled in), inform the user:
 > "A schema already exists. I'll show you the current version and propose updates."
@@ -107,6 +107,19 @@ Ask: "Write this schema? [y]es / [e]dit"
 If `[e]dit`: ask what to change, update the draft, show it again. Repeat until approved.
 
 **7. Write `.mnemo/<project-name>/SCHEMA.md`** — on approval, write the file.
+
+Fast path after approval:
+```bash
+python skills/schema/scripts/write_schema.py \
+  --vault .mnemo/<project-name> \
+  --domain "<domain description>" \
+  --entity-types "<comma-separated entity types>" \
+  --concept-categories "<comma-separated concept categories>"
+```
+
+The script is non-interactive, supports `--help`, writes JSON to stdout, and
+writes errors to stderr. Do not use it for the interview; use it only to
+materialize already validated values.
 
 **8. Report:**
 > "Schema written to `.mnemo/<project-name>/SCHEMA.md`.

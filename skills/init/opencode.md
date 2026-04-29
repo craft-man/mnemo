@@ -1,6 +1,6 @@
 ---
 name: mnemo-init-opencode
-description: OpenCode-specific wiring for mnemo init. Run after skills/init/SKILL.md completes.
+description: OpenCode-specific wiring for mnemo-init. Run after skills/init/SKILL.md completes.
 ---
 
 ## Agent wiring — AGENTS.md

@@ -13,7 +13,7 @@ compatibility: >
   acceleration (scripts/wiki_search.py).
 metadata:
   author: mnemo contributors
-  version: "0.16.6"
+  version: "0.17.0"
 allowed-tools: Read Write Edit Glob Grep Bash
 ---
 

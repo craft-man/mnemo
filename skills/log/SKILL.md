@@ -13,7 +13,7 @@ compatibility: >
   agents invoke by natural language. No external dependencies.
 metadata:
   author: mnemo contributors
-  version: "0.16.6"
+  version: "0.17.0"
 allowed-tools: Read Glob Bash
 ---
 
@@ -27,7 +27,7 @@ No sub-agent is dispatched — the log is small and deterministic.
 3. If the file does not exist, check for any subdirectory under `.mnemo/` and
    use its `log.md` if exactly one vault is present.
 4. If still not found, output:
-   > log.md not found. Run /mnemo:init to initialize the vault.
+   > log.md not found. Run mnemo-init to initialize the vault.
 
    Then stop.
 
