@@ -161,8 +161,9 @@ Tests cover `create_structure`, `guard`, `prompt_qmd`, `update_gitignore`, and t
 
 ## Versioning
 
-mnemo follows [Semantic Versioning](https://semver.org/). The version lives in four places:
+mnemo follows [Semantic Versioning](https://semver.org/). The version lives in five places:
 - `.claude-plugin/plugin.json` → `"version"`
+- `.codex-plugin/plugin.json` → `"version"`
 - `README.md` → version badge
 - All `skills/*/SKILL.md` → `version:` frontmatter field
 - `CHANGELOG.md` → new section header

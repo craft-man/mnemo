@@ -17,15 +17,25 @@ from datetime import date
 from pathlib import Path
 
 ROOT = Path(__file__).parent.parent
+PLUGIN_MANIFESTS = (
+    ROOT / ".claude-plugin" / "plugin.json",
+    ROOT / ".codex-plugin" / "plugin.json",
+)
 
 
 def current_version() -> str:
-    plugin = ROOT / ".claude-plugin" / "plugin.json"
-    return json.loads(plugin.read_text(encoding="utf-8"))["version"]
+    versions = {
+        path.relative_to(ROOT).as_posix(): json.loads(path.read_text(encoding="utf-8"))["version"]
+        for path in PLUGIN_MANIFESTS
+    }
+    distinct = set(versions.values())
+    if len(distinct) != 1:
+        details = ", ".join(f"{name}={version}" for name, version in versions.items())
+        sys.exit(f"error: plugin manifest versions are out of sync: {details}")
+    return next(iter(distinct))
 
 
-def bump_plugin_json(old: str, new: str) -> Path:
-    path = ROOT / ".claude-plugin" / "plugin.json"
+def bump_plugin_json(path: Path, new: str) -> Path:
     data = json.loads(path.read_text(encoding="utf-8"))
     data["version"] = new
     path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
@@ -120,9 +130,10 @@ def main() -> None:
 
     changed: list[Path] = []
 
-    path = bump_plugin_json(old, new)
-    print(f"  {path.relative_to(ROOT)}")
-    changed.append(path)
+    for plugin_path in PLUGIN_MANIFESTS:
+        path = bump_plugin_json(plugin_path, new)
+        print(f"  {path.relative_to(ROOT)}")
+        changed.append(path)
 
     path = bump_readme(old, new)
     print(f"  {path.relative_to(ROOT)}")
