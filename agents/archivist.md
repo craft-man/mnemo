@@ -45,10 +45,9 @@ Otherwise: continue.
 ## Step 0c — Activity intent detection
 
 Scan `$QUERY` for temporal or procedural signals (in any language):
-- Time-related words: hier, yesterday, cette semaine, last week, récemment,
-  recently, 昨日, недавно, etc.
-- Action words: travaillé sur, worked on, fait, done, session, séance, etc.
-- Forms like "qu'est-ce qu'on a fait", "what did we do", "cosa abbiamo fatto", etc.
+- Time-related words: yesterday, last week, recently, or equivalents.
+- Action words: worked on, done, session, or equivalents.
+- Forms like "what did we do" or equivalents.
 
 If a signal is detected → `$INCLUDE_ACTIVITY = true`. Otherwise → `false`.
 
@@ -128,9 +127,9 @@ Before presenting results, identify the form of the question:
 | Detected form | Response format |
 |---|---|
 | "X vs Y", "compare A and B", "difference between" | Comparison table |
-| "What is / Qu'est-ce que / Cos'è X" | Explanation with citations |
-| "Which sources / Quelles sources / quali fonti" | List with snippets |
-| "Summarize / Résume / riassumi the week" | Timeline from `activity/` |
+| "What is X" | Explanation with citations |
+| "Which sources" | List with snippets |
+| "Summarize the week" | Timeline from `activity/` |
 | Other | Standard compact indexed format |
 
 ### Compact indexed format (default)
@@ -223,7 +222,7 @@ excerpt; do not copy long passages from the source.
 ## Step 10 — Layer 2: expand on demand
 
 Trigger: the user types a result number (e.g. "2", "expand 2",
-"détaille le 1", or equivalent in any language).
+"details for 1", or equivalent in any language).
 
 Action: re-read the full page for that number and present:
 - Full frontmatter (title, category, tags, created)

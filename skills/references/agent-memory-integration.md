@@ -18,7 +18,7 @@ This project uses mnemo for knowledge management.
 - Session brief: `.mnemo/<project-name>/SESSION_BRIEF.md` — compact startup context
 
 At session startup, read `SESSION_BRIEF.md` if present. Read `graphify-out/GRAPH_REPORT.md` only when the task concerns codebase structure. Do not load the whole wiki at startup.
-If startup auto-load did not happen, run `/mnemo:context` or ask: "Charge le contexte mnemo minimal pour ce projet."
+If startup auto-load did not happen, run `/mnemo:context` or ask: "Load the minimal mnemo context for this project."
 
 **Before answering any factual question** that might be in the knowledge base, run `/mnemo:query <topic>`. If results are returned, synthesize from them. If 0 results, say so explicitly — never invent wiki content.
 
@@ -44,7 +44,7 @@ Session brief: `.mnemo/<project-name>/SESSION_BRIEF.md`
 
 Workflow:
 - At session startup, read `SESSION_BRIEF.md` if present. Read `graphify-out/GRAPH_REPORT.md` only for codebase-structure tasks. Do not load the whole wiki.
-- If startup auto-load did not happen, run `/mnemo:context` or ask: "Charge le contexte mnemo minimal pour ce projet."
+- If startup auto-load did not happen, run `/mnemo:context` or ask: "Load the minimal mnemo context for this project."
 - Query before answering: invoke the `query` skill with the topic.
 - Ingest new sources: invoke the `ingest` skill after adding files to `.mnemo/<project-name>/raw/`.
 - Save insights: invoke the `save` skill with a descriptive title.
@@ -66,7 +66,7 @@ This project maintains a synthesized wiki at `.mnemo/<project-name>/wiki/`.
 
 - Read `.mnemo/<project-name>/SESSION_BRIEF.md` at session startup if present.
 - Read `graphify-out/GRAPH_REPORT.md` only when the task concerns codebase structure.
-- If startup auto-load did not happen, run `/mnemo:context` or ask: "Charge le contexte mnemo minimal pour ce projet."
+- If startup auto-load did not happen, run `/mnemo:context` or ask: "Load the minimal mnemo context for this project."
 - Use `/mnemo:query <term>` for factual lookup instead of loading the whole wiki.
 - Skill instructions are in `skills/<skill-name>/SKILL.md` — follow them to ingest, query, save, and lint.
 ```
@@ -82,7 +82,7 @@ If a confirmed Copilot instruction file exists, add a short mnemo stanza there. 
 ```markdown
 ## Knowledge Base (mnemo)
 
-Read `.mnemo/<project-name>/SESSION_BRIEF.md` first if present. If startup auto-load did not happen, run `/mnemo:context` or ask: "Charge le contexte mnemo minimal pour ce projet." Read `graphify-out/GRAPH_REPORT.md` only for codebase-structure tasks. Use `/mnemo:query <term>` or `skills/query/SKILL.md` before answering factual questions. Do not load the whole wiki at startup.
+Read `.mnemo/<project-name>/SESSION_BRIEF.md` first if present. If startup auto-load did not happen, run `/mnemo:context` or ask: "Load the minimal mnemo context for this project." Read `graphify-out/GRAPH_REPORT.md` only for codebase-structure tasks. Use `/mnemo:query <term>` or `skills/query/SKILL.md` before answering factual questions. Do not load the whole wiki at startup.
 ```
 
 ---
@@ -96,7 +96,7 @@ Agents should start from the smallest useful context:
 3. `/mnemo:query <term>` for focused retrieval.
 
 `index.md` is a catalog, not startup context. Load it only when the brief or query workflow points there.
-Manual fallback for all agents, including Copilot: run `/mnemo:context` or say "Charge le contexte mnemo minimal pour ce projet." Use `/mnemo:context --code` only when codebase structure matters.
+Manual fallback for all agents, including Copilot: run `/mnemo:context` or say "Load the minimal mnemo context for this project." Use `/mnemo:context --code` only when codebase structure matters.
 
 ---
 

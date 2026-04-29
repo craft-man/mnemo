@@ -85,21 +85,21 @@ Agents in `agents/*.md` are self-contained workflow specs. They must be
 portable: a host may execute them through native sub-agent delegation or inline
 through the main agent via the dispatch adapters.
 
-**Structure de fichier obligatoire :**
+**Required file structure:**
 
 ```markdown
 ---
 name: mnemo-<role>
 description: >
-  Une phrase sur ce que fait l'agent et quand il est dispatché.
-reasoning-profile: heavy   # ou balanced selon la charge
+  One sentence about what the agent does and when it is dispatched.
+reasoning-profile: heavy   # or balanced, depending on workload
 allowed-tools: Read Write Edit Grep Glob Bash
 ---
 
 ## Inputs
 
-- `vault`: chemin du vault
-- <autres inputs transmis par le skill parent>
+- `vault`: vault path
+- <other inputs passed by the parent skill>
 
 ---
 
@@ -107,18 +107,18 @@ allowed-tools: Read Write Edit Grep Glob Bash
 ## Step N: Report
 ```
 
-**Conventions :**
-- `reasoning-profile: heavy` pour les workflows lourds (ingest complet, lint, graph analytics)
-- `reasoning-profile: balanced` pour les workflows de lecture/synthèse (query, save)
-- Chaque agent est self-contained; ne pas importer ni référencer le SKILL.md parent
-- Les inputs sont explicitement listés dans la section `## Inputs` du prompt de dispatch
-- Terminer par un step Report qui résume les actions effectuées
-- Le workflow doit rester valide en délégation native et en fallback inline
+**Conventions:**
+- Use `reasoning-profile: heavy` for heavy workflows (full ingest, lint, graph analytics)
+- Use `reasoning-profile: balanced` for reading/synthesis workflows (query, save)
+- Each agent is self-contained; do not import or reference the parent `SKILL.md`
+- Inputs are explicitly listed in the `## Inputs` section of the dispatch prompt
+- End with a Report step that summarizes the actions performed
+- The workflow must remain valid for both native delegation and inline fallback
 
-**Mise à jour du skill parent :**
-Quand tu ajoutes ou modifies un agent, vérifier que le Step 0 dans le SKILL.md
-correspondant transmet bien tous les inputs nécessaires à l'agent via le
-contrat défini dans `skills/references/subagent-dispatch.md`.
+**Parent skill update:**
+When you add or modify an agent, verify that Step 0 in the corresponding
+`SKILL.md` passes all required inputs to the agent through the contract defined
+in `skills/references/subagent-dispatch.md`.
 
 ## Adding or modifying dispatch adapters
 
@@ -140,8 +140,9 @@ Rules:
 - Treat reasoning hints as advisory only.
 - Do not redefine workflow semantics in the adapter.
 
-**Versioning :**
-Les fichiers agents ne portent pas de version individuelle. La version du plugin (`0.x.y`) couvre l'ensemble skills + agents.
+**Versioning:**
+Agent files do not carry individual versions. The plugin version (`0.x.y`)
+covers the full skills + agents set.
 
 ## Skill authoring tips
 

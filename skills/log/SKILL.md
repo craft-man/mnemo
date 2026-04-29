@@ -27,7 +27,7 @@ No sub-agent is dispatched — the log is small and deterministic.
 3. If the file does not exist, check for any subdirectory under `.mnemo/` and
    use its `log.md` if exactly one vault is present.
 4. If still not found, output:
-   > log.md introuvable. Lancez /mnemo:init pour initialiser le vault.
+   > log.md not found. Run /mnemo:init to initialize the vault.
 
    Then stop.
 
@@ -37,15 +37,15 @@ Parse `$ARGUMENTS` (may be empty) to extract up to three optional filters:
 
 | Filter | Type | NL triggers |
 |--------|------|-------------|
-| `op`   | `ingest \| skipped \| generated \| lint` | "ingest", "ingests", "skip", "skips", "skipped", "generated", "génér", "lint" |
-| `last` | integer N | "dernier" → 1, "derniers" → 1, "last" → 1, "les N derniers", "last N", "les N" |
-| `since` | ISO date YYYY-MM-DD | "hier" → today − 1 day, "cette semaine" / "this week" → Monday of current week, "depuis lundi" / "since monday" → Monday of current week, "depuis YYYY-MM-DD" / "since YYYY-MM-DD" → that date |
+| `op`   | `ingest \| skipped \| generated \| lint` | "ingest", "ingests", "skip", "skips", "skipped", "generated", "lint" |
+| `last` | integer N | "last" → 1, "last N" |
+| `since` | ISO date YYYY-MM-DD | "yesterday" → today - 1 day, "this week" → Monday of current week, "since monday" → Monday of current week, "since YYYY-MM-DD" → that date |
 
 Rules:
-- "dernier" or "last" without a number → `last=1`.
-- No arguments or "tout" / "all" → no filters applied.
+- "last" without a number → `last=1`.
+- No arguments or "all" → no filters applied.
 - If `since` value is present but unrecognized, output:
-  > Date non reconnue : "\<valeur>". Essayez "depuis YYYY-MM-DD".
+  > Unrecognized date: "\<value>". Try "since YYYY-MM-DD".
 
   Then stop.
 - Use `Bash` with `date` to compute relative dates (today, yesterday, Monday of
@@ -87,7 +87,7 @@ Apply filters in this order:
 4. **last filter** — if `last` is set, keep only the first `last` entries.
 
 If no entries remain after filtering:
-> Aucune entrée correspondante dans log.md.
+> No matching entries in log.md.
 
 Then stop.
 
@@ -96,7 +96,7 @@ Then stop.
 Output a markdown table:
 
 ```
-| Date | Fichier | Opération |
+| Date | File | Operation |
 |---|---|---|
 | 2026-04-25 14:00 | — | lint |
 | 2026-04-24 11:00 | raw/notes.md | skipped |
@@ -106,6 +106,6 @@ Output a markdown table:
 Format rules:
 - **Date** column: display `YYYY-MM-DD HH:MM` (drop seconds and timezone).
   If timestamp has no time component, display `YYYY-MM-DD`.
-- **Fichier** column: display `path` as-is (use `—` for lint entries).
-- **Opération** column: display `op` lowercase as-is.
+- **File** column: display `path` as-is (use `—` for lint entries).
+- **Operation** column: display `op` lowercase as-is.
 - Table is sorted most recent first (already done in Step 3).
