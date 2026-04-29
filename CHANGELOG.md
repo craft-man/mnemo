@@ -6,6 +6,19 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.16.2] — 2026-04-29
+
+### Added
+
+- **Init wiring regression tests** — added coverage for the fast-path `/mnemo:init` flow when `CLAUDE.md` already exists and when no agent memory file exists yet.
+
+### Changed
+
+- **Fast-path agent memory wiring restored** — the standalone `/mnemo:init` bootstrap now resumes the host-aware steps after filesystem setup, wiring mnemo into `CLAUDE.md` or `AGENTS.md` instead of stopping early.
+- **Claude stop hook restoration** — when the fast path wires `CLAUDE.md`, it now also restores `.claude/settings.local.json` with the `/mnemo:mine` session-end reminder if it is missing.
+
+---
+
 ## [0.16.1] — 2026-04-29
 
 ### Added
