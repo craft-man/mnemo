@@ -14,7 +14,7 @@ compatibility: >
   agents invoke by natural language. Requires: graphify (pip install graphifyy && graphify install).
 metadata:
   author: mnemo contributors
-  version: "0.16.3"
+  version: "0.16.4"
 allowed-tools: Read Write Edit Glob Bash
 ---
 

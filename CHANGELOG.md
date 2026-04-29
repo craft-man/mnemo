@@ -6,6 +6,19 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.16.4] — 2026-04-29
+
+### Added
+
+- **Init completion regression coverage** — expanded `tests/test_init_mnemo.py` to cover the fast-path completion message and the non-interactive handling of an existing global user profile.
+
+### Changed
+
+- **Existing onboard profile is now kept silently during init** — the standalone `/mnemo:init` fast path no longer pauses to ask whether an already-present `~/.mnemo/wiki/entities/person-user.md` should be reviewed.
+- **Bootstrap follow-up messaging now matches the real flow** — the fast path no longer suggests `/mnemo:schema` as a next step after schema setup already ran during init, and instead points directly to `raw/`, `/mnemo:ingest`, and `/mnemo:query`.
+
+---
+
 ## [0.16.3] — 2026-04-29
 
 ### Added

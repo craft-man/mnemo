@@ -1,6 +1,6 @@
 {
   "name": "mnemo",
-  "version": "0.16.3",
+  "version": "0.16.4",
   "description": "Agentic knowledge management system for Codex and compatible agent workflows. Ingest raw files into a synthesized wiki, query the knowledge base, and save AI-generated insights permanently.",
   "author": {
     "name": "mnemo contributors"
