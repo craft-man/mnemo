@@ -13,6 +13,8 @@ Named after [Mnemosyne](https://en.wikipedia.org/wiki/Mnemosyne), the Greek godd
 
 If this saves you time, [![GitHub stars](https://img.shields.io/github/stars/craft-man/mnemo?style=social)](https://github.com/craft-man/mnemo) helps others find it.
 
+[Discover mnemo!](https://craft-man.github.io/mnemo)
+
 > [!WARNING]
 > This plugin is in beta. Core skills run on Claude Code, OpenCode, Gemini CLI, Cursor, Codex, and any agentskills.io-compatible agent. Heavy workflows use native sub-agents when the host supports delegation, and otherwise fall back to inline execution. Session memory wiring and session-end reminders are host-dependent: mnemo uses the current tool's project memory file and hook/reminder system when available, and falls back to best-effort local instructions otherwise. Thanks for your patience! Contributions welcome.
 
