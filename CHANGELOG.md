@@ -6,6 +6,19 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.16.3] — 2026-04-29
+
+### Added
+
+- **Init schema regression coverage** — expanded `tests/test_init_mnemo.py` to cover the required schema pass in the fast-path bootstrap flow.
+
+### Changed
+
+- **Schema setup is now mandatory during init** — `/mnemo:init` no longer frames domain taxonomy setup as an optional follow-up. The bootstrap now always runs a schema pass and falls back to starter defaults only when fields are left blank.
+- **Init skill and script alignment** — the host-level `skills/init/SKILL.md` and the standalone Python fast path now match on this behavior, removing the contradiction that suggested `SCHEMA.md` refinement could be skipped.
+
+---
+
 ## [0.16.2] — 2026-04-29
 
 ### Added
