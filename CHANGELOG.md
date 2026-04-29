@@ -6,6 +6,19 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.16.5] — 2026-04-29
+
+### Added
+
+- **End-to-end init regression coverage** — expanded init tests for default qmd and graphify execution, minimal `main()` answers, automatic agent memory wiring, and forbidden manual handoff messaging.
+
+### Changed
+
+- **Init now completes setup before returning** — `/mnemo:init` now treats schema, onboarding, qmd, graphify, Obsidian guidance, session brief generation, and agent memory wiring as one integrated run.
+- **Manual handoffs removed from init messaging** — qmd and graphify use yes-default prompts with automatic install attempts, falling back cleanly without asking the user to install or run follow-up commands manually.
+
+---
+
 ## [0.16.4] — 2026-04-29
 
 ### Added
