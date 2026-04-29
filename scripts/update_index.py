@@ -4,12 +4,6 @@ Python 3.10+ stdlib only.
 
 Usage:
   python scripts/update_index.py --vault .mnemo/myproject [--dry-run] [--json]
-
-Inspired by github.com/alirezarezvani/claude-skills — adapted to mnemo conventions:
-  - Categories: sources, entities, concepts, synthesis
-  - Link format: [Title](wiki/category/file.md)  (not Obsidian wikilinks)
-  - Excludes wiki/indexes/ and wiki/activity/
-  - Shards at 150 pages into wiki/indexes/<category>.md
 """
 from __future__ import annotations
 import argparse
