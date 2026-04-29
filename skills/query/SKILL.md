@@ -14,7 +14,7 @@ compatibility: >
   (scripts/wiki_search.py).
 metadata:
   author: mnemo contributors
-  version: "0.14.0"
+  version: "0.15.0"
 allowed-tools: Read Glob Grep Bash
 ---
 

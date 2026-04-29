@@ -6,6 +6,14 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.15.0] — 2026-04-29
+
+### Added
+
+- **Codex plugin metadata** — added a Codex plugin manifest and repo-local marketplace entry so mnemo can be exposed in Codex plugin catalogs.
+
+---
+
 ## [0.14.0] — 2026-04-28
 
 ### Added
