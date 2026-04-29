@@ -81,9 +81,12 @@ class TestMainProjectOnly(unittest.TestCase):
     def test_choice_2_creates_local_structure(self):
         with tempfile.TemporaryDirectory() as tmp:
             target = pathlib.Path(tmp)
+            fake_home = pathlib.Path(tmp) / "fakehome"
+            fake_home.mkdir()
             # inputs: choice=2, onboard six answers + confirm, qmd=n, graphify=n, obsidian=n
             with patch("builtins.input", side_effect=["2", "n", "1", "2", "English", "testing", "2", "1", "", "n", "n", "n"]), \
-                 patch("sys.argv", ["init_mnemo.py", str(target)]):
+                 patch("sys.argv", ["init_mnemo.py", str(target)]), \
+                 patch("pathlib.Path.home", return_value=fake_home):
                 from init_mnemo import main
                 main()
             self.assertTrue((target / ".mnemo" / target.name / "wiki" / "sources").is_dir())
@@ -142,7 +145,8 @@ class TestMainBoth(unittest.TestCase):
             # inputs: choice="" (->1), onboard six defaults, qmd skipped after install prompt, graphify skipped after install prompt, obsidian=""
             with patch("builtins.input", side_effect=["", "", "", "", "", "", "", "", "", "", "s", "", "s", ""]), \
                  patch("sys.argv", ["init_mnemo.py", str(target)]), \
-                 patch("pathlib.Path.home", return_value=fake_home):
+                 patch("pathlib.Path.home", return_value=fake_home), \
+                 patch("shutil.which", return_value=None):
                 from init_mnemo import main
                 main()
             self.assertTrue((target / ".mnemo" / target.name / "wiki" / "sources").is_dir())
@@ -188,6 +192,22 @@ class TestPromptQmd(unittest.TestCase):
             self.assertEqual(config["search_backend"], "qmd")
             self.assertEqual(config["qmd_collection"], "mnemo-wiki")
 
+    def test_auto_installs_qmd_when_missing(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            install_result = MagicMock()
+            install_result.returncode = 0
+            collection_result = MagicMock()
+            collection_result.returncode = 0
+            with patch("builtins.input", side_effect=["y", ""]), \
+                 patch("shutil.which", side_effect=[None, "C:/bin/npm", None, "C:/bin/qmd", "C:/bin/qmd"]), \
+                 patch("subprocess.run", side_effect=[install_result, collection_result]) as mock_run:
+                prompt_qmd(root, "project")
+            config = json.loads((root / "config.json").read_text(encoding="utf-8"))
+            self.assertEqual(config["search_backend"], "qmd")
+            self.assertEqual(mock_run.call_args_list[0].args[0], ["npm", "install", "-g", "@tobilu/qmd"])
+            self.assertEqual(mock_run.call_args_list[1].args[0], ["qmd", "collection", "add", "mnemo-wiki", ".mnemo/project/wiki", "**/*.md"])
+
     def test_writes_qmd_config_on_default_empty(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = pathlib.Path(tmp)
@@ -203,9 +223,12 @@ class TestPromptQmd(unittest.TestCase):
     def test_main_creates_config_json_for_project(self):
         with tempfile.TemporaryDirectory() as tmp:
             target = pathlib.Path(tmp)
+            fake_home = pathlib.Path(tmp) / "fakehome"
+            fake_home.mkdir()
             # inputs: choice=2, onboard six answers + confirm, qmd=n, graphify=n, obsidian=n
             with patch("builtins.input", side_effect=["2", "n", "1", "2", "English", "testing", "2", "1", "", "n", "n", "n"]), \
-                 patch("sys.argv", ["init_mnemo.py", str(target)]):
+                 patch("sys.argv", ["init_mnemo.py", str(target)]), \
+                 patch("pathlib.Path.home", return_value=fake_home):
                 from init_mnemo import main
                 main()
             self.assertTrue((target / ".mnemo" / target.name / "config.json").exists())
@@ -252,24 +275,24 @@ class TestPromptGraphify(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             target = pathlib.Path(tmp)
             printed = []
-            # default yes, then skips install
             with patch("builtins.input", side_effect=["", "s"]), \
                  patch("shutil.which", return_value=None), \
                  patch("builtins.print", side_effect=lambda *a, **k: printed.append(" ".join(str(x) for x in a))):
                 result = prompt_graphify(target)
             self.assertFalse(result)
             combined = " ".join(printed)
-            self.assertIn("pip install graphifyy", combined)
+            self.assertIn("Skipped. Run /mnemo:graphify manually later.", combined)
 
     def test_proceeds_after_install_when_graphify_found(self):
         with tempfile.TemporaryDirectory() as tmp:
             target = pathlib.Path(tmp)
+            install_result = MagicMock()
+            install_result.returncode = 0
             mock_result = MagicMock()
             mock_result.returncode = 0
-            # which returns None first (not installed), then path (after install)
             with patch("builtins.input", side_effect=["", ""]), \
-                 patch("shutil.which", side_effect=[None, "/usr/bin/graphify"]), \
-                 patch("subprocess.run", return_value=mock_result):
+                 patch("shutil.which", side_effect=[None, "C:/bin/graphify", "C:/bin/graphify"]), \
+                 patch("subprocess.run", side_effect=[install_result, install_result, mock_result]):
                 result = prompt_graphify(target)
             self.assertTrue(result)
 
@@ -277,7 +300,8 @@ class TestPromptGraphify(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             target = pathlib.Path(tmp)
             with patch("builtins.input", side_effect=["", ""]), \
-                 patch("shutil.which", return_value=None):
+                 patch("shutil.which", side_effect=[None, None, None]), \
+                 patch("subprocess.run", return_value=MagicMock(returncode=0)):
                 result = prompt_graphify(target)
             self.assertFalse(result)
 
@@ -335,9 +359,12 @@ class TestUpdateGitignore(unittest.TestCase):
     def test_main_skips_gitignore_when_no_git_repo(self):
         with tempfile.TemporaryDirectory() as tmp:
             target = pathlib.Path(tmp)
+            fake_home = pathlib.Path(tmp) / "fakehome"
+            fake_home.mkdir()
             # inputs: choice=2, onboard six answers + confirm, qmd=n, graphify=n, obsidian=n (no gitignore prompt)
             with patch("builtins.input", side_effect=["2", "n", "1", "2", "English", "testing", "2", "1", "", "n", "n", "n"]), \
-                 patch("sys.argv", ["init_mnemo.py", str(target)]):
+                 patch("sys.argv", ["init_mnemo.py", str(target)]), \
+                 patch("pathlib.Path.home", return_value=fake_home):
                 from init_mnemo import main
                 main()
             self.assertFalse((target / ".gitignore").exists())
@@ -345,10 +372,13 @@ class TestUpdateGitignore(unittest.TestCase):
     def test_main_skips_gitignore_on_n_answer(self):
         with tempfile.TemporaryDirectory() as tmp:
             target = pathlib.Path(tmp)
+            fake_home = pathlib.Path(tmp) / "fakehome"
+            fake_home.mkdir()
             (target / ".git").mkdir()
             # inputs: choice=2, onboard six answers + confirm, qmd=n, gitignore=n, graphify=n, obsidian=n
             with patch("builtins.input", side_effect=["2", "n", "1", "2", "English", "testing", "2", "1", "", "n", "n", "n", "n"]), \
-                 patch("sys.argv", ["init_mnemo.py", str(target)]):
+                 patch("sys.argv", ["init_mnemo.py", str(target)]), \
+                 patch("pathlib.Path.home", return_value=fake_home):
                 from init_mnemo import main
                 main()
             self.assertFalse((target / ".gitignore").exists())

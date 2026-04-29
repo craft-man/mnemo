@@ -117,20 +117,58 @@ def prompt_choice() -> str:
     return raw if raw in ("1", "2", "3") else "1"
 
 
+def _run_command(args: list[str], cwd: pathlib.Path | None = None) -> bool:
+    result = subprocess.run(args, cwd=cwd)
+    return result.returncode == 0
+
+
+def _install_qmd() -> bool:
+    installers = []
+    if shutil.which("npm") is not None:
+        installers.append(["npm", "install", "-g", "@tobilu/qmd"])
+    if shutil.which("bun") is not None:
+        installers.append(["bun", "install", "-g", "@tobilu/qmd"])
+
+    if not installers:
+        print("  qmd is not installed and no supported installer was found.")
+        print("  Install Node.js >= 22 or Bun >= 1.0, then re-run /mnemo:init or /mnemo:query.")
+        return False
+
+    for command in installers:
+        print(f"  Installing qmd automatically: {' '.join(command)}")
+        if _run_command(command):
+            return shutil.which("qmd") is not None
+
+    print("  Automatic qmd installation failed -- using BM25 for now.")
+    return False
+
+
+def _install_graphify() -> bool:
+    print("  Installing graphify automatically...")
+    if not _run_command([sys.executable, "-m", "pip", "install", "graphifyy"]):
+        print("  graphify package installation failed.")
+        return False
+
+    if _run_command(["graphify", "install"]):
+        return shutil.which("graphify") is not None
+
+    if _run_command([sys.executable, "-m", "graphify", "install"]):
+        return shutil.which("graphify") is not None
+
+    print("  graphify runtime installation failed.")
+    return False
+
+
 def prompt_qmd(mnemo_root: pathlib.Path, project_name: str) -> None:
     print()
     ans = input("Enable hybrid search with qmd? (BM25 + vector, requires Node.js >= 22 or Bun >= 1.0) [Y/n]: ").strip().lower()
     if ans not in ("n", "no"):
         config = {"search_backend": "qmd", "qmd_collection": "mnemo-wiki"}
         if shutil.which("qmd") is None:
-            print("  qmd is not installed. Install it with:")
-            print("    npm install -g @tobilu/qmd")
-            print("    # or")
-            print("    bun install -g @tobilu/qmd")
-            ans2 = input("  Press Enter once installed, or type 's' to skip qmd: ").strip().lower()
+            ans2 = input("  qmd is not installed. Install it automatically now? [Y/n/s skip]: ").strip().lower()
             if ans2 in ("s", "skip"):
                 config = {"search_backend": "bm25"}
-            elif shutil.which("qmd") is None:
+            elif ans2 not in ("", "y", "yes") or not _install_qmd() or shutil.which("qmd") is None:
                 print("  qmd still not found -- using BM25 for now.")
                 config = {"search_backend": "bm25"}
         if config["search_backend"] == "qmd":
@@ -357,13 +395,11 @@ def prompt_graphify(target: pathlib.Path, mnemo_root: pathlib.Path | None = None
         return False
 
     if shutil.which("graphify") is None:
-        print("  graphify is not installed. Install it with:")
-        print("    pip install graphifyy && graphify install")
-        ans2 = input("  Press Enter once installed, or type 's' to skip: ").strip().lower()
+        ans2 = input("  graphify is not installed. Install it automatically now? [Y/n/s skip]: ").strip().lower()
         if ans2 in ("s", "skip"):
             print("  Skipped. Run /mnemo:graphify manually later.")
             return False
-        if shutil.which("graphify") is None:
+        if ans2 not in ("", "y", "yes") or not _install_graphify() or shutil.which("graphify") is None:
             print("  graphify still not found — skipping. Run /mnemo:graphify manually later.")
             return False
 
