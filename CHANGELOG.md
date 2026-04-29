@@ -6,6 +6,36 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.17.0] — 2026-04-29
+
+### Added
+
+- **Skill-owned init scripts** — added non-interactive helpers under
+  `skills/init/scripts/`, `skills/schema/scripts/`, `skills/onboard/scripts/`,
+  and `skills/graphify/scripts/` for vault creation, schema/profile writes,
+  search fallback, session brief generation, agent memory wiring, and graphify
+  integration.
+- **`mnemo-init` eval cases** — added Agent Skills eval cases for fresh init,
+  already-initialized guard behavior, qmd fallback, and graphify failure
+  continuation.
+
+### Changed
+
+- **Init command renamed to `mnemo-init`** — replaced `/mnemo:init` and removed
+  the old root bootstrap wrapper to avoid collisions with host-native init
+  commands.
+- **Init flow now composes dedicated skills** — `mnemo-init` delegates schema,
+  onboarding, and graphify to their owning skills while keeping the full setup in
+  one run.
+- **Graphify failure next steps clarified** — when graphify was requested but
+  failed, init now reports both valid paths: ingest files from `raw/` and rerun
+  `/mnemo:graphify` later after fixing graphify.
+- **Init tests simplified around script contracts** — replaced the monolithic
+  bootstrap tests with focused coverage for the small non-interactive scripts
+  and the public command rename.
+
+---
+
 ## [0.16.6] — 2026-04-29
 
 ### Added
