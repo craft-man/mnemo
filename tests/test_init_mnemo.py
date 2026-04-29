@@ -7,7 +7,7 @@ import unittest
 from unittest.mock import patch, MagicMock
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent.parent / "skills" / "init"))
-from init_mnemo import create_structure, guard, update_gitignore, prompt_qmd, prompt_graphify, prompt_onboard, DIRS
+from init_mnemo import create_structure, guard, update_gitignore, prompt_qmd, prompt_graphify, prompt_onboard, wire_agent_memory, DIRS
 
 
 class TestCreateStructure(unittest.TestCase):
@@ -382,6 +382,49 @@ class TestUpdateGitignore(unittest.TestCase):
                 from init_mnemo import main
                 main()
             self.assertFalse((target / ".gitignore").exists())
+
+
+class TestAgentMemoryWiring(unittest.TestCase):
+    def test_prefers_existing_claude_md(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            target = pathlib.Path(tmp)
+            (target / "CLAUDE.md").write_text("# Project Instructions\n", encoding="utf-8")
+
+            wired = wire_agent_memory(target, "demo-project", graphify_done=False)
+
+            self.assertEqual(wired, "CLAUDE.md")
+            content = (target / "CLAUDE.md").read_text(encoding="utf-8")
+            self.assertIn("## mnemo", content)
+            self.assertIn(".mnemo/demo-project/SESSION_BRIEF.md", content)
+            settings = json.loads((target / ".claude" / "settings.local.json").read_text(encoding="utf-8"))
+            self.assertIn("hooks", settings)
+            self.assertIn("Stop", settings["hooks"])
+
+    def test_creates_agents_md_when_no_agent_file_exists(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            target = pathlib.Path(tmp)
+
+            wired = wire_agent_memory(target, "demo-project", graphify_done=False)
+
+            self.assertEqual(wired, "AGENTS.md")
+            content = (target / "AGENTS.md").read_text(encoding="utf-8")
+            self.assertIn("## Knowledge Base (mnemo)", content)
+            self.assertIn(".mnemo/demo-project/wiki/", content)
+
+    def test_main_wires_existing_claude_md(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            target = pathlib.Path(tmp)
+            fake_home = pathlib.Path(tmp) / "fakehome"
+            fake_home.mkdir()
+            (target / "CLAUDE.md").write_text("# Project Instructions\n", encoding="utf-8")
+            with patch("builtins.input", side_effect=["2", "n", "1", "2", "English", "testing", "2", "1", "", "n", "n", "n"]), \
+                 patch("sys.argv", ["init_mnemo.py", str(target)]), \
+                 patch("pathlib.Path.home", return_value=fake_home):
+                from init_mnemo import main
+                main()
+            content = (target / "CLAUDE.md").read_text(encoding="utf-8")
+            self.assertIn("## mnemo", content)
+            self.assertIn(".mnemo/" + target.name + "/SESSION_BRIEF.md", content)
 
 
 if __name__ == "__main__":

@@ -506,6 +506,117 @@ updated: {today}
     print("  Profile saved to ~/.mnemo/wiki/entities/person-user.md.")
 
 
+def _contains_mnemo_stanza(path: pathlib.Path) -> bool:
+    if not path.exists():
+        return False
+    content = path.read_text(encoding="utf-8")
+    return "## Knowledge Base (mnemo)" in content or "\n## mnemo\n" in f"\n{content}\n"
+
+
+def _build_agents_stanza(project_name: str) -> str:
+    return f"""## Knowledge Base (mnemo)
+
+Wiki location: `.mnemo/{project_name}/wiki/`
+Index: `.mnemo/{project_name}/index.md`
+Session brief: `.mnemo/{project_name}/SESSION_BRIEF.md`
+
+Workflow:
+- At session startup, read `SESSION_BRIEF.md` if present. Read `graphify-out/GRAPH_REPORT.md` only for codebase-structure tasks. Do not load the whole wiki.
+- If startup auto-load did not happen, run `/mnemo:context` or ask: "Load the minimal mnemo context for this project."
+- Query before answering: invoke the `query` skill with the topic (read `skills/query/SKILL.md`).
+- Ingest new sources: invoke the `ingest` skill after adding files to `.mnemo/{project_name}/raw/` (read `skills/ingest/SKILL.md`).
+- Save insights: invoke the `save` skill with a descriptive title (read `skills/save/SKILL.md`).
+- Lint after edits: invoke the `lint` skill at session end (read `skills/lint/SKILL.md`).
+"""
+
+
+def _build_claude_stanza(project_name: str, graphify_done: bool) -> str:
+    stanza = f"""## mnemo
+
+This project has a mnemo knowledge base in `.mnemo/{project_name}/`.
+
+At session startup:
+- Read `.mnemo/{project_name}/SESSION_BRIEF.md` if it exists.
+- Read `graphify-out/GRAPH_REPORT.md` only when the task concerns codebase structure.
+- Do not load the whole wiki at startup.
+- If the brief was not auto-read at startup, the user can run `/mnemo:context`.
+
+During the session:
+- Query it with `/mnemo:query <term>` before answering factual questions.
+- Ingest new sources with `/mnemo:ingest`
+- When a spec or plan is finalized (e.g. from superpowers brainstorming or writing-plans), move it to `.mnemo/{project_name}/raw/` and run `/mnemo:ingest` to add it to the knowledge base
+"""
+    if graphify_done:
+        stanza += "- Run `/mnemo:graphify` after significant code changes to keep the knowledge graph up to date\n"
+    return stanza
+
+
+def _append_stanza(path: pathlib.Path, stanza: str) -> None:
+    if path.exists():
+        content = path.read_text(encoding="utf-8").rstrip()
+        path.write_text(f"{content}\n\n{stanza.rstrip()}\n", encoding="utf-8")
+        return
+    path.write_text(f"{stanza.rstrip()}\n", encoding="utf-8")
+
+
+def ensure_claude_stop_hook(target: pathlib.Path) -> bool:
+    settings_path = target / ".claude" / "settings.local.json"
+    settings_path.parent.mkdir(parents=True, exist_ok=True)
+    mnemo_command = "echo 'mnemo - session ending. Run /mnemo:mine to capture insights from this session.'"
+    mnemo_hook = {
+        "matcher": "",
+        "hooks": [
+            {
+                "type": "command",
+                "command": mnemo_command,
+            }
+        ],
+    }
+
+    if settings_path.exists():
+        try:
+            data = json.loads(settings_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            print("  .claude/settings.local.json is not valid JSON -- skipping mnemo stop hook wiring.")
+            return False
+    else:
+        data = {}
+
+    hooks = data.setdefault("hooks", {})
+    stop_hooks = hooks.setdefault("Stop", [])
+    for entry in stop_hooks:
+        for hook in entry.get("hooks", []):
+            if hook.get("command") == mnemo_command:
+                return False
+
+    stop_hooks.append(mnemo_hook)
+    settings_path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+    return True
+
+
+def wire_agent_memory(target: pathlib.Path, project_name: str, graphify_done: bool) -> str | None:
+    agents_path = target / "AGENTS.md"
+    claude_path = target / "CLAUDE.md"
+
+    if agents_path.exists():
+        target_path = agents_path
+        stanza = _build_agents_stanza(project_name)
+    elif claude_path.exists():
+        target_path = claude_path
+        stanza = _build_claude_stanza(project_name, graphify_done)
+    else:
+        target_path = agents_path
+        stanza = _build_agents_stanza(project_name)
+
+    if _contains_mnemo_stanza(target_path):
+        return None
+
+    _append_stanza(target_path, stanza)
+    if target_path.name == "CLAUDE.md":
+        ensure_claude_stop_hook(target)
+    return target_path.name
+
+
 def update_gitignore(target: pathlib.Path) -> None:
     gitignore = target / ".gitignore"
     entry = ".mnemo/"
@@ -592,6 +703,9 @@ def main() -> None:
     if choice in ("1", "2"):
         prompt_obsidian(local_root)
         update_session_brief(local_root)
+        wired_target = wire_agent_memory(target, project_name, graphify_done)
+        if wired_target is not None:
+            print(f"  mnemo instructions added to {wired_target}.")
 
     print("\nNext steps:")
     if graphify_done:
