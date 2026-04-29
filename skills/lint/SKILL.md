@@ -15,7 +15,7 @@ compatibility: >
   (skills/lint/wiki_lint.py).
 metadata:
   author: mnemo contributors
-  version: "0.15.0"
+  version: "0.16.0"
 allowed-tools: Read Write Edit Glob Grep Bash
 ---
 

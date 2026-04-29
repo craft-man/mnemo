@@ -6,6 +6,18 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.16.0] — 2026-04-29
+
+### Added
+
+- **Automatic init installs** — the standalone `/mnemo:init` fast path now attempts to install `@tobilu/qmd` and `graphify` automatically when those optional integrations are enabled but missing.
+
+### Changed
+
+- **Codex-friendly setup flow** — qmd and graphify setup no longer depends on the user manually completing installs outside the init flow before configuration can continue.
+
+---
+
 ## [0.15.0] — 2026-04-29
 
 ### Added
