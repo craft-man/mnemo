@@ -5,6 +5,7 @@ Usage:
   python scripts/init_mnemo.py              # current directory
   python scripts/init_mnemo.py ./my-project # specific directory
 """
+import argparse
 import json
 import pathlib
 import shutil
@@ -116,6 +117,91 @@ def prompt_choice() -> str:
     return raw if raw in ("1", "2", "3") else "1"
 
 
+def _parse_csv(value: str, defaults: list[str]) -> list[str]:
+    items = [item.strip() for item in value.split(",") if item.strip()]
+    return items if len(items) >= 2 else defaults
+
+
+def write_schema(mnemo_root: pathlib.Path, domain: str, entity_types: str, concept_categories: str) -> None:
+    domain = domain.strip() or "General knowledge base for this project."
+    entities = _parse_csv(entity_types, ["Person", "Tool", "Project"])
+    concepts = _parse_csv(concept_categories, ["Pattern", "Technique", "Problem"])
+
+    entity_lines = "\n".join(f"- **{name}** -- named {name.lower()} items in this domain" for name in entities)
+    concept_lines = "\n".join(f"- **{name}** -- recurring {name.lower()} concepts in this domain" for name in concepts)
+    schema = f"""# Knowledge Base Schema
+
+## Domain
+{domain}
+
+## Entity Types
+{entity_lines}
+
+## Concept Taxonomy
+{concept_lines}
+
+## Naming Conventions
+- Entity pages: `wiki/entities/<type>-<name>.md` (e.g. `tool-redis.md`)
+- Concept pages: `wiki/concepts/<category>-<name>.md` (e.g. `pattern-saga.md`)
+- Source pages: `wiki/sources/<slug>.md`
+- Synthesis pages: `wiki/synthesis/<slug>.md`
+
+## Wikilink Style
+Use `[[Page Title]]` syntax -- always the exact H1 title of the target page. Obsidian-compatible.
+"""
+    (mnemo_root / "SCHEMA.md").write_text(schema, encoding="utf-8")
+
+
+def write_profile(
+    role: str,
+    technical_level: str,
+    language: str,
+    domains: str,
+    proactivity: str,
+    register: str,
+) -> bool:
+    global_root = ensure_global_tier()
+    profile_path = global_root / "wiki" / "entities" / "person-user.md"
+    if profile_path.exists():
+        print("  Global mnemo profile already exists -- keeping it unchanged.")
+        return False
+
+    today = date.today().isoformat()
+    created = _read_created_date(profile_path)
+    profile = f"""---
+title: User Profile
+category: entities
+tags: [user, profile]
+created: {created}
+updated: {today}
+---
+
+# User Profile
+
+## Role
+{role.strip() or "Solo developer"}
+
+## Technical Level
+{technical_level.strip() or "CLI comfortable"}
+
+## Language
+{language.strip() or "English"}
+
+## Domains
+{domains.strip() or "General knowledge"}
+
+## Proactivity
+{proactivity.strip() or "Moderate"}
+
+## Register
+{register.strip() or "Direct"}
+
+## Links
+"""
+    profile_path.write_text(profile, encoding="utf-8")
+    return True
+
+
 def _run_command(args: list[str], cwd: pathlib.Path | None = None) -> bool:
     result = subprocess.run(args, cwd=cwd)
     return result.returncode == 0
@@ -181,6 +267,30 @@ def prompt_qmd(mnemo_root: pathlib.Path, project_name: str) -> None:
     (mnemo_root / "config.json").write_text(json.dumps(config, indent=2), encoding="utf-8")
 
 
+def configure_search(mnemo_root: pathlib.Path, project_name: str, search_backend: str) -> None:
+    if search_backend == "bm25":
+        config = {"search_backend": "bm25"}
+        (mnemo_root / "config.json").write_text(json.dumps(config, indent=2), encoding="utf-8")
+        print("  Search backend configured: BM25.")
+        return
+
+    config = {"search_backend": "qmd", "qmd_collection": "mnemo-wiki"}
+    if shutil.which("qmd") is None:
+        print("  qmd is not installed; attempting automatic installation.")
+        if not _install_qmd() or shutil.which("qmd") is None:
+            print("  qmd still not found -- using BM25 for now.")
+            config = {"search_backend": "bm25"}
+    if config["search_backend"] == "qmd":
+        collection_path = f".mnemo/{project_name}/wiki"
+        result = subprocess.run(["qmd", "collection", "add", "mnemo-wiki", collection_path, "**/*.md"], cwd=mnemo_root.parent.parent)
+        if result.returncode != 0:
+            print("  qmd collection registration failed -- using BM25 for now.")
+            config = {"search_backend": "bm25"}
+        else:
+            print("  qmd is configured. Embeddings will be built automatically on first /mnemo:ingest.")
+    (mnemo_root / "config.json").write_text(json.dumps(config, indent=2), encoding="utf-8")
+
+
 def _read_created_date(path: pathlib.Path) -> str:
     if not path.exists():
         return date.today().isoformat()
@@ -203,15 +313,9 @@ def prompt_schema_setup(mnemo_root: pathlib.Path) -> bool:
     entity_types = input("Entity types, comma-separated (e.g. Person, Tool, Project): ").strip()
     concept_categories = input("Concept categories, comma-separated (e.g. Pattern, Technique, Problem): ").strip()
 
-    entities = [item.strip() for item in entity_types.split(",") if item.strip()]
-    concepts = [item.strip() for item in concept_categories.split(",") if item.strip()]
-    if not domain:
-        domain = "General knowledge base for this project."
-    if len(entities) < 2:
-        entities = ["Person", "Tool", "Project"]
-    if len(concepts) < 2:
-        concepts = ["Pattern", "Technique", "Problem"]
-
+    domain = domain or "General knowledge base for this project."
+    entities = _parse_csv(entity_types, ["Person", "Tool", "Project"])
+    concepts = _parse_csv(concept_categories, ["Pattern", "Technique", "Problem"])
     entity_lines = "\n".join(f"- **{name}** -- named {name.lower()} items in this domain" for name in entities)
     concept_lines = "\n".join(f"- **{name}** -- recurring {name.lower()} concepts in this domain" for name in concepts)
     schema = f"""# Knowledge Base Schema
@@ -234,13 +338,12 @@ def prompt_schema_setup(mnemo_root: pathlib.Path) -> bool:
 ## Wikilink Style
 Use `[[Page Title]]` syntax -- always the exact H1 title of the target page. Obsidian-compatible.
 """
-
     print("\nSchema preview:")
     print(schema)
     confirm = input("Write this schema? [Y/e]: ").strip().lower()
     if confirm in ("e", "edit"):
         print("  Edit mode is not available in the standalone script yet; writing the generated schema.")
-    (mnemo_root / "SCHEMA.md").write_text(schema, encoding="utf-8")
+    write_schema(mnemo_root, domain, ", ".join(entities), ", ".join(concepts))
     print("  Schema written to SCHEMA.md.")
     return True
 
@@ -408,6 +511,27 @@ def prompt_graphify(target: pathlib.Path, mnemo_root: pathlib.Path | None = None
     return True
 
 
+def run_graphify(target: pathlib.Path, mnemo_root: pathlib.Path | None = None) -> bool:
+    if shutil.which("graphify") is None:
+        print("  graphify is not installed; attempting automatic installation.")
+        if not _install_graphify() or shutil.which("graphify") is None:
+            print("  graphify still not found -- codebase graph mapping was not enabled.")
+            return False
+
+    ensure_graphifyignore(target)
+    print("  Running graphify on the project (this may take a moment)...")
+    result = subprocess.run(["graphify", "."], cwd=target)
+    if result.returncode != 0:
+        print("  graphify failed -- codebase graph mapping was not enabled.")
+        return False
+
+    if mnemo_root is not None and not write_graphify_pages(target, mnemo_root):
+        return False
+
+    print("  Codebase mapped. Start with graphify-out/GRAPH_REPORT.md for structure.")
+    return True
+
+
 def prompt_onboard() -> None:
     global_root = ensure_global_tier()
     profile_path = global_root / "wiki" / "entities" / "person-user.md"
@@ -442,38 +566,6 @@ def prompt_onboard() -> None:
     proactivity = proactive_map.get(input("Proactivity [1 High / 2 Moderate / 3 Low]: ").strip(), "Moderate")
     register = register_map.get(input("Register [1 Direct / 2 Collaborative]: ").strip(), "Direct")
 
-    today = date.today().isoformat()
-    created = _read_created_date(profile_path)
-    profile = f"""---
-title: User Profile
-category: entities
-tags: [user, profile]
-created: {created}
-updated: {today}
----
-
-# User Profile
-
-## Role
-{role}
-
-## Technical Level
-{level}
-
-## Language
-{language}
-
-## Domains
-{domains}
-
-## Proactivity
-{proactivity}
-
-## Register
-{register}
-
-## Links
-"""
     print("\n## Your mnemo profile")
     print(f"Role: {role}")
     print(f"Technical level: {level}")
@@ -484,7 +576,7 @@ updated: {today}
     ans = input("Write this profile? [Y/e]: ").strip().lower()
     if ans in ("e", "edit"):
         print("  Edit mode is not available in the standalone script yet; writing the generated profile.")
-    profile_path.write_text(profile, encoding="utf-8")
+    write_profile(role, level, language, domains, proactivity, register)
     print("  Profile saved to ~/.mnemo/wiki/entities/person-user.md.")
 
 
@@ -620,6 +712,10 @@ def prompt_obsidian(vault_root: pathlib.Path) -> None:
         print(f"  You can open {vault_root} as an Obsidian vault anytime — it's compatible out of the box.")
         return
 
+    show_obsidian_instructions(vault_root)
+
+
+def show_obsidian_instructions(vault_root: pathlib.Path) -> None:
     print()
     print("  If Obsidian is not yet installed, download it from: https://obsidian.md/")
     print("  (free, available on macOS, Windows, Linux, iOS, Android — no sign-up for local vaults)")
@@ -634,8 +730,35 @@ def prompt_obsidian(vault_root: pathlib.Path) -> None:
     print("    Pages you clip will be picked up automatically by /mnemo:ingest")
 
 
-def main() -> None:
-    target = pathlib.Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else pathlib.Path.cwd()
+def parse_args(argv: list[str]) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Bootstrap a mnemo knowledge base.")
+    parser.add_argument("target", nargs="?", help="Project directory to initialize. Defaults to the current directory.")
+    parser.add_argument("--non-interactive", action="store_true", help="Run without prompts using explicit values and safe defaults.")
+    parser.add_argument("--init-scope", choices=("both", "project", "global"), default="both", help="Initialization scope for non-interactive mode.")
+    parser.add_argument("--schema-domain", default="General knowledge base for this project.")
+    parser.add_argument("--schema-entity-types", default="Person, Tool, Project")
+    parser.add_argument("--schema-concept-categories", default="Pattern, Technique, Problem")
+    parser.add_argument("--role", default="Solo developer")
+    parser.add_argument("--technical-level", default="CLI comfortable")
+    parser.add_argument("--language", default="English")
+    parser.add_argument("--domains", default="General knowledge")
+    parser.add_argument("--proactivity", default="Moderate")
+    parser.add_argument("--register", default="Direct")
+    parser.add_argument("--search-backend", choices=("bm25", "qmd"), default="bm25")
+    parser.add_argument("--enable-graphify", action="store_true")
+    parser.add_argument("--open-obsidian", action="store_true")
+    parser.add_argument("--add-gitignore", dest="add_gitignore", action="store_true", default=True)
+    parser.add_argument("--no-add-gitignore", dest="add_gitignore", action="store_false")
+    return parser.parse_args(argv)
+
+
+def _choice_from_scope(scope: str) -> str:
+    return {"both": "1", "project": "2", "global": "3"}[scope]
+
+
+def main(argv: list[str] | None = None) -> None:
+    args = parse_args(sys.argv[1:] if argv is None else argv)
+    target = pathlib.Path(args.target).resolve() if args.target else pathlib.Path.cwd()
     project_name = target.name
 
     if guard(target):
@@ -643,7 +766,7 @@ def main() -> None:
         print(f"To start over, delete .mnemo/{project_name}/ and re-run this script.")
         sys.exit(0)
 
-    choice = prompt_choice()
+    choice = _choice_from_scope(args.init_scope) if args.non_interactive else prompt_choice()
     initialized: list[str] = []
 
     if choice in ("1", "2"):
@@ -664,25 +787,52 @@ def main() -> None:
         print(line)
 
     if choice in ("1", "2"):
-        prompt_schema_setup(local_root)
+        if args.non_interactive:
+            write_schema(local_root, args.schema_domain, args.schema_entity_types, args.schema_concept_categories)
+            print("  Schema written to SCHEMA.md.")
+        else:
+            prompt_schema_setup(local_root)
 
-    prompt_onboard()
+    if args.non_interactive:
+        if write_profile(args.role, args.technical_level, args.language, args.domains, args.proactivity, args.register):
+            print("  Profile saved to ~/.mnemo/wiki/entities/person-user.md.")
+    else:
+        prompt_onboard()
 
     if choice in ("1", "2"):
-        prompt_qmd(local_root, project_name)
+        if args.non_interactive:
+            configure_search(local_root, project_name, args.search_backend)
+        else:
+            prompt_qmd(local_root, project_name)
 
     if choice in ("1", "2") and (target / ".git").exists():
-        print()
-        ans = input("Add .mnemo/ to .gitignore? (recommended — keeps your wiki out of version control) [Y/n]: ").strip().lower()
-        if ans in ("", "y", "yes"):
-            update_gitignore(target)
+        if args.non_interactive:
+            if args.add_gitignore:
+                update_gitignore(target)
+        else:
+            print()
+            ans = input("Add .mnemo/ to .gitignore? (recommended — keeps your wiki out of version control) [Y/n]: ").strip().lower()
+            if ans in ("", "y", "yes"):
+                update_gitignore(target)
 
     graphify_done = False
     if choice in ("1", "2"):
-        graphify_done = prompt_graphify(target, local_root)
+        if args.non_interactive:
+            if args.enable_graphify:
+                graphify_done = run_graphify(target, local_root)
+            else:
+                print("  Codebase graph mapping was not enabled during init.")
+        else:
+            graphify_done = prompt_graphify(target, local_root)
 
     if choice in ("1", "2"):
-        prompt_obsidian(local_root)
+        if args.non_interactive:
+            if args.open_obsidian:
+                show_obsidian_instructions(local_root)
+            else:
+                print(f"  You can open {local_root} as an Obsidian vault anytime — it's compatible out of the box.")
+        else:
+            prompt_obsidian(local_root)
         update_session_brief(local_root)
         wired_target = wire_agent_memory(target, project_name, graphify_done)
         if wired_target is not None:
@@ -696,4 +846,12 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except EOFError:
+        print(
+            "mnemo init needs interactive stdin. Re-run in a terminal, or use "
+            "`--non-interactive` with --schema-* and onboarding arguments.",
+            file=sys.stderr,
+        )
+        sys.exit(2)

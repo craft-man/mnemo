@@ -25,9 +25,25 @@ Initialize `.mnemo/<project-name>/` with the full taxonomy structure.
 ## Step 0 — Python fast path
 
 Use the Python fast path first whenever it is available: use `Glob('**/scripts/init_mnemo.py')` first, then `Glob('**/skills/init/init_mnemo.py')` if the public wrapper is not found.
+
+For Codex or any agent running the script as a subprocess, collect the mandatory values in the chat before launching the script:
+- Schema: domain, entity types, concept categories.
+- Onboarding: role, technical level, language, domains, proactivity, register.
+- Search and integrations: default to BM25, graphify off, and Obsidian off unless the user explicitly chooses otherwise.
+
 If found at `<script_path>`, run:
 ```
-python3 <script_path>
+python3 <script_path> --non-interactive \
+  --schema-domain "<domain>" \
+  --schema-entity-types "<Person, Tool, Project>" \
+  --schema-concept-categories "<Pattern, Technique, Problem>" \
+  --role "<role>" \
+  --technical-level "<technical level>" \
+  --language "<language>" \
+  --domains "<domains>" \
+  --proactivity "<High|Moderate|Low>" \
+  --register "<Direct|Collaborative>" \
+  --search-backend bm25
 ```
 If exit 0 — stop the manual init workflow. The Python script is the canonical complete bootstrap path and already handles local/global structure, mandatory schema setup, mandatory onboarding, qmd, graphify, Obsidian, session brief generation, and best-effort agent memory wiring before returning. In the final response, describe only what was completed and the normal next use: drop source files into `raw/`, then ingest them. Do not list `/mnemo:onboard`, `/mnemo:schema`, `/mnemo:graphify`, profile creation, schema customization, manual installation, or agent-memory setup as optional follow-ups.
 If exit non-zero — emit `⚠ fast path failed (exit <code>) — falling back to LLM.` then continue with the steps below.

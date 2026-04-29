@@ -88,7 +88,23 @@ class TestPublicWrappers(unittest.TestCase):
             env = os.environ.copy()
             env["HOME"] = str(fake_home)
             env["USERPROFILE"] = str(fake_home)
-            inputs = "\n".join(["2", "n", "1", "2", "English", "testing", "2", "1", "", "n", "n", "n"]) + "\n"
+            inputs = "\n".join([
+                "2",
+                "Project notes",
+                "Person, Tool, Project",
+                "Pattern, Technique, Problem",
+                "",
+                "1",
+                "2",
+                "English",
+                "testing",
+                "2",
+                "1",
+                "",
+                "n",
+                "n",
+                "n",
+            ]) + "\n"
             result = subprocess.run(
                 [sys.executable, str(ROOT / "scripts" / "init_mnemo.py"), str(target)],
                 input=inputs,

@@ -1,36 +1,45 @@
 ---
 name: mnemo-init-codex
-description: Codex-specific wiring for mnemo init. Run after skills/init/SKILL.md completes.
+description: Codex-specific wiring for mnemo init. Use with skills/init/SKILL.md.
 ---
 
-## Agent wiring — AGENTS.md
+## Codex Init Contract
 
-Ask the user:
-> "Want me to add a memory stanza to `AGENTS.md` so Codex remembers the wiki in future sessions? [y/n]"
+Codex must complete the whole init contract in the same run. Do not defer schema,
+onboarding, search config, session brief generation, graphify decision, Obsidian
+decision, or `AGENTS.md` wiring to a follow-up.
 
-If `[n]`: do nothing.
+Before launching the script, ask the user for the required schema and onboarding
+answers in chat. If the user provides minimal detail, use safe complete defaults:
+- Schema domain: `General knowledge base for this project.`
+- Entity types: `Person, Tool, Project`
+- Concept categories: `Pattern, Technique, Problem`
+- Role: `Solo developer`
+- Technical level: `CLI comfortable`
+- Language: `English`
+- Domains: `General knowledge`
+- Proactivity: `Moderate`
+- Register: `Direct`
+- Search backend: `bm25`
+- Graphify: off unless explicitly requested
+- Obsidian: off unless explicitly requested
 
-If `[y]`:
+Run the public wrapper with explicit values:
 
-Check if `AGENTS.md` already contains the heading `## Knowledge Base (mnemo)`. If yes: skip silently.
-
-Otherwise, append to `AGENTS.md` (create it if it doesn't exist):
-
-```markdown
-## Knowledge Base (mnemo)
-
-Wiki location: `.mnemo/<project-name>/wiki/`
-Index: `.mnemo/<project-name>/index.md`
-Session brief: `.mnemo/<project-name>/SESSION_BRIEF.md`
-
-Workflow:
-- At session startup, read `SESSION_BRIEF.md` if present. Read `graphify-out/GRAPH_REPORT.md` only for codebase-structure tasks. Do not load the whole wiki.
-- If the brief was not auto-read at startup, the user can run `/mnemo:context`.
-- Query before answering: invoke the `query` skill with the topic (read `skills/query/SKILL.md`).
-- Ingest new sources: invoke the `ingest` skill after adding files to `.mnemo/<project-name>/raw/` (read `skills/ingest/SKILL.md`).
-- Save insights: invoke the `save` skill with a descriptive title (read `skills/save/SKILL.md`).
-- Lint after edits: invoke the `lint` skill at session end (read `skills/lint/SKILL.md`).
+```bash
+python scripts/init_mnemo.py --non-interactive \
+  --schema-domain "<domain>" \
+  --schema-entity-types "<entity types>" \
+  --schema-concept-categories "<concept categories>" \
+  --role "<role>" \
+  --technical-level "<technical level>" \
+  --language "<language>" \
+  --domains "<domains>" \
+  --proactivity "<proactivity>" \
+  --register "<register>" \
+  --search-backend bm25
 ```
 
-Confirm:
-> "Done — stanza added to `AGENTS.md`."
+Add `--enable-graphify`, `--open-obsidian`, or `--search-backend qmd` only when
+the user explicitly chooses those options. The script preserves an existing
+global user profile without rewriting it.

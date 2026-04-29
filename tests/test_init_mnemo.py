@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import json
+import os
 import pathlib
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -8,6 +10,9 @@ from unittest.mock import patch, MagicMock
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent.parent / "skills" / "init"))
 from init_mnemo import create_structure, guard, update_gitignore, prompt_qmd, prompt_graphify, prompt_onboard, wire_agent_memory, DIRS
+
+
+ROOT = pathlib.Path(__file__).resolve().parents[1]
 
 
 class TestCreateStructure(unittest.TestCase):
@@ -525,6 +530,112 @@ class TestMainCompletionMessage(unittest.TestCase):
             self.assertNotIn("run /mnemo:onboard", combined.lower())
             self.assertNotIn("run /mnemo:graphify", combined.lower())
             self.assertIn(f"Add source files to .mnemo/{target.name}/raw/ and run /mnemo:ingest", combined)
+
+
+class TestNonInteractiveInit(unittest.TestCase):
+    def _env(self, home: pathlib.Path) -> dict[str, str]:
+        env = os.environ.copy()
+        env["HOME"] = str(home)
+        env["USERPROFILE"] = str(home)
+        return env
+
+    def _non_interactive_args(self, target: pathlib.Path) -> list[str]:
+        return [
+            sys.executable,
+            str(ROOT / "scripts" / "init_mnemo.py"),
+            str(target),
+            "--non-interactive",
+            "--schema-domain",
+            "Research notes for testing.",
+            "--schema-entity-types",
+            "Person, Dataset, Tool",
+            "--schema-concept-categories",
+            "Question, Method, Finding",
+            "--role",
+            "Researcher",
+            "--technical-level",
+            "CLI comfortable",
+            "--language",
+            "English",
+            "--domains",
+            "testing, knowledge management",
+            "--proactivity",
+            "Moderate",
+            "--register",
+            "Direct",
+            "--search-backend",
+            "bm25",
+        ]
+
+    def test_subprocess_non_interactive_completes_full_contract(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            target = root / "project"
+            target.mkdir()
+            fake_home = root / "home"
+            fake_home.mkdir()
+
+            result = subprocess.run(
+                self._non_interactive_args(target),
+                text=True,
+                capture_output=True,
+                env=self._env(fake_home),
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            vault = target / ".mnemo" / target.name
+            schema = (vault / "SCHEMA.md").read_text(encoding="utf-8")
+            self.assertIn("Research notes for testing.", schema)
+            self.assertIn("**Dataset**", schema)
+            self.assertIn("**Finding**", schema)
+            self.assertTrue((fake_home / ".mnemo" / "wiki" / "entities" / "person-user.md").exists())
+            self.assertEqual(json.loads((vault / "config.json").read_text(encoding="utf-8"))["search_backend"], "bm25")
+            self.assertTrue((vault / "SESSION_BRIEF.md").exists())
+            self.assertTrue((target / "AGENTS.md").exists())
+            combined = result.stdout + result.stderr
+            self.assertNotIn("/mnemo:schema", combined)
+            self.assertNotIn("/mnemo:onboard", combined)
+
+    def test_subprocess_non_interactive_preserves_existing_global_profile(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            target = root / "project"
+            target.mkdir()
+            fake_home = root / "home"
+            profile = fake_home / ".mnemo" / "wiki" / "entities" / "person-user.md"
+            profile.parent.mkdir(parents=True)
+            original = "# User Profile\n\nExisting profile\n"
+            profile.write_text(original, encoding="utf-8")
+
+            result = subprocess.run(
+                self._non_interactive_args(target),
+                text=True,
+                capture_output=True,
+                env=self._env(fake_home),
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(profile.read_text(encoding="utf-8"), original)
+
+    def test_subprocess_without_stdin_has_clear_error(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            target = root / "project"
+            target.mkdir()
+            fake_home = root / "home"
+            fake_home.mkdir()
+
+            result = subprocess.run(
+                [sys.executable, str(ROOT / "scripts" / "init_mnemo.py"), str(target)],
+                input="",
+                text=True,
+                capture_output=True,
+                env=self._env(fake_home),
+            )
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("mnemo init needs interactive stdin", result.stderr)
+            self.assertNotIn("EOFError", result.stderr)
 
 
 class TestInitSkillContract(unittest.TestCase):
