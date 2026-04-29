@@ -190,7 +190,7 @@ Slash commands work in any agent. Natural language alternatives are shown in com
 
 ```
 /mnemo:init                          # "initialize mnemo"; guides qmd, graphify, schema, and agent memory setup
-/mnemo:context                       # "Charge le contexte mnemo minimal pour ce projet."
+/mnemo:context                       # "Load the minimum mnemonic context for this project"
 # drop files into .mnemo/<project-name>/raw/
 /mnemo:ingest                        # "ingest files in raw/"
 /mnemo:graphify                      # optional: map the codebase into graphify-out/
@@ -279,7 +279,7 @@ mnemo keeps startup context compact:
 3. Use `/mnemo:query <term>` for focused retrieval.
 
 Do not load the whole wiki at session startup. `index.md` remains the catalog; `SESSION_BRIEF.md` is the operational summary.
-If startup auto-load did not happen, run `/mnemo:context` or say "Charge le contexte mnemo minimal pour ce projet."
+If startup auto-load did not happen, run `/mnemo:context` or say "Load the minimum mnemonic context for this project"
 
 ### `/mnemo:onboard`
 
