@@ -6,6 +6,20 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.16.6] — 2026-04-29
+
+### Added
+
+- **Non-interactive Codex init** — added an explicit `--non-interactive` mode for `scripts/init_mnemo.py` so Codex can pass schema, onboarding, search, graphify, and Obsidian choices without relying on subprocess prompts.
+- **Init subprocess regression coverage** — added tests for full non-interactive init, existing global profile preservation, and missing stdin handling.
+
+### Changed
+
+- **Codex init contract** — updated init skill guidance so Codex collects required answers in chat, runs the script with explicit arguments, and does not defer schema or onboarding to follow-up commands.
+- **Prompt-mode failure handling** — init now exits with a clear message when interactive stdin is unavailable instead of surfacing an `EOFError` traceback.
+
+---
+
 ## [0.16.5] — 2026-04-29
 
 ### Added

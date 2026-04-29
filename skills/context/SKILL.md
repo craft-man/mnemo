@@ -10,7 +10,7 @@ compatibility: >
   fast path (scripts/show_session_brief.py).
 metadata:
   author: mnemo contributors
-  version: "0.16.5"
+  version: "0.16.6"
 allowed-tools: Read Glob Bash
 ---
 

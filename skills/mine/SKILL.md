@@ -12,7 +12,7 @@ compatibility: >
   invoke by natural language.
 metadata:
   author: mnemo contributors
-  version: "0.16.5"
+  version: "0.16.6"
 allowed-tools: Read Glob
 ---
 
