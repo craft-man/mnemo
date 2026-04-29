@@ -1,0 +1,20 @@
+{
+  "name": "mnemo-local",
+  "interface": {
+    "displayName": "mnemo Local Plugins"
+  },
+  "plugins": [
+    {
+      "name": "mnemo",
+      "source": {
+        "source": "local",
+        "path": "./"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

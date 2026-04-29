@@ -1,0 +1,41 @@
+{
+  "name": "mnemo",
+  "version": "0.14.0",
+  "description": "Agentic knowledge management system for Codex and compatible agent workflows. Ingest raw files into a synthesized wiki, query the knowledge base, and save AI-generated insights permanently.",
+  "author": {
+    "name": "mnemo contributors"
+  },
+  "homepage": "https://github.com/craft-man/mnemo",
+  "repository": "https://github.com/craft-man/mnemo",
+  "license": "MIT",
+  "keywords": [
+    "knowledge-base",
+    "wiki",
+    "second-brain",
+    "obsidian",
+    "rag-alternative",
+    "llm-wiki",
+    "codex"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "mnemo",
+    "shortDescription": "Agentic knowledge management for Codex",
+    "longDescription": "Ingest source files into a synthesized, searchable wiki; query your knowledge base; and preserve AI-generated insights as durable notes.",
+    "developerName": "mnemo contributors",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/craft-man/mnemo",
+    "defaultPrompt": [
+      "Use mnemo to initialize a knowledge base for this project.",
+      "Use mnemo to ingest notes from raw files into the wiki.",
+      "Use mnemo to query my knowledge base before answering."
+    ],
+    "brandColor": "#10A37F",
+    "composerIcon": "./mnemo.png",
+    "logo": "./mnemo.png"
+  }
+}
