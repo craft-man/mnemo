@@ -62,7 +62,7 @@ The project tier is a taxonomy-based wiki:
     ├── index.md      ← categorized table of contents
     ├── log.md        ← audit trail
     ├── SESSION_BRIEF.md ← compact startup context for agents
-    ├── SCHEMA.md     ← domain conventions (edit per project)
+    ├── SCHEMA.md     ← domain conventions collected during init
     └── config.json   ← search backend configuration
 ```
 
@@ -139,7 +139,7 @@ Without an agent, use the standalone bootstrap (Python 3.10+):
 python3 scripts/init_mnemo.py
 ```
 
-Both paths let you configure **qmd** for hybrid semantic search. Then drop files into `.mnemo/<project-name>/raw/` and:
+Both paths run the full init flow: local/global bootstrap, schema, onboarding, search config, optional graphify, optional Obsidian guidance, session brief, and agent memory setup. qmd and graphify are proposed with yes as the default and executed during init when enabled. Then drop files into `.mnemo/<project-name>/raw/` and:
 
 ```
 /mnemo:ingest      # "ingest files in raw/"
@@ -169,7 +169,7 @@ Deterministic operations are handled by Python scripts (3.10+, no external depen
 
 By default mnemo uses a simple stdlib **BM25** fallback. It has no extra dependencies and works out of the box for small wikis.
 
-For medium and large wikis, **[qmd](https://github.com/tobi/qmd)** is recommended. It provides local hybrid search (BM25 + vector embeddings), and both `/mnemo:init` and `python3 scripts/init_mnemo.py` offer to configure it. Once set up, `/mnemo:query` routes through qmd automatically.
+For medium and large wikis, **[qmd](https://github.com/tobi/qmd)** is recommended. It provides local hybrid search (BM25 + vector embeddings), and both `/mnemo:init` and `python3 scripts/init_mnemo.py` propose it with yes as the default, then configure it during the same init run when enabled. Once set up, `/mnemo:query` routes through qmd automatically.
 
 **qmd requirements:** Node.js ≥ 22 or Bun ≥ 1.0, ~2 GB disk (models downloaded once on first use).
 
@@ -191,7 +191,7 @@ The active backend is stored in `.mnemo/<project-name>/config.json` under `searc
 Slash commands work in any agent. Natural language alternatives are shown in comments, so use whichever your agent prefers.
 
 ```
-/mnemo:init                          # "initialize mnemo"; guides qmd, graphify, schema, and agent memory setup
+/mnemo:init                          # "initialize mnemo"; runs schema/onboard, qmd, graphify, and agent memory setup in one flow
 /mnemo:context                       # "Load the minimum mnemonic context for this project"
 # drop files into .mnemo/<project-name>/raw/
 /mnemo:ingest                        # "ingest files in raw/"
@@ -232,7 +232,7 @@ Bootstraps a new knowledge base. Run once per project; it warns if already initi
     ├── index.md
     ├── log.md        ← ingest and graphify audit trail
     ├── SESSION_BRIEF.md ← compact startup context
-    ├── SCHEMA.md     ← starter taxonomy, ready to edit
+    ├── SCHEMA.md     ← project taxonomy collected during init
     └── config.json   ← search backend (`bm25` or `qmd`)
 ```
 
@@ -240,13 +240,13 @@ Bootstraps a new knowledge base. Run once per project; it warns if already initi
 
 `/mnemo:init` also:
 
-- offers to run `/mnemo:schema` immediately
-- ensures your global profile exists via `/mnemo:onboard`
-- offers to enable **qmd** for hybrid semantic search
+- runs the project schema setup immediately
+- ensures your global profile exists
+- proposes **qmd** with yes as the default, then configures it during init when enabled
 - generates `SESSION_BRIEF.md` for compact startup context
-- offers to write project memory instructions into a host-supported auto-loaded memory file when available
-- offers to configure a session-end `/mnemo:mine` reminder when the host supports local hooks or reminders
-- offers to run `/mnemo:graphify` right away
+- writes project memory instructions into a host-supported or best-effort agent memory file
+- configures a session-end reminder when the host supports local hooks or reminders
+- proposes graphify with yes as the default, then runs it during init when enabled
 
 Future sessions should read `SESSION_BRIEF.md` first. When graphify is enabled, they read `graphify-out/GRAPH_REPORT.md` only for codebase-structure tasks.
 
