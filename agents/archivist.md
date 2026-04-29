@@ -181,11 +181,11 @@ If **substantial**, systematically offer:
 > *→ `wiki/synthesis/<slug>.md`* — or I can add it to an existing page.
 
 **Branches:**
-- `oui` / `yes` / `archive` → create the page (full frontmatter + body +
+- `yes` / `archive` → create the page (full frontmatter + body +
   `## Links`), update `{vault}/index.md`, add to `{vault}/log.md`:
   `- wiki/synthesis/<slug>.md | <timestamp> | generated`
 - Explicit category (`"in comparisons/"`) → use the requested category
-- `non` / `no` / any negative response → write nothing
+- `no` / any negative response → write nothing
 
 Format of the archived page:
 ```markdown
