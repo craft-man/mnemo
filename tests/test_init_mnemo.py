@@ -83,23 +83,25 @@ class TestMainProjectOnly(unittest.TestCase):
             target = pathlib.Path(tmp)
             fake_home = pathlib.Path(tmp) / "fakehome"
             fake_home.mkdir()
-            # inputs: choice=2, onboard six answers + confirm, qmd=n, graphify=n, obsidian=n
-            with patch("builtins.input", side_effect=["2", "n", "1", "2", "English", "testing", "2", "1", "", "n", "n", "n"]), \
+            # inputs: choice=2, schema prompts, onboard six answers + confirm, qmd=n, graphify=n, obsidian=n
+            with patch("builtins.input", side_effect=["2", "Project notes", "Person, Tool, Project", "Pattern, Technique, Problem", "", "1", "2", "English", "testing", "2", "1", "", "n", "n", "n"]), \
                  patch("sys.argv", ["init_mnemo.py", str(target)]), \
                  patch("pathlib.Path.home", return_value=fake_home):
                 from init_mnemo import main
                 main()
             self.assertTrue((target / ".mnemo" / target.name / "wiki" / "sources").is_dir())
+            schema = (target / ".mnemo" / target.name / "SCHEMA.md").read_text(encoding="utf-8")
+            self.assertIn("Project notes", schema)
 
     def test_choice_2_does_not_create_global(self):
         with tempfile.TemporaryDirectory() as tmp:
             target = pathlib.Path(tmp)
             fake_home = pathlib.Path(tmp) / "fakehome"
             fake_home.mkdir()
-            # inputs: choice=2, onboard skipped because profile exists, qmd=n, graphify=n, obsidian=n
+            # inputs: choice=2, schema prompts, onboard skipped because profile exists, qmd=n, graphify=n, obsidian=n
             (fake_home / ".mnemo" / "wiki" / "entities").mkdir(parents=True)
             (fake_home / ".mnemo" / "wiki" / "entities" / "person-user.md").write_text("# User Profile\n", encoding="utf-8")
-            with patch("builtins.input", side_effect=["2", "n", "n", "n", "n", "n"]), \
+            with patch("builtins.input", side_effect=["2", "", "", "", "", "n", "n", "n", "n"]), \
                  patch("sys.argv", ["init_mnemo.py", str(target)]), \
                  patch("pathlib.Path.home", return_value=fake_home):
                 from init_mnemo import main
@@ -128,8 +130,8 @@ class TestMainBoth(unittest.TestCase):
             target = pathlib.Path(tmp)
             fake_home = pathlib.Path(tmp) / "fakehome"
             fake_home.mkdir()
-            # inputs: choice=1, onboard six answers + confirm, qmd=n, graphify=n, obsidian=n
-            with patch("builtins.input", side_effect=["1", "n", "1", "2", "English", "testing", "2", "1", "", "n", "n", "n"]), \
+            # inputs: choice=1, schema prompts, onboard six answers + confirm, qmd=n, graphify=n, obsidian=n
+            with patch("builtins.input", side_effect=["1", "Project notes", "Person, Tool, Project", "Pattern, Technique, Problem", "", "1", "2", "English", "testing", "2", "1", "", "n", "n", "n"]), \
                  patch("sys.argv", ["init_mnemo.py", str(target)]), \
                  patch("pathlib.Path.home", return_value=fake_home):
                 from init_mnemo import main
@@ -142,8 +144,8 @@ class TestMainBoth(unittest.TestCase):
             target = pathlib.Path(tmp)
             fake_home = pathlib.Path(tmp) / "fakehome"
             fake_home.mkdir()
-            # inputs: choice="" (->1), onboard six defaults, qmd skipped after install prompt, graphify skipped after install prompt, obsidian=""
-            with patch("builtins.input", side_effect=["", "", "", "", "", "", "", "", "", "", "s", "", "s", ""]), \
+            # inputs: choice="" (->1), schema defaults, onboard defaults, qmd skipped after install prompt, graphify skipped after install prompt, obsidian=""
+            with patch("builtins.input", side_effect=["", "", "", "", "", "", "", "", "", "", "", "", "", "s", "n", ""]), \
                  patch("sys.argv", ["init_mnemo.py", str(target)]), \
                  patch("pathlib.Path.home", return_value=fake_home), \
                  patch("shutil.which", return_value=None):
@@ -225,8 +227,8 @@ class TestPromptQmd(unittest.TestCase):
             target = pathlib.Path(tmp)
             fake_home = pathlib.Path(tmp) / "fakehome"
             fake_home.mkdir()
-            # inputs: choice=2, onboard six answers + confirm, qmd=n, graphify=n, obsidian=n
-            with patch("builtins.input", side_effect=["2", "n", "1", "2", "English", "testing", "2", "1", "", "n", "n", "n"]), \
+            # inputs: choice=2, schema prompts, onboard six answers + confirm, qmd=n, graphify=n, obsidian=n
+            with patch("builtins.input", side_effect=["2", "Project notes", "Person, Tool, Project", "Pattern, Technique, Problem", "", "1", "2", "English", "testing", "2", "1", "", "n", "n", "n"]), \
                  patch("sys.argv", ["init_mnemo.py", str(target)]), \
                  patch("pathlib.Path.home", return_value=fake_home):
                 from init_mnemo import main
@@ -348,8 +350,8 @@ class TestUpdateGitignore(unittest.TestCase):
             fake_home = pathlib.Path(tmp) / "fakehome"
             fake_home.mkdir()
             (target / ".git").mkdir()
-            # inputs: choice=2, onboard six answers + confirm, qmd=n, gitignore=y, graphify=n, obsidian=n
-            with patch("builtins.input", side_effect=["2", "n", "1", "2", "English", "testing", "2", "1", "", "n", "y", "n", "n"]), \
+            # inputs: choice=2, schema prompts, onboard six answers + confirm, qmd=n, gitignore=y, graphify=n, obsidian=n
+            with patch("builtins.input", side_effect=["2", "Project notes", "Person, Tool, Project", "Pattern, Technique, Problem", "", "1", "2", "English", "testing", "2", "1", "", "n", "y", "n", "n"]), \
                  patch("sys.argv", ["init_mnemo.py", str(target)]), \
                  patch("pathlib.Path.home", return_value=fake_home):
                 from init_mnemo import main
@@ -361,8 +363,8 @@ class TestUpdateGitignore(unittest.TestCase):
             target = pathlib.Path(tmp)
             fake_home = pathlib.Path(tmp) / "fakehome"
             fake_home.mkdir()
-            # inputs: choice=2, onboard six answers + confirm, qmd=n, graphify=n, obsidian=n (no gitignore prompt)
-            with patch("builtins.input", side_effect=["2", "n", "1", "2", "English", "testing", "2", "1", "", "n", "n", "n"]), \
+            # inputs: choice=2, schema prompts, onboard six answers + confirm, qmd=n, graphify=n, obsidian=n (no gitignore prompt)
+            with patch("builtins.input", side_effect=["2", "Project notes", "Person, Tool, Project", "Pattern, Technique, Problem", "", "1", "2", "English", "testing", "2", "1", "", "n", "n", "n"]), \
                  patch("sys.argv", ["init_mnemo.py", str(target)]), \
                  patch("pathlib.Path.home", return_value=fake_home):
                 from init_mnemo import main
@@ -375,8 +377,8 @@ class TestUpdateGitignore(unittest.TestCase):
             fake_home = pathlib.Path(tmp) / "fakehome"
             fake_home.mkdir()
             (target / ".git").mkdir()
-            # inputs: choice=2, onboard six answers + confirm, qmd=n, gitignore=n, graphify=n, obsidian=n
-            with patch("builtins.input", side_effect=["2", "n", "1", "2", "English", "testing", "2", "1", "", "n", "n", "n", "n"]), \
+            # inputs: choice=2, schema prompts, onboard six answers + confirm, qmd=n, gitignore=n, graphify=n, obsidian=n
+            with patch("builtins.input", side_effect=["2", "Project notes", "Person, Tool, Project", "Pattern, Technique, Problem", "", "1", "2", "English", "testing", "2", "1", "", "n", "n", "n", "n"]), \
                  patch("sys.argv", ["init_mnemo.py", str(target)]), \
                  patch("pathlib.Path.home", return_value=fake_home):
                 from init_mnemo import main
@@ -417,7 +419,7 @@ class TestAgentMemoryWiring(unittest.TestCase):
             fake_home = pathlib.Path(tmp) / "fakehome"
             fake_home.mkdir()
             (target / "CLAUDE.md").write_text("# Project Instructions\n", encoding="utf-8")
-            with patch("builtins.input", side_effect=["2", "n", "1", "2", "English", "testing", "2", "1", "", "n", "n", "n"]), \
+            with patch("builtins.input", side_effect=["2", "", "", "", "", "1", "2", "English", "testing", "2", "1", "", "n", "n", "n"]), \
                  patch("sys.argv", ["init_mnemo.py", str(target)]), \
                  patch("pathlib.Path.home", return_value=fake_home):
                 from init_mnemo import main

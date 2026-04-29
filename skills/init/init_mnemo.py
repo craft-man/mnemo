@@ -194,13 +194,10 @@ def _read_created_date(path: pathlib.Path) -> str:
 
 
 def prompt_schema_setup(mnemo_root: pathlib.Path) -> bool:
-    """Offer a standalone schema customization path for the init fast path."""
+    """Collect baseline domain taxonomy during init so SCHEMA.md is not left as an optional follow-up."""
     print()
-    ans = input("Define your domain taxonomy now? (you can run /mnemo:schema anytime) [y/N]: ").strip().lower()
-    if ans not in ("y", "yes"):
-        print("  Starter SCHEMA.md will be used until you run /mnemo:schema.")
-        return False
-
+    print("Define the domain taxonomy for this knowledge base.")
+    print("  This step is part of init. Leave a field blank to accept the starter defaults.")
     raw_files = sorted((mnemo_root / "raw").glob("*"))
     if raw_files:
         print(f"  Found {len(raw_files)} file(s) in raw/. Use them as context when answering.")

@@ -108,13 +108,10 @@ Define recurring concept categories:
 Use `[[Page Title]]` syntax — always the exact H1 title of the target page. Obsidian-compatible.
 ```
 
-**5. Schema setup** — offer to define the domain taxonomy immediately:
+**5. Schema setup** — define the domain taxonomy immediately:
 
-> "Would you like to define your domain taxonomy now? I can read files already in `raw/` to infer entity types and concept categories, then ask a few questions. [y]es / [n]o (you can run `/mnemo:schema` anytime)"
-
-If `[y]es`: invoke the schema skill by reading `skills/schema/SKILL.md` and following its instructions. Skip the manual SCHEMA.md note in step 5.
-
-If `[n]o`: continue — the starter SCHEMA.md from step 3 will be used until the user runs `/mnemo:schema`.
+Invoke the schema skill by reading `skills/schema/SKILL.md` and following its instructions.
+This is part of init, not an optional follow-up. If the user does not want to refine every field, accept minimal answers and keep starter defaults where needed, but still complete the schema pass now.
 
 **6. User profile** — ensure the global user profile exists:
 
