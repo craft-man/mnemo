@@ -40,7 +40,6 @@ SCHEMA_TEMPLATE = """\
 # Knowledge Base Schema
 
 > Edit this file to define domain-specific conventions.
-> Run /mnemo:schema to have Claude guide you through customization.
 
 ## Domain
 <!-- Describe the subject matter (e.g. "distributed systems", "my research") -->
@@ -420,17 +419,8 @@ def prompt_onboard() -> None:
     print()
 
     if profile_path.exists():
-        content = profile_path.read_text(encoding="utf-8")
-        print("User profile already exists:")
-        for heading in ("Role", "Technical Level", "Language", "Domains", "Proactivity", "Register"):
-            marker = f"## {heading}"
-            if marker in content:
-                value = content.split(marker, 1)[1].split("\n## ", 1)[0].strip()
-                print(f"  {heading}: {value}")
-        ans = input("Review and update it? [y/N]: ").strip().lower()
-        if ans not in ("y", "yes"):
-            print("  Profile unchanged.")
-            return
+        print("  Global mnemo profile already exists -- keeping it unchanged.")
+        return
 
     print("Set up your global mnemo user profile.")
     role_map = {
@@ -709,7 +699,8 @@ def main() -> None:
         print("  Re-run /mnemo:graphify after significant code changes to keep the graph up to date")
     else:
         print("  Run /mnemo:graphify to map your codebase into a queryable knowledge graph")
-        print(f"  Or: run /mnemo:schema to define your domain taxonomy, drop files into .mnemo/{project_name}/raw/, run /mnemo:ingest")
+    if choice in ("1", "2"):
+        print(f"  Add source files to .mnemo/{project_name}/raw/ and run /mnemo:ingest")
     print("  Query with /mnemo:query <term>")
 
 

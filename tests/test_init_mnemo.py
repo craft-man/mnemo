@@ -98,10 +98,10 @@ class TestMainProjectOnly(unittest.TestCase):
             target = pathlib.Path(tmp)
             fake_home = pathlib.Path(tmp) / "fakehome"
             fake_home.mkdir()
-            # inputs: choice=2, schema prompts, onboard skipped because profile exists, qmd=n, graphify=n, obsidian=n
+            # inputs: choice=2, schema prompts, onboarding skipped because profile exists, qmd=n, graphify=n, obsidian=n
             (fake_home / ".mnemo" / "wiki" / "entities").mkdir(parents=True)
             (fake_home / ".mnemo" / "wiki" / "entities" / "person-user.md").write_text("# User Profile\n", encoding="utf-8")
-            with patch("builtins.input", side_effect=["2", "", "", "", "", "n", "n", "n", "n"]), \
+            with patch("builtins.input", side_effect=["2", "", "", "", "n", "n", "n", "n"]), \
                  patch("sys.argv", ["init_mnemo.py", str(target)]), \
                  patch("pathlib.Path.home", return_value=fake_home):
                 from init_mnemo import main
@@ -427,6 +427,42 @@ class TestAgentMemoryWiring(unittest.TestCase):
             content = (target / "CLAUDE.md").read_text(encoding="utf-8")
             self.assertIn("## mnemo", content)
             self.assertIn(".mnemo/" + target.name + "/SESSION_BRIEF.md", content)
+
+
+class TestPromptOnboard(unittest.TestCase):
+    def test_skips_existing_profile_without_prompt(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            fake_home = pathlib.Path(tmp) / "fakehome"
+            profile = fake_home / ".mnemo" / "wiki" / "entities" / "person-user.md"
+            profile.parent.mkdir(parents=True)
+            profile.write_text("# User Profile\n", encoding="utf-8")
+            printed = []
+
+            with patch("pathlib.Path.home", return_value=fake_home), \
+                 patch("builtins.print", side_effect=lambda *a, **k: printed.append(" ".join(str(x) for x in a))):
+                prompt_onboard()
+
+            self.assertTrue(any("keeping it unchanged" in line for line in printed))
+
+
+class TestMainCompletionMessage(unittest.TestCase):
+    def test_does_not_suggest_schema_as_follow_up(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            target = pathlib.Path(tmp)
+            fake_home = pathlib.Path(tmp) / "fakehome"
+            fake_home.mkdir()
+            printed = []
+
+            with patch("builtins.input", side_effect=["2", "Project notes", "Person, Tool, Project", "Pattern, Technique, Problem", "", "1", "2", "English", "testing", "2", "1", "", "n", "n", "n"]), \
+                 patch("builtins.print", side_effect=lambda *a, **k: printed.append(" ".join(str(x) for x in a))), \
+                 patch("sys.argv", ["init_mnemo.py", str(target)]), \
+                 patch("pathlib.Path.home", return_value=fake_home):
+                from init_mnemo import main
+                main()
+
+            combined = "\n".join(printed)
+            self.assertNotIn("run /mnemo:schema", combined)
+            self.assertIn(f"Add source files to .mnemo/{target.name}/raw/ and run /mnemo:ingest", combined)
 
 
 if __name__ == "__main__":
