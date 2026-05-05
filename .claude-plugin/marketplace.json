@@ -1,0 +1,17 @@
+{
+  "name": "craft-man",
+  "owner": {
+    "name": "craft-man",
+    "email": "teddy.kornowitz@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "mnemo",
+      "source": {
+        "source": "github",
+        "repo": "craft-man/mnemo"
+      },
+      "description": "Agentic Knowledge Management System — a Second Brain for Claude Code and agentskills.io-compatible agents. Ingests raw files into a synthesized, searchable wiki; queries your knowledge base; saves AI-generated insights permanently."
+    }
+  ]
+}
